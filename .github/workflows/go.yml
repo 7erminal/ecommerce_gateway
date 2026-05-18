@@ -35,7 +35,7 @@ jobs:
 
         ssh -o StrictHostKeyChecking=no root@$SSH_SERVER << 'EOF'
           set -e
-          cd /usr/app/ecommerce/gateway_service
+          cd /usr/app/ecommerce/ecommerce_gateway
           git stash
           git pull origin ecommerce
           go build -o ecommerce-gateway-service
