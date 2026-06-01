@@ -19,7 +19,7 @@ func main() {
 	logs.SetLogger(logs.AdapterFile, `{"filename":"../logs/AMC-gateway.log"}`)
 
 	beego.InsertFilter("*", beego.BeforeRouter, cors.Allow(&cors.Options{
-		AllowOrigins:     []string{"http://localhost:5173", "http://localhost:5174", "https://api.amc-flowpos.com"},
+		AllowOrigins:     []string{"http://localhost:5173", "http://localhost:5174", "https://70b8-154-161-28-82.ngrok-free.app"},
 		AllowMethods:     []string{"PUT", "PATCH", "POST", "GET", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "X-Requested-With", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
