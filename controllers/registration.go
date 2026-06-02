@@ -32,16 +32,16 @@ func (c *RegistrationController) RegisterAlt() {
 	var v requests.Registration
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
 
-	if v.Token == "" {
+	if v.RoleId == "" {
 		var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: false, Result: nil, StatusDesc: "User role not specified"}
 
 		c.Data["json"] = resp
 	} else {
-		userRole := functions.GetRole(&c.Controller, v.Token)
+		userRole := functions.GetRole(&c.Controller, v.RoleId)
 
 		if userRole.StatusCode == 200 {
 
-			var req requests.RegisterUser = requests.RegisterUser{Email: v.Email, Name: v.FirstName + " | " + v.LastName, Gender: "", PhoneNumber: v.PhoneNumber, Password: v.Password, RoleId: v.Token}
+			var req requests.RegisterUser = requests.RegisterUser{Email: v.Email, Name: v.FirstName + " | " + v.LastName, Gender: "", PhoneNumber: v.PhoneNumber, Password: v.Password, RoleId: v.RoleId}
 
 			regResp := functions.RegistrationRequest(&c.Controller, req)
 
