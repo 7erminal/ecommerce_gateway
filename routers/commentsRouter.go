@@ -252,6 +252,15 @@ func init() {
 
     beego.GlobalControllerRouter["AMC_gateway/controllers:SystemController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:SystemController"],
         beego.ControllerComments{
+            Method: "GetRoles",
+            Router: `/get-roles`,
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["AMC_gateway/controllers:SystemController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:SystemController"],
+        beego.ControllerComments{
             Method: "UpdateBranch",
             Router: `/update-branch/:id`,
             AllowHTTPMethods: []string{"put"},
