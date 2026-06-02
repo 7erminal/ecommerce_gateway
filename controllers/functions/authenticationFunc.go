@@ -11,7 +11,7 @@ import (
 	beego "github.com/beego/beego/v2/server/web"
 )
 
-func SignInRequest(c *beego.Controller, req requests.SignIn) (resp responses.StringOriResponseDTO) {
+func SignInRequest(c *beego.Controller, req requests.SignIn) (resp responses.LoginTokenResponseDTO) {
 	host, _ := beego.AppConfig.String("authenticationBaseUrl")
 
 	logs.Info("Sending email ", req.Email)
@@ -41,7 +41,7 @@ func SignInRequest(c *beego.Controller, req requests.SignIn) (resp responses.Str
 
 	logs.Info("Raw response received is ", res)
 	// data := map[string]interface{}{}
-	var data responses.StringOriResponseDTO
+	var data responses.LoginTokenResponseDTO
 	json.Unmarshal(read, &data)
 	c.Data["json"] = data
 
@@ -236,6 +236,42 @@ func VerifyInviteToken(c *beego.Controller, token string) (resp responses.Invite
 	logs.Info("Raw response received is ", res)
 	// data := map[string]interface{}{}
 	var data responses.InviteDecodeResponseDTO
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	return data
+}
+
+func RefreshAccessToken(c *beego.Controller, token string) (resp responses.LoginTokenResponseDTO) {
+	host, _ := beego.AppConfig.String("authenticationBaseUrl")
+
+	logs.Info("About to refresh access token ", token)
+
+	request := api.NewRequest(
+		host,
+		"/v1/auth/refresh/user/token",
+		api.POST)
+	request.InterfaceParams["Value"] = token
+	request.HeaderField["RefreshToken"] = token
+	// request.Params = {"UserId": strconv.Itoa(int(userid))}
+	client := api.Client{
+		Request: request,
+		Type_:   "body",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	logs.Info("Raw response received is ", res)
+	// data := map[string]interface{}{}
+	var data responses.LoginTokenResponseDTO
 	json.Unmarshal(read, &data)
 	c.Data["json"] = data
 

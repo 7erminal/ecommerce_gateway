@@ -23,6 +23,7 @@ func (c *AuthenticationController) URLMapping() {
 	c.Mapping("SignIn", c.SignIn)
 	c.Mapping("Register", c.Register)
 	c.Mapping("ChangePassword", c.ChangePassword)
+	c.Mapping("RefreshAccessToken", c.RefreshAccessToken)
 }
 
 // Register User ...
@@ -61,7 +62,7 @@ func (c *AuthenticationController) Register() {
 
 		// var data models.UserGateway
 
-		var tkn *string
+		var tkn *responses.LoginDataResponseDTO
 
 		if regResp.StatusCode == 200 {
 			// go functions.UpdateUserInvite(&c.Controller, idStr, v.Value)
@@ -98,16 +99,16 @@ func (c *AuthenticationController) Register() {
 
 			if loginResp.StatusCode == 200 {
 				isSuccess = true
-				tkn = &loginResp.Value
+				tkn = loginResp.Result
 			}
 		}
 
-		var resp responses.StringResponseDTO = responses.StringResponseDTO{Success: isSuccess, Result: tkn, StatusDesc: regResp.StatusDesc}
+		var resp responses.LoginResponseDTO = responses.LoginResponseDTO{Success: isSuccess, Result: tkn, StatusDesc: regResp.StatusDesc}
 
 		c.Data["json"] = resp
 
 	} else {
-		var resp responses.StringResponseDTO = responses.StringResponseDTO{Success: false, Result: nil, StatusDesc: "User verification failed"}
+		var resp responses.LoginResponseDTO = responses.LoginResponseDTO{Success: false, Result: nil, StatusDesc: "User verification failed"}
 
 		c.Data["json"] = resp
 	}
@@ -139,7 +140,7 @@ func (c *AuthenticationController) SignIn() {
 	// var data models.UserGateway
 
 	var isSuccess bool = false
-	var tkn *string
+	var tkn *responses.LoginDataResponseDTO
 
 	if loginResp.StatusCode == 200 {
 		// splitName := strings.Split(loginResp.Result.FullName, " | ")
@@ -164,10 +165,10 @@ func (c *AuthenticationController) SignIn() {
 		// }
 
 		isSuccess = true
-		tkn = &loginResp.Value
+		tkn = loginResp.Result
 	}
 
-	var resp responses.StringResponseDTO = responses.StringResponseDTO{Success: isSuccess, Result: tkn, StatusDesc: loginResp.StatusDesc}
+	var resp responses.LoginResponseDTO = responses.LoginResponseDTO{Success: isSuccess, Result: tkn, StatusDesc: loginResp.StatusDesc}
 
 	c.Data["json"] = resp
 
@@ -240,6 +241,36 @@ func (c *AuthenticationController) ChangePassword() {
 // // @Failure 403 body is empty
 // // @router /verify-token [post]
 func (c *AuthenticationController) VerifyToken() {
+	var v requests.StringRequestDTO
+	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
+
+	logs.Info("Received ", v.Value)
+
+	loginResp := functions.VerifyToken(&c.Controller, v.Value)
+
+	var isSuccess bool = false
+	var tkn *string
+
+	if loginResp.StatusCode == 200 {
+		isSuccess = true
+		tkn = &v.Value
+	}
+
+	var resp responses.StringResponseDTO = responses.StringResponseDTO{Success: isSuccess, Result: tkn, StatusDesc: loginResp.StatusDesc}
+
+	c.Data["json"] = resp
+
+	c.ServeJSON()
+}
+
+// // RefreshAccessToken ...
+// // @Title RefreshAccessToken
+// // @Description refresh user access token
+// // @Param	body		body 	requests.StringRequestDTO	true		"body for Authentication content"
+// // @Success 200 {object} responses.StringResponseDTO
+// // @Failure 403 body is empty
+// // @router /refresh-access-token [post]
+func (c *AuthenticationController) RefreshAccessToken() {
 	var v requests.StringRequestDTO
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
 
