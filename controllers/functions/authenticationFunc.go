@@ -169,6 +169,7 @@ func RegistrationRequest(c *beego.Controller, req requests.RegisterUser) (resp r
 	request.InterfaceParams["PhoneNumber"] = req.PhoneNumber
 	request.InterfaceParams["Role"] = req.RoleId
 	request.InterfaceParams["Dob"] = req.Dob
+	request.InterfaceParams["Branch"] = "1"
 	request.InterfaceParams["RoleRequired"] = true
 
 	// request.Params = {"UserId": strconv.Itoa(int(userid))}
