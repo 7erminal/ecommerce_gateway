@@ -41,7 +41,7 @@ func init() {
 			),
 		),
 		beego.NSNamespace("/app-service",
-			beego.NSBefore(middlewares.AuthMiddleware),
+			// beego.NSBefore(middlewares.AuthMiddleware),
 			beego.NSInclude(
 				&controllers.SystemController{},
 			),
