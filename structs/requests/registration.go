@@ -6,7 +6,7 @@ type Registration struct {
 	LastName    string
 	PhoneNumber string
 	Password    string
-	Token       string
+	RoleId      string
 }
 
 type RegisterUser struct {

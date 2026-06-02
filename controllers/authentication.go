@@ -19,7 +19,7 @@ type AuthenticationController struct {
 
 // URLMapping ...
 func (c *AuthenticationController) URLMapping() {
-	// c.Mapping("VerifyToken", c.VerifyToken)
+	c.Mapping("VerifyToken", c.VerifyToken)
 	c.Mapping("SignIn", c.SignIn)
 	c.Mapping("Register", c.Register)
 	c.Mapping("ChangePassword", c.ChangePassword)
@@ -36,87 +36,87 @@ func (c *AuthenticationController) Register() {
 	var v requests.Registration
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
 
-	if v.Token == "" {
-		var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: false, Result: nil, StatusDesc: "User role not specified"}
+	// if v.Token == "" {
+	// 	var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: false, Result: nil, StatusDesc: "User role not specified"}
+
+	// 	c.Data["json"] = resp
+	// } else {
+	// verifyUserToken := functions.VerifyInviteToken(&c.Controller, v.Token)
+
+	// logs.Info("User token verification is ", verifyUserToken)
+
+	// if verifyUserToken.StatusCode == 200 {
+
+	logs.Info("Checking role ", v.RoleId)
+
+	userRole := functions.GetRole(&c.Controller, strings.TrimSpace(v.RoleId))
+
+	if userRole.StatusCode == 200 && strings.TrimSpace(v.Email) == v.Email {
+
+		var req requests.RegisterUser = requests.RegisterUser{Email: v.Email, Name: v.FirstName + " | " + v.LastName, Gender: "", PhoneNumber: v.PhoneNumber, Password: v.Password, RoleId: v.RoleId}
+
+		regResp := functions.RegistrationRequest(&c.Controller, req)
+
+		var isSuccess bool = false
+
+		// var data models.UserGateway
+
+		var tkn *string
+
+		if regResp.StatusCode == 200 {
+			// go functions.UpdateUserInvite(&c.Controller, idStr, v.Value)
+			splitName := strings.Split(regResp.User.FullName, " | ")
+
+			logs.Debug("Name is ", splitName[0])
+
+			// role := models.Role{Role: serRole.Role.Role}
+
+			// data = models.UserGateway{
+			// 	// UserId:         regResp.User.UserId,
+			// 	// UserType:    regResp.User.UserType,
+			// 	FirstName:   splitName[0],
+			// 	LastName:    splitName[1],
+			// 	Username:    regResp.User.Username,
+			// 	Email:       regResp.User.Email,
+			// 	PhoneNumber: regResp.User.PhoneNumber,
+			// 	Role:        &role,
+			// 	// Gender:         regResp.User.Gender,
+			// 	// Dob:            regResp.User.Dob,
+			// 	// Address:        regResp.User.Address,
+			// 	// IdType:         regResp.User.IdType,
+			// 	// IdNumber:       regResp.User.IdNumber,
+			// 	// Active:         regResp.User.Active,
+			// 	// IsVerified:     regResp.User.IsVerified,
+			// 	// DateRegistered: regResp.User.DateCreated,
+			// }
+
+			isSuccess = true
+
+			var signInReq requests.SignIn = requests.SignIn{Email: v.Email, Password: v.Password}
+
+			loginResp := functions.SignInRequest(&c.Controller, signInReq)
+
+			if loginResp.StatusCode == 200 {
+				isSuccess = true
+				tkn = &loginResp.Value
+			}
+		}
+
+		var resp responses.StringResponseDTO = responses.StringResponseDTO{Success: isSuccess, Result: tkn, StatusDesc: regResp.StatusDesc}
 
 		c.Data["json"] = resp
+
 	} else {
-		verifyUserToken := functions.VerifyInviteToken(&c.Controller, v.Token)
+		var resp responses.StringResponseDTO = responses.StringResponseDTO{Success: false, Result: nil, StatusDesc: "User verification failed"}
 
-		logs.Info("User token verification is ", verifyUserToken)
-
-		if verifyUserToken.StatusCode == 200 {
-
-			logs.Info("Checking role ", verifyUserToken.Value.RoleId)
-
-			userRole := functions.GetRole(&c.Controller, strings.TrimSpace(verifyUserToken.Value.RoleId))
-
-			if userRole.StatusCode == 200 && strings.TrimSpace(verifyUserToken.Value.Email) == v.Email {
-
-				var req requests.RegisterUser = requests.RegisterUser{Email: v.Email, Name: v.FirstName + " | " + v.LastName, Gender: "", PhoneNumber: v.PhoneNumber, Password: v.Password, RoleId: verifyUserToken.Value.RoleId}
-
-				regResp := functions.RegistrationRequest(&c.Controller, req)
-
-				var isSuccess bool = false
-
-				// var data models.UserGateway
-
-				var tkn *string
-
-				if regResp.StatusCode == 200 {
-					// go functions.UpdateUserInvite(&c.Controller, idStr, v.Value)
-					splitName := strings.Split(regResp.User.FullName, " | ")
-
-					logs.Debug("Name is ", splitName[0])
-
-					// role := models.Role{Role: serRole.Role.Role}
-
-					// data = models.UserGateway{
-					// 	// UserId:         regResp.User.UserId,
-					// 	// UserType:    regResp.User.UserType,
-					// 	FirstName:   splitName[0],
-					// 	LastName:    splitName[1],
-					// 	Username:    regResp.User.Username,
-					// 	Email:       regResp.User.Email,
-					// 	PhoneNumber: regResp.User.PhoneNumber,
-					// 	Role:        &role,
-					// 	// Gender:         regResp.User.Gender,
-					// 	// Dob:            regResp.User.Dob,
-					// 	// Address:        regResp.User.Address,
-					// 	// IdType:         regResp.User.IdType,
-					// 	// IdNumber:       regResp.User.IdNumber,
-					// 	// Active:         regResp.User.Active,
-					// 	// IsVerified:     regResp.User.IsVerified,
-					// 	// DateRegistered: regResp.User.DateCreated,
-					// }
-
-					isSuccess = true
-
-					var signInReq requests.SignIn = requests.SignIn{Email: v.Email, Password: v.Password}
-
-					loginResp := functions.SignInRequest(&c.Controller, signInReq)
-
-					if loginResp.StatusCode == 200 {
-						isSuccess = true
-						tkn = &loginResp.Value
-					}
-				}
-
-				var resp responses.StringResponseDTO = responses.StringResponseDTO{Success: isSuccess, Result: tkn, StatusDesc: regResp.StatusDesc}
-
-				c.Data["json"] = resp
-
-			} else {
-				var resp responses.StringResponseDTO = responses.StringResponseDTO{Success: false, Result: nil, StatusDesc: "User verification failed"}
-
-				c.Data["json"] = resp
-			}
-		} else {
-			var resp responses.StringResponseDTO = responses.StringResponseDTO{Success: false, Result: nil, StatusDesc: "User role not specified"}
-
-			c.Data["json"] = resp
-		}
+		c.Data["json"] = resp
 	}
+	// } else {
+	// 	var resp responses.StringResponseDTO = responses.StringResponseDTO{Success: false, Result: nil, StatusDesc: "User role not specified"}
+
+	// 	c.Data["json"] = resp
+	// }
+	// }
 
 	c.ServeJSON()
 }
