@@ -6,6 +6,7 @@ type Registration struct {
 	LastName    string
 	PhoneNumber string
 	Password    string
+	Dob         string
 	RoleId      string
 }
 

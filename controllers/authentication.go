@@ -53,7 +53,7 @@ func (c *AuthenticationController) Register() {
 
 	if userRole.StatusCode == 200 && strings.TrimSpace(v.Email) == v.Email {
 
-		var req requests.RegisterUser = requests.RegisterUser{Email: v.Email, Name: v.FirstName + " | " + v.LastName, Gender: "", PhoneNumber: v.PhoneNumber, Password: v.Password, RoleId: v.RoleId}
+		var req requests.RegisterUser = requests.RegisterUser{Email: v.Email, Name: v.FirstName + " | " + v.LastName, Gender: "", PhoneNumber: v.PhoneNumber, Password: v.Password, RoleId: v.RoleId, Dob: v.Dob}
 
 		regResp := functions.RegistrationRequest(&c.Controller, req)
 
