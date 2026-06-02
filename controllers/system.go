@@ -24,6 +24,36 @@ func (c *SystemController) URLMapping() {
 	c.Mapping("GetAllBranches", c.GetAllBranches)
 	c.Mapping("Delete", c.Delete)
 	c.Mapping("UpdateBranch", c.UpdateBranch)
+	c.Mapping("GetRoles", c.GetRoles)
+}
+
+// GetRoles ...
+// @Title Get Roles
+// @Description Get all roles
+// @Success 200 {object} responses.RolesAllGatewayResponseDTO
+// @Failure 403 body is empty
+// @router /get-roles [get]
+func (c *SystemController) GetRoles() {
+
+	var isSuccess bool = false
+
+	rolesResp := functions.GetRoles(&c.Controller)
+
+	// var message string
+
+	if rolesResp.StatusCode == 200 {
+
+		isSuccess = true
+		// message = "Email sent"
+
+		var resp responses.RolesAllGatewayResponseDTO = responses.RolesAllGatewayResponseDTO{Success: isSuccess, Result: rolesResp.Roles, StatusDesc: rolesResp.StatusDesc}
+		c.Data["json"] = resp
+	} else {
+		var resp responses.RolesAllGatewayResponseDTO = responses.RolesAllGatewayResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
+		c.Data["json"] = resp
+	}
+
+	c.ServeJSON()
 }
 
 // Post ...
