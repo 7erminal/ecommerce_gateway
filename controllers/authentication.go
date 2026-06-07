@@ -233,13 +233,13 @@ func (c *AuthenticationController) ChangePassword() {
 	c.ServeJSON()
 }
 
-// // VerifyToken ...
-// // @Title VerifyToken
-// // @Description verify user token
-// // @Param	body		body 	requests.StringRequestDTO	true		"body for Authentication content"
-// // @Success 200 {object} responses.StringResponseDTO
-// // @Failure 403 body is empty
-// // @router /verify-token [post]
+// VerifyToken ...
+// @Title VerifyToken
+// @Description verify user token. Token provided via value param.
+// @Param	body		body 	requests.StringRequestDTO	true		"body for Authentication content"
+// @Success 200 {object} responses.StringResponseDTO
+// @Failure 403 body is empty
+// @router /verify-token [post]
 func (c *AuthenticationController) VerifyToken() {
 	var v requests.StringRequestDTO
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
@@ -263,13 +263,13 @@ func (c *AuthenticationController) VerifyToken() {
 	c.ServeJSON()
 }
 
-// // RefreshAccessToken ...
-// // @Title RefreshAccessToken
-// // @Description refresh user access token. Return new access token using refresh token.
-// // @Param	body		body 	requests.StringRequestDTO	true		"body for Authentication content"
-// // @Success 200 {object} responses.StringResponseDTO
-// // @Failure 403 body is empty
-// // @router /refresh-access-token [post]
+// RefreshAccessToken ...
+// @Title RefreshAccessToken
+// @Description refresh user access token. Return new access token using refresh token.
+// @Param	body		body 	requests.StringRequestDTO	true		"body for Authentication content"
+// @Success 200 {object} responses.StringResponseDTO
+// @Failure 403 body is empty
+// @router /refresh-access-token [post]
 func (c *AuthenticationController) RefreshAccessToken() {
 	var v requests.StringRequestDTO
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
