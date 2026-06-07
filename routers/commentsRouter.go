@@ -18,6 +18,15 @@ func init() {
 
     beego.GlobalControllerRouter["AMC_gateway/controllers:AuthenticationController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:AuthenticationController"],
         beego.ControllerComments{
+            Method: "RefreshAccessToken",
+            Router: `/refresh-access-token`,
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["AMC_gateway/controllers:AuthenticationController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:AuthenticationController"],
+        beego.ControllerComments{
             Method: "Register",
             Router: `/register`,
             AllowHTTPMethods: []string{"post"},
@@ -29,6 +38,15 @@ func init() {
         beego.ControllerComments{
             Method: "SignIn",
             Router: `/sign-in`,
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["AMC_gateway/controllers:AuthenticationController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:AuthenticationController"],
+        beego.ControllerComments{
+            Method: "VerifyToken",
+            Router: `/verify-token`,
             AllowHTTPMethods: []string{"post"},
             MethodParams: param.Make(),
             Filters: nil,
