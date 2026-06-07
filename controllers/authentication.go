@@ -276,7 +276,7 @@ func (c *AuthenticationController) RefreshAccessToken() {
 
 	logs.Info("Received ", v.Value)
 
-	loginResp := functions.VerifyToken(&c.Controller, v.Value)
+	loginResp := functions.RefreshAccessToken(&c.Controller, v.Value)
 
 	var isSuccess bool = false
 	var tkn *string
