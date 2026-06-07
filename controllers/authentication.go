@@ -265,7 +265,7 @@ func (c *AuthenticationController) VerifyToken() {
 
 // // RefreshAccessToken ...
 // // @Title RefreshAccessToken
-// // @Description refresh user access token
+// // @Description refresh user access token. Return new access token using refresh token.
 // // @Param	body		body 	requests.StringRequestDTO	true		"body for Authentication content"
 // // @Success 200 {object} responses.StringResponseDTO
 // // @Failure 403 body is empty
@@ -284,6 +284,8 @@ func (c *AuthenticationController) RefreshAccessToken() {
 	if loginResp.StatusCode == 200 {
 		isSuccess = true
 		tkn = &v.Value
+	} else {
+		logs.Error("Unable to verify user")
 	}
 
 	var resp responses.StringResponseDTO = responses.StringResponseDTO{Success: isSuccess, Result: tkn, StatusDesc: loginResp.StatusDesc}
