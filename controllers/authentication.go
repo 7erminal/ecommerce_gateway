@@ -279,16 +279,16 @@ func (c *AuthenticationController) RefreshAccessToken() {
 	loginResp := functions.RefreshAccessToken(&c.Controller, v.Value)
 
 	var isSuccess bool = false
-	var tkn *string
+	var tkn *responses.LoginDataResponseDTO
 
 	if loginResp.StatusCode == 200 {
 		isSuccess = true
-		tkn = &v.Value
+		tkn = loginResp.Result
 	} else {
 		logs.Error("Unable to verify user")
 	}
 
-	var resp responses.StringResponseDTO = responses.StringResponseDTO{Success: isSuccess, Result: tkn, StatusDesc: loginResp.StatusDesc}
+	var resp responses.LoginResponseDTO = responses.LoginResponseDTO{Success: isSuccess, Result: tkn, StatusDesc: loginResp.StatusDesc}
 
 	c.Data["json"] = resp
 
