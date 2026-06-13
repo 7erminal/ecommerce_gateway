@@ -552,7 +552,7 @@ func (c *ItemsController) GetCategories() {
 // @Param	offset	query	string	false	"Start position of result set. Must be an integer"
 // @Success 200 {object} responses.ItemsResponseDTO
 // @Failure 403 body is empty
-// @router /get-products [get]
+// @router /get-items [get]
 func (c *ItemsController) GetItems() {
 	authorization := c.Ctx.Input.Header("Authorization")
 
@@ -672,7 +672,7 @@ func (c *ItemsController) GetItems() {
 // @Param	id		path 	string	true		"The key for staticblock"
 // @Success 200 {object} responses.ItemResponseDTO
 // @Failure 403 body is empty
-// @router /get-product/:id [get]
+// @router /get-item/:id [get]
 func (c *ItemsController) GetProduct() {
 	authorization := c.Ctx.Input.Header("Authorization")
 
