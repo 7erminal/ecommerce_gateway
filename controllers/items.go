@@ -490,13 +490,13 @@ func (c *ItemsController) AddCategory() {
 	c.ServeJSON()
 }
 
-// GetProductTypes ...
-// @Title Get Product Types
-// @Description Get Product types
+// GetCategories ...
+// @Title Get Categories
+// @Description Get Categories
 // @Param	Authorization		header 	string true		"header for User"
 // @Success 200 {object} responses.CategoriesResponseDTO
 // @Failure 403 body is empty
-// @router /get-product-types [get]
+// @router /get-categories [get]
 func (c *ItemsController) GetCategories() {
 	authorization := c.Ctx.Input.Header("Authorization")
 
@@ -517,11 +517,11 @@ func (c *ItemsController) GetCategories() {
 			categoryResponse := functions.GetCategories(&c.Controller)
 
 			if categoryResponse.StatusCode == 200 {
-				logs.Info("Product types returned: ", categoryResponse.Categories)
+				logs.Info("Categories returned: ", categoryResponse.Categories)
 
 				isSuccess = true
 
-				var resp responses.CategoriesResponseDTO = responses.CategoriesResponseDTO{Success: isSuccess, Result: categoryResponse.Categories, StatusDesc: "Product types fetched successfully"}
+				var resp responses.CategoriesResponseDTO = responses.CategoriesResponseDTO{Success: isSuccess, Result: categoryResponse.Categories, StatusDesc: "Categories fetched successfully"}
 				c.Data["json"] = resp
 			} else {
 				var resp responses.CategoriesResponseDTO = responses.CategoriesResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
