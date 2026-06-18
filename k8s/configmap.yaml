@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: naki-gateway-config
+  namespace: naki
+data:
+  APP_HTTP_PORT: "8080"
+  BEEGO_RUNMODE: "prod"
+  PORT: "8080"
+  AUTHENTICATION_BASE_URL: "http://naki-authentication-service.naki.svc.cluster.local"
+  CUSTOMER_BASE_URL: "http://naki-customer-management-service.naki.svc.cluster.local"
+  ITEM_BASE_URL: "http://naki-item-service.naki.svc.cluster.local"
+  SYSTEM_BASE_URL: "http://naki-system-service.naki.svc.cluster.local"
+  TRANSACTIONS_BASE_URL: "http://naki-transactions-service.naki.svc.cluster.local"
+  AUDIT_TRAIL_BASE_URL: "http://naki-audit-trail-service.naki.svc.cluster.local"
+  NOTIFICATIONS_BASE_URL: "http://naki-notification-service.naki.svc.cluster.local"
+  PAYMENT_BASE_URL: "http://naki-payment-service.naki.svc.cluster.local"

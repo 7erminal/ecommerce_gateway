@@ -424,15 +424,15 @@ func (c *ItemsController) UpdateItemImage() {
 	c.ServeJSON()
 }
 
-// AddProductType ...
-// @Title Add Product Type
-// @Description Add Product type
+// AddCategory ...
+// @Title Add Category
+// @Description Add Category
 // @Param	Authorization		header 	string true		"header for User"
 // @Param	CategoryImage		formData 	file	true		"Category Image"
 // @Param	CategoryName		formData 	string	true		"Category name"
 // @Success 200 {object} responses.CategoryResponseDTO
 // @Failure 403 body is empty
-// @router /add-product-type [post]
+// @router /add-category [post]
 func (c *ItemsController) AddCategory() {
 	authorization := c.Ctx.Input.Header("Authorization")
 
@@ -498,40 +498,20 @@ func (c *ItemsController) AddCategory() {
 // @Failure 403 body is empty
 // @router /get-categories [get]
 func (c *ItemsController) GetCategories() {
-	authorization := c.Ctx.Input.Header("Authorization")
-
-	token := strings.Split(authorization, " ")
-
 	var isSuccess bool = false
 
-	if token[0] == "Bearer" {
-		logs.Info("Token is ", token[1])
-		verifyToken := functions.VerifyToken(&c.Controller, token[1])
+	logs.Info("Success response received")
+	isSuccess = true
 
-		logs.Info("Success response")
+	categoryResponse := functions.GetCategories(&c.Controller)
 
-		if verifyToken.StatusCode == 200 {
-			logs.Info("Success response received")
-			isSuccess = true
+	if categoryResponse.StatusCode == 200 {
+		logs.Info("Categories returned: ", categoryResponse.Categories)
 
-			categoryResponse := functions.GetCategories(&c.Controller)
+		isSuccess = true
 
-			if categoryResponse.StatusCode == 200 {
-				logs.Info("Categories returned: ", categoryResponse.Categories)
-
-				isSuccess = true
-
-				var resp responses.CategoriesResponseDTO = responses.CategoriesResponseDTO{Success: isSuccess, Result: categoryResponse.Categories, StatusDesc: "Categories fetched successfully"}
-				c.Data["json"] = resp
-			} else {
-				var resp responses.CategoriesResponseDTO = responses.CategoriesResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
-				c.Data["json"] = resp
-			}
-
-		} else {
-			var resp responses.CategoriesResponseDTO = responses.CategoriesResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
-			c.Data["json"] = resp
-		}
+		var resp responses.CategoriesResponseDTO = responses.CategoriesResponseDTO{Success: isSuccess, Result: categoryResponse.Categories, StatusDesc: "Categories fetched successfully"}
+		c.Data["json"] = resp
 	} else {
 		var resp responses.CategoriesResponseDTO = responses.CategoriesResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
 		c.Data["json"] = resp
@@ -665,9 +645,9 @@ func (c *ItemsController) GetItems() {
 	c.ServeJSON()
 }
 
-// GetProduct ...
-// @Title Get Product
-// @Description Get Product
+// GetItem ...
+// @Title Get Item
+// @Description Get Item
 // @Param	Authorization		header 	string true		"header for User"
 // @Param	id		path 	string	true		"The key for staticblock"
 // @Success 200 {object} responses.ItemResponseDTO
