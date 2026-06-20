@@ -310,7 +310,7 @@ func GetItemStats(c *beego.Controller, branchId string) (resp responses.ItemsSta
 	return data
 }
 
-func AddCategory(c *beego.Controller, categoryImage string, categoryName string) (resp responses.CategoryOriResponseDTO) {
+func AddCategory(c *beego.Controller, categoryImage string, categoryName string, categoryDescription string) (resp responses.CategoryOriResponseDTO) {
 	host, _ := beego.AppConfig.String("itemBaseUrl")
 
 	logs.Info("Sending file ", categoryImage)
@@ -322,6 +322,7 @@ func AddCategory(c *beego.Controller, categoryImage string, categoryName string)
 
 	request.FileField["Image"] = categoryImage
 	request.Params["CategoryName"] = categoryName
+	request.Params["CategoryDescription"] = categoryDescription
 	request.Params["Icon"] = ""
 	// request.HeaderField["content-type"] = "multipart/form-data"
 	// request.Params = {"UserId": strconv.Itoa(int(userid))}

@@ -434,57 +434,39 @@ func (c *ItemsController) UpdateItemImage() {
 // @Failure 403 body is empty
 // @router /add-category [post]
 func (c *ItemsController) AddCategory() {
-	authorization := c.Ctx.Input.Header("Authorization")
-
-	token := strings.Split(authorization, " ")
-
 	var isSuccess bool = false
 
-	if token[0] == "Bearer" {
-		logs.Info("Token is ", token[1])
-		verifyToken := functions.VerifyToken(&c.Controller, token[1])
+	image, header, err := c.GetFile("CategoryImage")
 
-		logs.Info("Success response")
+	if err != nil {
+		var resp responses.CategoryResponseDTO = responses.CategoryResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "No file uploaded"}
+		c.Data["json"] = resp
+	} else {
+		logs.Info("Success response received")
+		isSuccess = false
+		respCode, filePath := functions.SaveImage(&c.Controller, "CategoryImage", image, *header)
 
-		if verifyToken.StatusCode == 200 {
-			image, header, err := c.GetFile("CategoryImage")
+		if respCode == 200 {
 
-			if err != nil {
-				var resp responses.CategoryResponseDTO = responses.CategoryResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "No file uploaded"}
+			categoryName := c.Ctx.Input.Query("CategoryName")
+			categoryDescription := c.Ctx.Input.Query("CategoryDescription")
+
+			categoryResp := functions.AddCategory(&c.Controller, filePath, categoryName, categoryDescription)
+
+			if categoryResp.StatusCode == 200 {
+
+				isSuccess = true
+
+				var resp responses.CategoryResponseDTO = responses.CategoryResponseDTO{Success: isSuccess, Result: categoryResp.Category, StatusDesc: categoryResp.StatusDesc}
 				c.Data["json"] = resp
 			} else {
-				logs.Info("Success response received")
-				isSuccess = false
-				respCode, filePath := functions.SaveImage(&c.Controller, "CategoryImage", image, *header)
-
-				if respCode == 200 {
-
-					categoryName := c.Ctx.Input.Query("CategoryName")
-
-					categoryResp := functions.AddCategory(&c.Controller, filePath, categoryName)
-
-					if categoryResp.StatusCode == 200 {
-
-						isSuccess = true
-
-						var resp responses.CategoryResponseDTO = responses.CategoryResponseDTO{Success: isSuccess, Result: categoryResp.Category, StatusDesc: categoryResp.StatusDesc}
-						c.Data["json"] = resp
-					} else {
-						var resp responses.CategoryResponseDTO = responses.CategoryResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
-						c.Data["json"] = resp
-					}
-				} else {
-					var resp responses.CategoryResponseDTO = responses.CategoryResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred. File upload failed"}
-					c.Data["json"] = resp
-				}
+				var resp responses.CategoryResponseDTO = responses.CategoryResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
+				c.Data["json"] = resp
 			}
 		} else {
-			var resp responses.CategoryResponseDTO = responses.CategoryResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
+			var resp responses.CategoryResponseDTO = responses.CategoryResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred. File upload failed"}
 			c.Data["json"] = resp
 		}
-	} else {
-		var resp responses.CategoryResponseDTO = responses.CategoryResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
-		c.Data["json"] = resp
 	}
 
 	c.ServeJSON()
