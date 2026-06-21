@@ -17,8 +17,10 @@ func SaveImage(c *beego.Controller, fieldName string, file multipart.File, heade
 
 	// Save the uploaded file
 	fileName := filepath.Base(header.Filename)
-	filePath = "tmp/" + time.Now().Format("20060102150405") + fileName // Define your file path
-	err := c.SaveToFile(fieldName, "../images/"+filePath)
+	host, _ := beego.AppConfig.String("imagesBaseUrl")
+	filePath = host + "tmp/" + time.Now().Format("20060102150405") + fileName // Define your file path
+
+	err := c.SaveToFile(fieldName, filePath)
 
 	if err != nil {
 		c.Ctx.Output.SetStatus(http.StatusInternalServerError)
@@ -28,8 +30,6 @@ func SaveImage(c *beego.Controller, fieldName string, file multipart.File, heade
 
 		return 400, errorMessage
 	}
-
-	host, _ := beego.AppConfig.String("imagesBaseUrl")
 	filePath = host + "/" + filePath
 
 	logs.Info("Full file path is ", filePath)
