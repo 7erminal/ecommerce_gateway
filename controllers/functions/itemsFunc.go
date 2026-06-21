@@ -586,6 +586,8 @@ func GetCategories(c *beego.Controller) (resp responses.CategoriesOriResponseDTO
 func GetCategory(c *beego.Controller, categoryId string) (resp responses.CategoryOriResponseDTO) {
 	host, _ := beego.AppConfig.String("itemBaseUrl")
 
+	logs.Info("Fetching category with id ", categoryId)
+
 	request := api.NewRequest(
 		host,
 		"/v1/categories/"+categoryId,
