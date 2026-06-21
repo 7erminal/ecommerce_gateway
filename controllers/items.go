@@ -61,18 +61,35 @@ func (c *ItemsController) AddSalesItem() {
 		proceed = false
 	}
 
-	sales_product_type_name, _ := beego.AppConfig.String("salesProductType")
-
-	getProductTypes := functions.GetCategoryByName(&c.Controller, sales_product_type_name)
-
+	getProductTypes := functions.GetCategory(&c.Controller, strconv.FormatInt(v.CategoryId, 10))
 	if getProductTypes.StatusCode != 200 {
 		errorMessage = "Product type provided does not exist"
 		proceed = false
 	}
 
 	if proceed {
-		req := requests.AddItemRequestDTO{ProductName: v.ProductName, Quantity: v.Quantity, ReorderLevel: 0, CostPrice: v.CostPrice, SellingPrice: v.SellingPrice, BranchId: userData.UserDetails.Branch.BranchId, ImagePath: v.ImagePath}
-		addItemResp := functions.AddItem(&c.Controller, req, getProductTypes.Category.CategoryId, getBranchResp.Branch.Country.CountryCode, userData.UserDetails.Branch.BranchId, int(userData.UserId))
+		req := requests.AddItemRequestDTO{
+			ProductName:     v.ProductName,
+			Description:     v.Description,
+			Weight:          v.Weight,
+			Quantity:        v.Quantity,
+			ReorderLevel:    0,
+			CostPrice:       v.CostPrice,
+			SellingPrice:    v.SellingPrice,
+			BranchId:        userData.UserDetails.Branch.BranchId,
+			ImagePath:       v.ImagePath,
+			AvailableSizes:  v.AvailableSizes,
+			AvailableColors: v.AvailableColors,
+			Purposes:        v.Purposes,
+			Features:        v.Features,
+		}
+		addItemResp := functions.AddItem(
+			&c.Controller,
+			req,
+			getProductTypes.Category.CategoryId,
+			getBranchResp.Branch.Country.CountryCode,
+			userData.UserDetails.Branch.BranchId,
+			int(userData.UserId))
 
 		itemResp := responses.Item{}
 		if addItemResp.StatusCode == 200 {

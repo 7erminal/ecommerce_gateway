@@ -1,21 +1,36 @@
 package requests
 
 type AddItemRequestDTO struct {
-	ProductName  string
-	Quantity     int
-	CostPrice    float64
-	SellingPrice float64
-	BranchId     int64
-	ImagePath    string
-	ReorderLevel int
+	ProductName     string
+	Weight          string
+	Description     string
+	Quantity        int
+	CostPrice       float64
+	SellingPrice    float64
+	BranchId        int64
+	ImagePath       string
+	ReorderLevel    int
+	CategoryId      int64
+	Purposes        *[]int64
+	Features        *[]int64
+	AvailableSizes  *[]string
+	AvailableColors *[]string
 }
 
 type AddSalesItemRequestDTO struct {
-	ProductName  string
-	Quantity     int
-	CostPrice    float64
-	SellingPrice float64
-	ImagePath    string
+	ProductName     string
+	Description     string
+	CategoryId      int64
+	Purposes        *[]int64
+	Features        *[]int64
+	AvailableSizes  *[]string
+	AvailableColors *[]string
+	Quantity        int
+	CostPrice       float64
+	SellingPrice    float64
+	ImagePath       string
+	QuantityAlert   int
+	Weight          string
 }
 
 type AddRentalItemRequestDTO struct {

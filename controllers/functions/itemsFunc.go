@@ -23,11 +23,11 @@ func AddItem(c *beego.Controller, req requests.AddItemRequestDTO, productTypeId 
 		"/v1/items/",
 		api.POST)
 	request.InterfaceParams["ItemName"] = req.ProductName
-	request.InterfaceParams["Description"] = ""
-	request.InterfaceParams["Weight"] = ""
+	request.InterfaceParams["Description"] = req.Description
+	request.InterfaceParams["Weight"] = req.Weight
 	request.InterfaceParams["Category"] = productTypeId
-	request.InterfaceParams["AvailableSizes"] = ""
-	request.InterfaceParams["AvailableColors"] = ""
+	request.InterfaceParams["AvailableSizes"] = req.AvailableSizes
+	request.InterfaceParams["AvailableColors"] = req.AvailableColors
 	request.InterfaceParams["Quantity"] = req.Quantity
 	request.InterfaceParams["ItemPrice"] = req.SellingPrice
 	request.InterfaceParams["AltItemPrice"] = req.CostPrice
