@@ -27,6 +27,8 @@ func (c *ItemsController) URLMapping() {
 	c.Mapping("GetProduct", c.GetProduct)
 	c.Mapping("UpdateItem", c.UpdateItem)
 	c.Mapping("AddRentalsItem", c.AddRentalsItem)
+	c.Mapping("AddPurpose", c.AddPurpose)
+	c.Mapping("AddFeature", c.AddFeature)
 }
 
 // AddSalesItem ...
@@ -472,6 +474,102 @@ func (c *ItemsController) AddCategory() {
 	c.ServeJSON()
 }
 
+// AddFeature ...
+// @Title Add Feature
+// @Description Add Feature
+// @Param	Authorization		header 	string true		"header for User"
+// @Param	FeatureImage		formData 	file	true		"Feature Image"
+// @Param	FeatureName		formData 	string	true		"Feature name"
+// @Success 200 {object} responses.CategoryResponseDTO
+// @Failure 403 body is empty
+// @router /add-feature [post]
+func (c *ItemsController) AddFeature() {
+	var isSuccess bool = false
+
+	image, header, err := c.GetFile("FeatureImage")
+
+	if err != nil {
+		var resp responses.CategoryResponseDTO = responses.CategoryResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "No file uploaded"}
+		c.Data["json"] = resp
+	} else {
+		logs.Info("Success response received")
+		isSuccess = false
+		respCode, filePath := functions.SaveImage(&c.Controller, "FeatureImage", image, *header)
+
+		if respCode == 200 {
+
+			featureName := c.Ctx.Input.Query("FeatureName")
+			featureDescription := c.Ctx.Input.Query("FeatureDescription")
+
+			featureResp := functions.AddFeature(&c.Controller, filePath, featureName, featureDescription)
+
+			if featureResp.StatusCode == 200 {
+
+				isSuccess = true
+
+				var resp responses.FeaturesResponseDTO = responses.FeaturesResponseDTO{Success: isSuccess, Result: featureResp.Features, StatusDesc: featureResp.StatusDesc}
+				c.Data["json"] = resp
+			} else {
+				var resp responses.FeaturesResponseDTO = responses.FeaturesResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
+				c.Data["json"] = resp
+			}
+		} else {
+			var resp responses.FeaturesResponseDTO = responses.FeaturesResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred. File upload failed"}
+			c.Data["json"] = resp
+		}
+	}
+
+	c.ServeJSON()
+}
+
+// AddPurpose ...
+// @Title Add Purpose
+// @Description Add Purpose
+// @Param	Authorization		header 	string true		"header for User"
+// @Param	PurposeImage		formData 	file	true		"Purpose Image"
+// @Param	PurposeName		formData 	string	true		"Purpose name"
+// @Success 200 {object} responses.CategoryResponseDTO
+// @Failure 403 body is empty
+// @router /add-purpose [post]
+func (c *ItemsController) AddPurpose() {
+	var isSuccess bool = false
+
+	image, header, err := c.GetFile("PurposeImage")
+
+	if err != nil {
+		var resp responses.CategoryResponseDTO = responses.CategoryResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "No file uploaded"}
+		c.Data["json"] = resp
+	} else {
+		logs.Info("Success response received")
+		isSuccess = false
+		respCode, filePath := functions.SaveImage(&c.Controller, "PurposeImage", image, *header)
+
+		if respCode == 200 {
+
+			purposeName := c.Ctx.Input.Query("PurposeName")
+			purposeDescription := c.Ctx.Input.Query("PurposeDescription")
+
+			purposeResp := functions.AddPurpose(&c.Controller, filePath, purposeName, purposeDescription)
+
+			if purposeResp.StatusCode == 200 {
+
+				isSuccess = true
+
+				var resp responses.PurposesResponseDTO = responses.PurposesResponseDTO{Success: isSuccess, Result: purposeResp.Purposes, StatusDesc: purposeResp.StatusDesc}
+				c.Data["json"] = resp
+			} else {
+				var resp responses.PurposesResponseDTO = responses.PurposesResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
+				c.Data["json"] = resp
+			}
+		} else {
+			var resp responses.PurposesResponseDTO = responses.PurposesResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred. File upload failed"}
+			c.Data["json"] = resp
+		}
+	}
+
+	c.ServeJSON()
+}
+
 // GetCategories ...
 // @Title Get Categories
 // @Description Get Categories
@@ -496,6 +594,66 @@ func (c *ItemsController) GetCategories() {
 		c.Data["json"] = resp
 	} else {
 		var resp responses.CategoriesResponseDTO = responses.CategoriesResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
+		c.Data["json"] = resp
+	}
+
+	c.ServeJSON()
+}
+
+// GetFeatures ...
+// @Title Get Features
+// @Description Get Features
+// @Param	Authorization		header 	string true		"header for User"
+// @Success 200 {object} responses.FeaturesResponseDTO
+// @Failure 403 body is empty
+// @router /get-features [get]
+func (c *ItemsController) GetFeatures() {
+	var isSuccess bool = false
+
+	logs.Info("Success response received")
+	isSuccess = true
+
+	featureResponse := functions.GetFeatures(&c.Controller)
+
+	if featureResponse.StatusCode == 200 {
+		logs.Info("Features returned: ", featureResponse.Features)
+
+		isSuccess = true
+
+		var resp responses.FeaturesResponseDTO = responses.FeaturesResponseDTO{Success: isSuccess, Result: featureResponse.Features, StatusDesc: "Features fetched successfully"}
+		c.Data["json"] = resp
+	} else {
+		var resp responses.FeaturesResponseDTO = responses.FeaturesResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
+		c.Data["json"] = resp
+	}
+
+	c.ServeJSON()
+}
+
+// GetPurposes ...
+// @Title Get Purposes
+// @Description Get Purposes
+// @Param	Authorization		header 	string true		"header for User"
+// @Success 200 {object} responses.PurposesResponseDTO
+// @Failure 403 body is empty
+// @router /get-purposes [get]
+func (c *ItemsController) GetPurposes() {
+	var isSuccess bool = false
+
+	logs.Info("Success response received")
+	isSuccess = true
+
+	purposeResponse := functions.GetPurposes(&c.Controller)
+
+	if purposeResponse.StatusCode == 200 {
+		logs.Info("Purposes returned: ", purposeResponse.Purposes)
+
+		isSuccess = true
+
+		var resp responses.PurposesResponseDTO = responses.PurposesResponseDTO{Success: isSuccess, Result: purposeResponse.Purposes, StatusDesc: "Purposes fetched successfully"}
+		c.Data["json"] = resp
+	} else {
+		var resp responses.PurposesResponseDTO = responses.PurposesResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
 		c.Data["json"] = resp
 	}
 

@@ -109,7 +109,25 @@ func init() {
     beego.GlobalControllerRouter["AMC_gateway/controllers:ItemsController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:ItemsController"],
         beego.ControllerComments{
             Method: "AddCategory",
-            Router: `/add-product-type`,
+            Router: `/add-category`,
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["AMC_gateway/controllers:ItemsController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:ItemsController"],
+        beego.ControllerComments{
+            Method: "AddFeature",
+            Router: `/add-feature`,
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["AMC_gateway/controllers:ItemsController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:ItemsController"],
+        beego.ControllerComments{
+            Method: "AddPurpose",
+            Router: `/add-purpose`,
             AllowHTTPMethods: []string{"post"},
             MethodParams: param.Make(),
             Filters: nil,
@@ -144,6 +162,15 @@ func init() {
 
     beego.GlobalControllerRouter["AMC_gateway/controllers:ItemsController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:ItemsController"],
         beego.ControllerComments{
+            Method: "GetFeatures",
+            Router: `/get-features`,
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["AMC_gateway/controllers:ItemsController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:ItemsController"],
+        beego.ControllerComments{
             Method: "GetProduct",
             Router: `/get-item/:id`,
             AllowHTTPMethods: []string{"get"},
@@ -155,6 +182,15 @@ func init() {
         beego.ControllerComments{
             Method: "GetItems",
             Router: `/get-items`,
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["AMC_gateway/controllers:ItemsController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:ItemsController"],
+        beego.ControllerComments{
+            Method: "GetPurposes",
+            Router: `/get-purposes`,
             AllowHTTPMethods: []string{"get"},
             MethodParams: param.Make(),
             Filters: nil,

@@ -354,6 +354,93 @@ func AddCategory(c *beego.Controller, categoryImage string, categoryName string,
 	return data
 }
 
+func AddFeature(c *beego.Controller, categoryImage string, categoryName string, categoryDescription string) (resp responses.FeaturesOriResponseDTO) {
+	host, _ := beego.AppConfig.String("itemBaseUrl")
+
+	logs.Info("Sending file ", categoryImage)
+
+	request := api.NewRequest(
+		host,
+		"/v1/features/",
+		api.POST)
+
+	request.FileField["Image"] = categoryImage
+	request.Params["FeatureName"] = categoryName
+	request.Params["Description"] = categoryDescription
+	// request.HeaderField["content-type"] = "multipart/form-data"
+	// request.Params = {"UserId": strconv.Itoa(int(userid))}
+	client := api.Client{
+		Request: request,
+		Type_:   "params",
+	}
+
+	// client.Request.HeaderField["content-type"] = "multipart/form-data"
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	logs.Info("Raw response received is ", res)
+	// data := map[string]interface{}{}
+	var data responses.FeaturesOriResponseDTO
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	logs.Info("Resp is ", data)
+
+	return data
+}
+
+func AddPurpose(c *beego.Controller, categoryImage string, categoryName string, categoryDescription string) (resp responses.PurposesOriResponseDTO) {
+	host, _ := beego.AppConfig.String("itemBaseUrl")
+
+	logs.Info("Sending file ", categoryImage)
+
+	request := api.NewRequest(
+		host,
+		"/v1/purposes/",
+		api.POST)
+
+	request.FileField["Image"] = categoryImage
+	request.Params["PurposeName"] = categoryName
+	request.Params["Description"] = categoryDescription
+	request.Params["Icon"] = ""
+	// request.HeaderField["content-type"] = "multipart/form-data"
+	// request.Params = {"UserId": strconv.Itoa(int(userid))}
+	client := api.Client{
+		Request: request,
+		Type_:   "params",
+	}
+
+	// client.Request.HeaderField["content-type"] = "multipart/form-data"
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	logs.Info("Raw response received is ", res)
+	// data := map[string]interface{}{}
+	var data responses.PurposesOriResponseDTO
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	logs.Info("Resp is ", data)
+
+	return data
+}
+
 func UploadItemImage(c *beego.Controller, itemImage string) (resp responses.ItemImageOriResponseDTO) {
 	host, _ := beego.AppConfig.String("itemBaseUrl")
 
@@ -507,6 +594,86 @@ func GetCategoryByName(c *beego.Controller, category string) (resp responses.Cat
 	logs.Info("Raw response received is ", res)
 	// data := map[string]interface{}{}
 	var data responses.CategoryOriResponseDTO
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	logs.Info("Resp is ", data)
+
+	return data
+}
+
+func GetFeatures(c *beego.Controller) (resp responses.FeaturesOriResponseDTO) {
+	host, _ := beego.AppConfig.String("itemBaseUrl")
+
+	request := api.NewRequest(
+		host,
+		"/v1/features/",
+		api.GET)
+
+	// request.FileField["UserImage"] = userImage
+	// request.Params["UserId"] = strconv.FormatInt(userId, 10)
+	// request.HeaderField["content-type"] = "multipart/form-data"
+	// request.Params = {"UserId": strconv.Itoa(int(userid))}
+	client := api.Client{
+		Request: request,
+		Type_:   "params",
+	}
+
+	// client.Request.HeaderField["content-type"] = "multipart/form-data"
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	logs.Info("Raw response received is ", res)
+	// data := map[string]interface{}{}
+	var data responses.FeaturesOriResponseDTO
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	logs.Info("Resp is ", data)
+
+	return data
+}
+
+func GetPurposes(c *beego.Controller) (resp responses.PurposesOriResponseDTO) {
+	host, _ := beego.AppConfig.String("itemBaseUrl")
+
+	request := api.NewRequest(
+		host,
+		"/v1/purposes/",
+		api.GET)
+
+	// request.FileField["UserImage"] = userImage
+	// request.Params["UserId"] = strconv.FormatInt(userId, 10)
+	// request.HeaderField["content-type"] = "multipart/form-data"
+	// request.Params = {"UserId": strconv.Itoa(int(userid))}
+	client := api.Client{
+		Request: request,
+		Type_:   "params",
+	}
+
+	// client.Request.HeaderField["content-type"] = "multipart/form-data"
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	logs.Info("Raw response received is ", res)
+	// data := map[string]interface{}{}
+	var data responses.PurposesOriResponseDTO
 	json.Unmarshal(read, &data)
 	c.Data["json"] = data
 
