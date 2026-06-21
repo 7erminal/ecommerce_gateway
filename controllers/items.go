@@ -102,16 +102,69 @@ func (c *ItemsController) AddSalesItem() {
 					logs.Error("Failed update")
 				}
 
+				var features []responses.Feature
+
+				if v.Features != nil {
+					if len(*v.Features) > 0 {
+						for _, featureId := range *v.Features {
+
+							var ifResp requests.AddProductFeatureRequestDTO = requests.AddProductFeatureRequestDTO{
+								ProductId: addItemResp.Item.ItemId,
+								FeatureId: featureId,
+							}
+
+							addItemFeatureResp := functions.AddItemFeatures(&c.Controller, ifResp)
+
+							if addItemFeatureResp.StatusCode == 200 {
+								logs.Info("Successfully added item feature")
+								features = *addItemFeatureResp.Item.Features
+							} else {
+								logs.Error("Failed to add item feature")
+							}
+						}
+					}
+				}
+
+				var purposes []responses.Purpose
+				if v.Purposes != nil {
+					if len(*v.Purposes) > 0 {
+						for _, purposeId := range *v.Purposes {
+
+							var ipResp requests.AddProductPurposeRequestDTO = requests.AddProductPurposeRequestDTO{
+								ProductId: addItemResp.Item.ItemId,
+								PurposeId: purposeId,
+							}
+
+							addItemPurposeResp := functions.AddItemPurposes(&c.Controller, ipResp)
+
+							if addItemPurposeResp.StatusCode == 200 {
+								logs.Info("Successfully added item purpose")
+								// purposes = append(purposes, *addItemPurposeResp.ItemPurpose.Purpose)
+								purposes = *addItemPurposeResp.Item.Purposes
+							} else {
+								logs.Error("Failed to add item purpose")
+							}
+						}
+					}
+				}
+
+				availableSizes := strings.Split(addItemResp.Item.AvailableSizes, ",")
+				availableColors := strings.Split(addItemResp.Item.AvailableColors, ",")
+
 				itemResp = responses.Item{
 					ProductId:        addItemResp.Item.ItemId,
 					ProductName:      addItemResp.Item.ItemName,
 					Description:      addItemResp.Item.Description,
-					ProductType:      addItemResp.Item.Category.CategoryName,
 					ProductPrice:     float64(addItemResp.Item.ItemPrice.ItemPrice),
 					ProductCostPrice: float64(addItemResp.Item.ItemPrice.AltItemPrice),
 					ImagePath:        itemImageUpdateResp.Item.ImagePath,
 					Quantity:         addItemResp.Item.Quantity,
 					Branch:           addItemResp.Item.Branch,
+					Category:         addItemResp.Item.Category,
+					AvailableSizes:   &availableSizes,
+					AvailableColors:  &availableColors,
+					Purposes:         &purposes,
+					Features:         &features,
 				}
 
 				isSuccess = true
@@ -198,7 +251,6 @@ func (c *ItemsController) AddRentalsItem() {
 					ProductId:        addItemResp.Item.ItemId,
 					ProductName:      addItemResp.Item.ItemName,
 					Description:      addItemResp.Item.Description,
-					ProductType:      addItemResp.Item.Category.CategoryName,
 					ProductPrice:     float64(addItemResp.Item.ItemPrice.ItemPrice),
 					ProductCostPrice: float64(addItemResp.Item.ItemPrice.AltItemPrice),
 					ImagePath:        itemImageUpdateResp.Item.ImagePath,
@@ -240,106 +292,199 @@ func (c *ItemsController) AddRentalsItem() {
 // @Failure 403 body is empty
 // @router /update-product/:id [put]
 func (c *ItemsController) UpdateItem() {
+	u := c.Ctx.Input.GetData("user")
+	userData, err := u.(*responses.UsersOri)
+	logs.Info("Error is ", err)
 	var v requests.UpdateItemRequestDTO
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
 
 	idStr := c.Ctx.Input.Param(":id")
 
-	authorization := c.Ctx.Input.Header("Authorization")
-	token := strings.Split(authorization, " ")
-
-	logs.Info("Received \nProduct name: ", v.ProductName, "Product Type ID:: ", v.ProductTypeId, "Branch ID:: ", v.BranchId, "Cost price:: ", v.CostPrice, "Image path:: ", v.ImagePath, "Quantity:: ", v.Quantity, "Selling price:: ", v.SellingPrice)
+	logs.Info("Received \nProduct name: ", v.ProductName, "Branch ID:: ", v.BranchId, "Cost price:: ", v.CostPrice, "Image path:: ", v.ImagePath, "Quantity:: ", v.Quantity, "Selling price:: ", v.SellingPrice)
 
 	var isSuccess bool = false
 
-	if token[0] == "Bearer" {
-		verifyToken := functions.VerifyToken(&c.Controller, token[1])
+	proceed := true
+	errorMessage := "An error occurred"
+	logs.Info("Token verified!")
+	getBranchResp := functions.GetBranch(&c.Controller, v.BranchId)
 
-		if verifyToken.StatusCode == 200 {
-			proceed := true
-			errorMessage := "An error occurred"
-			logs.Info("Token verified!")
-			logs.Info("Country is !", verifyToken.User.UserDetails.Branch)
-			getBranchResp := functions.GetBranch(&c.Controller, v.BranchId)
+	// if getBranchResp.StatusCode == 200 {
+	// userId := verifyToken.User.UserId
+	if getBranchResp.StatusCode != 200 {
+		errorMessage = "Branch provided does not exist"
+		proceed = false
+	}
 
-			// if getBranchResp.StatusCode == 200 {
-			// userId := verifyToken.User.UserId
-			if getBranchResp.StatusCode != 200 {
-				errorMessage = "Branch provided does not exist"
-				proceed = false
-			}
+	categoryId := strconv.FormatInt(v.CategoryId, 10)
 
-			categoryId := strconv.FormatInt(v.ProductTypeId, 10)
+	getProductTypes := functions.GetCategory(&c.Controller, categoryId)
 
-			getProductTypes := functions.GetCategory(&c.Controller, categoryId)
+	if getProductTypes.StatusCode != 200 {
+		errorMessage = "Product type provided does not exist"
+		proceed = false
+	}
 
-			if getProductTypes.StatusCode != 200 {
-				errorMessage = "Product type provided does not exist"
-				proceed = false
-			}
+	getItemResp := functions.GetItem(&c.Controller, idStr)
 
-			getItemResp := functions.GetItem(&c.Controller, idStr)
+	if getItemResp.StatusCode != 200 {
+		errorMessage = "Item provided does not exist"
+		proceed = false
+	}
 
-			if getItemResp.StatusCode != 200 {
-				errorMessage = "Item provided does not exist"
-				proceed = false
-			}
+	if proceed {
+		addItemResp := functions.UpdateItem(&c.Controller, v, getBranchResp.Branch.Country.CountryCode, v.BranchId, int(userData.UserId), idStr)
 
-			if proceed {
-				addItemResp := functions.UpdateItem(&c.Controller, v, getBranchResp.Branch.Country.CountryCode, v.BranchId, int(verifyToken.User.UserId), idStr)
-
-				itemResp := responses.Item{}
-				if addItemResp.StatusCode == 200 {
-					if addItemResp.Item != nil {
-						logs.Info("About to update item image")
-						itemImageUpdateResp := functions.UpdateItemImage(&c.Controller, addItemResp.Item.ItemId, v.ImagePath)
-						if itemImageUpdateResp.StatusCode == 200 {
-							logs.Info("Successfully updated item image")
-						} else {
-							logs.Error("Failed update")
-						}
-
-						itemResp = responses.Item{
-							ProductId:        addItemResp.Item.ItemId,
-							ProductName:      addItemResp.Item.ItemName,
-							Description:      addItemResp.Item.Description,
-							ProductType:      addItemResp.Item.Category.CategoryName,
-							ProductPrice:     float64(addItemResp.Item.ItemPrice.ItemPrice),
-							ProductCostPrice: float64(addItemResp.Item.ItemPrice.AltItemPrice),
-							ImagePath:        itemImageUpdateResp.Item.ImagePath,
-							Quantity:         addItemResp.Item.Quantity,
-							Branch:           addItemResp.Item.Branch,
-						}
-
-						isSuccess = true
-					} else {
-						isSuccess = false
-					}
-
+		itemResp := responses.Item{}
+		if addItemResp.StatusCode == 200 {
+			if addItemResp.Item != nil {
+				logs.Info("About to update item image")
+				itemImageUpdateResp := functions.UpdateItemImage(&c.Controller, addItemResp.Item.ItemId, v.ImagePath)
+				if itemImageUpdateResp.StatusCode == 200 {
+					logs.Info("Successfully updated item image")
+				} else {
+					logs.Error("Failed update")
 				}
 
-				var resp responses.ItemResponseDTO = responses.ItemResponseDTO{Success: isSuccess, Result: &itemResp, StatusDesc: addItemResp.StatusDesc}
+				itemFeaturesResp := functions.GetItemFeatures(&c.Controller, requests.AddProductFeatureRequestDTO{ProductId: addItemResp.Item.ItemId})
+				if itemFeaturesResp.StatusCode == 200 {
+					logs.Info("Successfully fetched item features")
+					for _, feature := range *itemFeaturesResp.Result {
+						logs.Info("Feature is ", feature.Feature)
+						exists := false
+						for _, featureId := range *v.Features {
+							if feature.Feature.FeatureId == featureId {
+								exists = true
+							}
+						}
 
-				c.Data["json"] = resp
-				// } else {
-				// 	var resp responses.ItemResponseDTO = responses.ItemResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An error occurred"}
+						if !exists {
+							logs.Info("Feature does not exist, deleting ", feature.Feature.FeatureId)
+							deleteResp := functions.DeleteItemFeature(&c.Controller, strconv.FormatInt(feature.ItemFeatureId, 10))
+							if deleteResp.StatusCode == 200 {
+								logs.Info("Successfully deleted item feature")
+							} else {
+								logs.Error("Failed to delete item feature")
+							}
+						}
+					}
 
-				// 	c.Data["json"] = resp
-				// }
+					exists := false
+					for _, featureId := range *v.Features {
+						for _, feature := range *itemFeaturesResp.Result {
+							if featureId == feature.Feature.FeatureId {
+								exists = true
+							}
+						}
+
+						if !exists {
+							logs.Info("Feature does not exist, adding ", featureId)
+							var ifResp requests.AddProductFeatureRequestDTO = requests.AddProductFeatureRequestDTO{
+								ProductId: addItemResp.Item.ItemId,
+								FeatureId: featureId,
+							}
+
+							addItemFeatureResp := functions.AddItemFeatures(&c.Controller, ifResp)
+
+							if addItemFeatureResp.StatusCode == 200 {
+								logs.Info("Successfully added item feature")
+							} else {
+								logs.Error("Failed to add item feature")
+							}
+						}
+					}
+				} else {
+					logs.Error("Failed to fetch item features")
+				}
+
+				itemPurposesResp := functions.GetItemPurposes(&c.Controller, requests.AddProductPurposeRequestDTO{ProductId: addItemResp.Item.ItemId})
+				if itemPurposesResp.StatusCode == 200 {
+					logs.Info("Successfully fetched item purposes")
+					for _, purpose := range *itemPurposesResp.Result {
+						logs.Info("Purpose is ", purpose.Purpose)
+						exists := false
+						for _, purposeId := range *v.Purposes {
+							if purpose.Purpose.PurposeId == purposeId {
+								exists = true
+							}
+						}
+
+						if !exists {
+							logs.Info("Purpose does not exist, deleting ", purpose.Purpose.PurposeId)
+							deleteResp := functions.DeleteItemPurpose(&c.Controller, strconv.FormatInt(purpose.ItemPurposeId, 10))
+							if deleteResp.StatusCode == 200 {
+								logs.Info("Successfully deleted item purpose")
+							} else {
+								logs.Error("Failed to delete item purpose")
+							}
+						}
+					}
+
+					exists := false
+					for _, purposeId := range *v.Purposes {
+						for _, purpose := range *itemPurposesResp.Result {
+							if purposeId == purpose.Purpose.PurposeId {
+								exists = true
+							}
+						}
+
+						if !exists {
+							logs.Info("Purpose does not exist, adding ", purposeId)
+							var ifResp requests.AddProductPurposeRequestDTO = requests.AddProductPurposeRequestDTO{
+								ProductId: addItemResp.Item.ItemId,
+								PurposeId: purposeId,
+							}
+
+							addItemPurposeResp := functions.AddItemPurposes(&c.Controller, ifResp)
+
+							if addItemPurposeResp.StatusCode == 200 {
+								logs.Info("Successfully added item purpose")
+							} else {
+								logs.Error("Failed to add item purpose")
+							}
+						}
+					}
+				} else {
+					logs.Error("Failed to fetch item purposes")
+				}
+
+				availableSizes := strings.Split(addItemResp.Item.AvailableSizes, ",")
+				availableColors := strings.Split(addItemResp.Item.AvailableColors, ",")
+
+				itemResp = responses.Item{
+					ProductId:        addItemResp.Item.ItemId,
+					ProductName:      addItemResp.Item.ItemName,
+					Description:      addItemResp.Item.Description,
+					Weight:           addItemResp.Item.Weight,
+					ProductPrice:     float64(addItemResp.Item.ItemPrice.ItemPrice),
+					ProductCostPrice: float64(addItemResp.Item.ItemPrice.AltItemPrice),
+					ImagePath:        itemImageUpdateResp.Item.ImagePath,
+					Quantity:         addItemResp.Item.Quantity,
+					Branch:           addItemResp.Item.Branch,
+					Category:         addItemResp.Item.Category,
+					AvailableSizes:   &availableSizes,
+					AvailableColors:  &availableColors,
+					// Features:         &features,
+					// Purposes:         &purposes,
+				}
+
+				isSuccess = true
 			} else {
-				var resp responses.ItemResponseDTO = responses.ItemResponseDTO{Success: isSuccess, Result: nil, StatusDesc: errorMessage}
-
-				c.Data["json"] = resp
+				isSuccess = false
 			}
 
-		} else {
-			var resp responses.ItemResponseDTO = responses.ItemResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An error occurred"}
-
-			c.Data["json"] = resp
 		}
+
+		var resp responses.ItemResponseDTO = responses.ItemResponseDTO{Success: isSuccess, Result: &itemResp, StatusDesc: addItemResp.StatusDesc}
+
+		c.Data["json"] = resp
+		// } else {
+		// 	var resp responses.ItemResponseDTO = responses.ItemResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An error occurred"}
+
+		// 	c.Data["json"] = resp
+		// }
 	} else {
-		logs.Info("Token not verified")
-		var resp responses.ItemResponseDTO = responses.ItemResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An error occurred"}
+		var resp responses.ItemResponseDTO = responses.ItemResponseDTO{Success: isSuccess, Result: nil, StatusDesc: errorMessage}
 
 		c.Data["json"] = resp
 	}
@@ -725,7 +870,6 @@ func (c *ItemsController) GetItems() {
 								ProductId:        item.ItemId,
 								ProductName:      item.ItemName,
 								Description:      item.Description,
-								ProductType:      item.Category.CategoryName,
 								ProductPrice:     float64(item.ItemPrice.ItemPrice),
 								ProductCostPrice: float64(item.ItemPrice.AltItemPrice),
 								ImagePath:        item.ImagePath,
@@ -806,7 +950,6 @@ func (c *ItemsController) GetProduct() {
 					ProductId:        itemResp.Item.ItemId,
 					ProductName:      itemResp.Item.ItemName,
 					Description:      itemResp.Item.Description,
-					ProductType:      itemResp.Item.Category.CategoryName,
 					ProductPrice:     float64(itemResp.Item.ItemPrice.ItemPrice),
 					ProductCostPrice: float64(itemResp.Item.ItemPrice.AltItemPrice),
 					ImagePath:        itemResp.Item.ImagePath,

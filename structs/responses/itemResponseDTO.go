@@ -47,18 +47,25 @@ type ItemsResp struct {
 	Active          int
 	Country         *CountryResp
 	Branch          *BranchResp
+	Purposes        *[]Purpose
+	Features        *[]Feature
 }
 
 type Item struct {
 	ProductId        int64
 	ProductName      string
 	Description      string
-	ProductType      string
+	Weight           string
 	ProductPrice     float64
 	ProductCostPrice float64
 	ImagePath        string
 	Quantity         int
 	Branch           *BranchResp
+	Category         *Categories
+	AvailableSizes   *[]string
+	AvailableColors  *[]string
+	Purposes         *[]Purpose
+	Features         *[]Feature
 }
 
 type ItemResponseDTO struct {
@@ -109,5 +116,43 @@ type ItemsStatsOriResponseDTO struct {
 type ItemsStatsResponseDTO struct {
 	Success    bool
 	Result     *StatsDTO
+	StatusDesc string
+}
+
+type Item_features struct {
+	ItemFeatureId int64
+	Item          *Items
+	Feature       *Feature
+	Active        int
+}
+
+type ItemFeatureResponseDTO struct {
+	StatusCode int
+	Result     *Item_features
+	StatusDesc string
+}
+
+type ItemFeaturesResponseDTO struct {
+	StatusCode int
+	Result     *[]Item_features
+	StatusDesc string
+}
+
+type Item_purposes struct {
+	ItemPurposeId int64
+	Item          *Items
+	Purpose       *Purpose
+	Active        int
+}
+
+type ItemPurposeResponseDTO struct {
+	StatusCode int
+	Result     *Item_purposes
+	StatusDesc string
+}
+
+type ItemPurposesResponseDTO struct {
+	StatusCode int
+	Result     *[]Item_purposes
 	StatusDesc string
 }

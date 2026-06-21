@@ -3,10 +3,10 @@ package responses
 import "time"
 
 type Categories struct {
-	CategoryId   int64  `orm:"auto;omitempty"`
-	CategoryName string `orm:"size(40)"`
-	ImagePath    string `orm:"size(250)"`
-	Icon         string `orm:"size(250)"`
+	CategoryId   int64
+	CategoryName string
+	ImagePath    string
+	Icon         string
 }
 
 type Feature struct {

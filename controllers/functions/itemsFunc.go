@@ -77,11 +77,11 @@ func UpdateItem(c *beego.Controller, req requests.UpdateItemRequestDTO, countryC
 		"/v1/items/",
 		api.PUT)
 	request.InterfaceParams["ItemName"] = req.ProductName
-	request.InterfaceParams["Description"] = ""
-	request.InterfaceParams["Weight"] = ""
-	request.InterfaceParams["Category"] = req.ProductTypeId
-	request.InterfaceParams["AvailableSizes"] = ""
-	request.InterfaceParams["AvailableColors"] = ""
+	request.InterfaceParams["Description"] = req.Description
+	request.InterfaceParams["Weight"] = req.Weight
+	request.InterfaceParams["Category"] = req.CategoryId
+	request.InterfaceParams["AvailableSizes"] = req.AvailableSizes
+	request.InterfaceParams["AvailableColors"] = req.AvailableColors
 	request.InterfaceParams["Quantity"] = req.Quantity
 	request.InterfaceParams["ItemPrice"] = req.SellingPrice
 	request.InterfaceParams["AltItemPrice"] = req.CostPrice
@@ -980,6 +980,266 @@ func DeleteItem(c *beego.Controller, id string) (resp responses.StringOriRespons
 	}
 	// data := map[string]interface{}{}
 	var data responses.StringOriResponseDTO
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	logs.Info("Resp is ", data)
+
+	return data
+}
+
+func DeleteItemFeature(c *beego.Controller, id string) (resp responses.StringOriResponseDTO) {
+	host, _ := beego.AppConfig.String("itemBaseUrl")
+
+	request := api.NewRequest(
+		host,
+		"/v1/item-features/"+id,
+		api.DELETE)
+
+	// request.FileField["UserImage"] = userImage
+	// request.Params["UserId"] = strconv.FormatInt(userId, 10)
+	// request.HeaderField["content-type"] = "multipart/form-data"
+	// request.Params = {"UserId": strconv.Itoa(int(userid))}
+	client := api.Client{
+		Request: request,
+		Type_:   "params",
+	}
+
+	// client.Request.HeaderField["content-type"] = "multipart/form-data"
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+	// data := map[string]interface{}{}
+	var data responses.StringOriResponseDTO
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	logs.Info("Resp is ", data)
+
+	return data
+}
+
+func DeleteItemPurpose(c *beego.Controller, id string) (resp responses.StringOriResponseDTO) {
+	host, _ := beego.AppConfig.String("itemBaseUrl")
+
+	request := api.NewRequest(
+		host,
+		"/v1/item-purposes/"+id,
+		api.DELETE)
+
+	// request.FileField["UserImage"] = userImage
+	// request.Params["UserId"] = strconv.FormatInt(userId, 10)
+	// request.HeaderField["content-type"] = "multipart/form-data"
+	// request.Params = {"UserId": strconv.Itoa(int(userid))}
+	client := api.Client{
+		Request: request,
+		Type_:   "params",
+	}
+
+	// client.Request.HeaderField["content-type"] = "multipart/form-data"
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+	// data := map[string]interface{}{}
+	var data responses.StringOriResponseDTO
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	logs.Info("Resp is ", data)
+
+	return data
+}
+
+func AddItemFeatures(c *beego.Controller, req requests.AddProductFeatureRequestDTO) (resp responses.ItemOriResponseDTO) {
+	host, _ := beego.AppConfig.String("itemBaseUrl")
+
+	// logs.Info("Sending first name ", req.BranchId)
+
+	request := api.NewRequest(
+		host,
+		"/v1/item-features/",
+		api.POST)
+	request.InterfaceParams["ItemId"] = req.ProductId
+	request.InterfaceParams["FeatureId"] = req.FeatureId
+
+	client := api.Client{
+		Request: request,
+		Type_:   "body",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+	// data := map[string]interface{}{}
+	var data responses.ItemOriResponseDTO
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	logs.Info("Resp is ", data)
+
+	return data
+}
+
+func AddItemPurposes(c *beego.Controller, req requests.AddProductPurposeRequestDTO) (resp responses.ItemOriResponseDTO) {
+	host, _ := beego.AppConfig.String("itemBaseUrl")
+
+	// logs.Info("Sending first name ", req.BranchId)
+
+	request := api.NewRequest(
+		host,
+		"/v1/item-purposes/",
+		api.POST)
+	request.InterfaceParams["ItemId"] = req.ProductId
+	request.InterfaceParams["PurposeId"] = req.PurposeId
+
+	client := api.Client{
+		Request: request,
+		Type_:   "body",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+	// data := map[string]interface{}{}
+	var data responses.ItemOriResponseDTO
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	logs.Info("Resp is ", data)
+
+	return data
+}
+
+func GetItemFeatures(c *beego.Controller, req requests.AddProductFeatureRequestDTO) (resp responses.ItemFeaturesResponseDTO) {
+	host, _ := beego.AppConfig.String("itemBaseUrl")
+
+	// logs.Info("Sending first name ", req.BranchId)
+
+	request := api.NewRequest(
+		host,
+		"/v1/item-features/",
+		api.GET)
+	request.InterfaceParams["query"] = "ItemId:" + strconv.FormatInt(req.ProductId, 10)
+
+	client := api.Client{
+		Request: request,
+		Type_:   "body",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+	// data := map[string]interface{}{}
+	var data responses.ItemFeaturesResponseDTO
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	logs.Info("Resp is ", data)
+
+	return data
+}
+
+func GetItemPurposes(c *beego.Controller, req requests.AddProductPurposeRequestDTO) (resp responses.ItemPurposesResponseDTO) {
+	host, _ := beego.AppConfig.String("itemBaseUrl")
+
+	// logs.Info("Sending first name ", req.BranchId)
+
+	request := api.NewRequest(
+		host,
+		"/v1/item-purposes/",
+		api.GET)
+	request.InterfaceParams["query"] = "ItemId:" + strconv.FormatInt(req.ProductId, 10)
+
+	client := api.Client{
+		Request: request,
+		Type_:   "body",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+	// data := map[string]interface{}{}
+	var data responses.ItemPurposesResponseDTO
 	json.Unmarshal(read, &data)
 	c.Data["json"] = data
 

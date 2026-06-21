@@ -33,6 +33,16 @@ type AddSalesItemRequestDTO struct {
 	Weight          string
 }
 
+type AddProductFeatureRequestDTO struct {
+	ProductId int64
+	FeatureId int64
+}
+
+type AddProductPurposeRequestDTO struct {
+	ProductId int64
+	PurposeId int64
+}
+
 type AddRentalItemRequestDTO struct {
 	ProductName  string
 	Quantity     int
@@ -42,13 +52,19 @@ type AddRentalItemRequestDTO struct {
 }
 
 type UpdateItemRequestDTO struct {
-	ProductName   string
-	Quantity      int
-	CostPrice     float64
-	SellingPrice  float64
-	BranchId      int64
-	ImagePath     string
-	ProductTypeId int64
+	ProductName     string
+	Quantity        int
+	AvailableSizes  *[]string
+	AvailableColors *[]string
+	CostPrice       float64
+	SellingPrice    float64
+	BranchId        int64
+	ImagePath       string
+	Description     string
+	CategoryId      int64
+	Purposes        *[]int64
+	Features        *[]int64
+	Weight          string
 }
 
 type Product struct {
