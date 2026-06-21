@@ -66,6 +66,7 @@ type Item struct {
 	AvailableColors  *[]string
 	Purposes         *[]Purpose
 	Features         *[]Feature
+	Status           string
 }
 
 type ItemResponseDTO struct {

@@ -864,6 +864,7 @@ func (c *ItemsController) GetItems() {
 								AvailableColors:  &availableColors,
 								Features:         item.Features,
 								Purposes:         item.Purposes,
+								Status:           "ACTIVE",
 							}
 
 							items = append(items, itemT)
@@ -912,53 +913,41 @@ func (c *ItemsController) GetItems() {
 // @Failure 403 body is empty
 // @router /get-item/:id [get]
 func (c *ItemsController) GetProduct() {
-	authorization := c.Ctx.Input.Header("Authorization")
-
-	token := strings.Split(authorization, " ")
-
 	var isSuccess bool = false
 
-	if token[0] == "Bearer" {
-		logs.Info("Token is ", token[1])
-		verifyToken := functions.VerifyToken(&c.Controller, token[1])
+	logs.Info("Success response received")
+	isSuccess = false
 
-		logs.Info("Success response")
+	idStr := c.Ctx.Input.Param(":id")
 
-		if verifyToken.StatusCode == 200 {
-			logs.Info("Success response received")
-			isSuccess = false
+	itemResp := functions.GetItem(&c.Controller, idStr)
 
-			idStr := c.Ctx.Input.Param(":id")
-
-			itemResp := functions.GetItem(&c.Controller, idStr)
-
-			item := responses.Item{}
-			if itemResp.StatusCode == 200 {
-				// logs.Info("Categories returned: ", categoryResponse.Categories)
-				item = responses.Item{
-					ProductId:        itemResp.Item.ItemId,
-					ProductName:      itemResp.Item.ItemName,
-					Description:      itemResp.Item.Description,
-					ProductPrice:     float64(itemResp.Item.ItemPrice.ItemPrice),
-					ProductCostPrice: float64(itemResp.Item.ItemPrice.AltItemPrice),
-					ImagePath:        itemResp.Item.ImagePath,
-					Quantity:         itemResp.Item.Quantity,
-					Branch:           itemResp.Item.Branch,
-				}
-
-				isSuccess = true
-
-				var resp responses.ItemResponseDTO = responses.ItemResponseDTO{Success: isSuccess, Result: &item, StatusDesc: itemResp.StatusDesc}
-				c.Data["json"] = resp
-			} else {
-				var resp responses.ItemResponseDTO = responses.ItemResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
-				c.Data["json"] = resp
-			}
-
-		} else {
-			var resp responses.ItemResponseDTO = responses.ItemResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
-			c.Data["json"] = resp
+	item := responses.Item{}
+	if itemResp.StatusCode == 200 {
+		// logs.Info("Categories returned: ", categoryResponse.Categories)
+		availableSizes := strings.Split(itemResp.Item.AvailableSizes, ",")
+		availableColors := strings.Split(itemResp.Item.AvailableColors, ",")
+		item = responses.Item{
+			ProductId:        itemResp.Item.ItemId,
+			ProductName:      itemResp.Item.ItemName,
+			Description:      itemResp.Item.Description,
+			ProductPrice:     float64(itemResp.Item.ItemPrice.ItemPrice),
+			ProductCostPrice: float64(itemResp.Item.ItemPrice.AltItemPrice),
+			ImagePath:        itemResp.Item.ImagePath,
+			Quantity:         itemResp.Item.Quantity,
+			Branch:           itemResp.Item.Branch,
+			Status:           "ACTIVE",
+			Category:         itemResp.Item.Category,
+			Features:         itemResp.Item.Features,
+			Purposes:         itemResp.Item.Purposes,
+			AvailableSizes:   &availableSizes,
+			AvailableColors:  &availableColors,
 		}
+
+		isSuccess = true
+
+		var resp responses.ItemResponseDTO = responses.ItemResponseDTO{Success: isSuccess, Result: &item, StatusDesc: itemResp.StatusDesc}
+		c.Data["json"] = resp
 	} else {
 		var resp responses.ItemResponseDTO = responses.ItemResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
 		c.Data["json"] = resp
