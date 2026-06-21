@@ -82,6 +82,7 @@ func (c *ItemsController) AddSalesItem() {
 			AvailableColors: v.AvailableColors,
 			Purposes:        v.Purposes,
 			Features:        v.Features,
+			Country:         "GHA",
 		}
 		addItemResp := functions.AddItem(
 			&c.Controller,

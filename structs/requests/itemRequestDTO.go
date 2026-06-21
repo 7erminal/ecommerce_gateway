@@ -15,6 +15,7 @@ type AddItemRequestDTO struct {
 	Features        *[]int64
 	AvailableSizes  *[]string
 	AvailableColors *[]string
+	Country         string
 }
 
 type AddSalesItemRequestDTO struct {
