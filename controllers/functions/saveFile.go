@@ -18,7 +18,7 @@ func SaveImage(c *beego.Controller, fieldName string, file multipart.File, heade
 	// Save the uploaded file
 	fileName := filepath.Base(header.Filename)
 	host, _ := beego.AppConfig.String("imagesBaseUrl")
-	filePath = host + "tmp/" + time.Now().Format("20060102150405") + fileName // Define your file path
+	filePath = host + "/tmp/" + time.Now().Format("20060102150405") + fileName // Define your file path
 
 	err := c.SaveToFile(fieldName, filePath)
 
