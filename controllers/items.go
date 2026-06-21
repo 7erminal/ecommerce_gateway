@@ -501,56 +501,38 @@ func (c *ItemsController) UpdateItem() {
 // @Failure 403 body is empty
 // @router /upload-product-image [post]
 func (c *ItemsController) UpdateItemImage() {
-	authorization := c.Ctx.Input.Header("Authorization")
-
-	token := strings.Split(authorization, " ")
 
 	var isSuccess bool = false
 
-	if token[0] == "Bearer" {
-		logs.Info("Token is ", token[1])
-		verifyToken := functions.VerifyToken(&c.Controller, token[1])
+	image, header, err := c.GetFile("Image")
 
-		logs.Info("Success response")
+	if err != nil {
+		var resp responses.ItemImageResponseDTO = responses.ItemImageResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "No file uploaded"}
+		c.Data["json"] = resp
+	} else {
+		logs.Info("Success response received")
+		isSuccess = false
+		respCode, filePath := functions.SaveImage(&c.Controller, "Image", image, *header)
 
-		if verifyToken.StatusCode == 200 {
-			image, header, err := c.GetFile("Image")
+		if respCode == 200 {
+			itemImage := functions.UploadItemImage(&c.Controller, filePath)
 
-			if err != nil {
-				var resp responses.ItemImageResponseDTO = responses.ItemImageResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "No file uploaded"}
+			if itemImage.StatusCode == 200 {
+				logs.Info("Item image returned: ", itemImage.Value)
+
+				isSuccess = true
+
+				var resp responses.ItemImageResponseDTO = responses.ItemImageResponseDTO{Success: isSuccess, Result: itemImage.Value, StatusDesc: itemImage.StatusDesc}
 				c.Data["json"] = resp
 			} else {
-				logs.Info("Success response received")
-				isSuccess = false
-				respCode, filePath := functions.SaveImage(&c.Controller, "Image", image, *header)
-
-				if respCode == 200 {
-					itemImage := functions.UploadItemImage(&c.Controller, filePath)
-
-					if itemImage.StatusCode == 200 {
-						logs.Info("Item image returned: ", itemImage.Value)
-
-						isSuccess = true
-
-						var resp responses.ItemImageResponseDTO = responses.ItemImageResponseDTO{Success: isSuccess, Result: itemImage.Value, StatusDesc: itemImage.StatusDesc}
-						c.Data["json"] = resp
-					} else {
-						var resp responses.ItemImageResponseDTO = responses.ItemImageResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
-						c.Data["json"] = resp
-					}
-				} else {
-					var resp responses.ItemImageResponseDTO = responses.ItemImageResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "Failed to upload file. Tmp"}
-					c.Data["json"] = resp
-				}
-
+				var resp responses.ItemImageResponseDTO = responses.ItemImageResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
+				c.Data["json"] = resp
 			}
 		} else {
-			var resp responses.StringResponseDTO = responses.StringResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
+			var resp responses.ItemImageResponseDTO = responses.ItemImageResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "Failed to upload file. Tmp"}
 			c.Data["json"] = resp
 		}
-	} else {
-		var resp responses.StringResponseDTO = responses.StringResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
-		c.Data["json"] = resp
+
 	}
 
 	c.ServeJSON()
@@ -864,8 +846,10 @@ func (c *ItemsController) GetItems() {
 					logs.Info("Items returned: ", getItemsResp.Items)
 
 					items := []responses.Item{}
-					if getItemsResp.Items != nil || len(*getItemsResp.Items) > 0 {
+					if getItemsResp.Items != nil && len(*getItemsResp.Items) > 0 {
 						for _, item := range *getItemsResp.Items {
+							availableSizes := strings.Split(item.AvailableSizes, ",")
+							availableColors := strings.Split(item.AvailableColors, ",")
 							itemT := responses.Item{
 								ProductId:        item.ItemId,
 								ProductName:      item.ItemName,
@@ -875,6 +859,11 @@ func (c *ItemsController) GetItems() {
 								ImagePath:        item.ImagePath,
 								Quantity:         item.Quantity,
 								Branch:           item.Branch,
+								Category:         item.Category,
+								AvailableSizes:   &availableSizes,
+								AvailableColors:  &availableColors,
+								Features:         item.Features,
+								Purposes:         item.Purposes,
 							}
 
 							items = append(items, itemT)
