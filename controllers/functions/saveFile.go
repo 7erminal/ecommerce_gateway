@@ -30,7 +30,6 @@ func SaveImage(c *beego.Controller, fieldName string, file multipart.File, heade
 
 		return 400, errorMessage
 	}
-	filePath = host + "/" + filePath
 
 	logs.Info("Full file path is ", filePath)
 
