@@ -40,97 +40,80 @@ func (c *ItemsController) URLMapping() {
 // @Failure 403 body is empty
 // @router /add-sales-product [post]
 func (c *ItemsController) AddSalesItem() {
+	u := c.Ctx.Input.GetData("user")
+	userData, err := u.(*responses.UsersOri)
+	logs.Info("Error is ", err)
 	var v requests.AddSalesItemRequestDTO
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
 
-	authorization := c.Ctx.Input.Header("Authorization")
-	token := strings.Split(authorization, " ")
-
 	var isSuccess bool = false
 
-	if token[0] == "Bearer" {
-		verifyToken := functions.VerifyToken(&c.Controller, token[1])
+	logs.Info("Received \nProduct name: ", v.ProductName, "Branch ID:: ", userData.UserDetails.Branch.BranchId, "Cost price:: ", v.CostPrice, "Image path:: ", v.ImagePath, "Quantity:: ", v.Quantity, "Selling price:: ", v.SellingPrice)
+	proceed := true
+	errorMessage := "An error occurred"
+	logs.Info("Token verified!")
+	getBranchResp := functions.GetBranch(&c.Controller, userData.UserDetails.Branch.BranchId)
 
-		if verifyToken.StatusCode == 200 {
-			logs.Info("Received \nProduct name: ", v.ProductName, "Branch ID:: ", v.BranchId, "Cost price:: ", v.CostPrice, "Image path:: ", v.ImagePath, "Quantity:: ", v.Quantity, "Selling price:: ", v.SellingPrice)
-			proceed := true
-			errorMessage := "An error occurred"
-			logs.Info("Token verified!")
-			logs.Info("Country is !", verifyToken.User.UserDetails.Branch)
-			getBranchResp := functions.GetBranch(&c.Controller, v.BranchId)
+	// if getBranchResp.StatusCode == 200 {
+	// userId := verifyToken.User.UserId
+	if getBranchResp.StatusCode != 200 {
+		errorMessage = "Branch provided does not exist"
+		proceed = false
+	}
 
-			// if getBranchResp.StatusCode == 200 {
-			// userId := verifyToken.User.UserId
-			if getBranchResp.StatusCode != 200 {
-				errorMessage = "Branch provided does not exist"
-				proceed = false
-			}
+	sales_product_type_name, _ := beego.AppConfig.String("salesProductType")
 
-			sales_product_type_name, _ := beego.AppConfig.String("salesProductType")
+	getProductTypes := functions.GetCategoryByName(&c.Controller, sales_product_type_name)
 
-			getProductTypes := functions.GetCategoryByName(&c.Controller, sales_product_type_name)
+	if getProductTypes.StatusCode != 200 {
+		errorMessage = "Product type provided does not exist"
+		proceed = false
+	}
 
-			if getProductTypes.StatusCode != 200 {
-				errorMessage = "Product type provided does not exist"
-				proceed = false
-			}
+	if proceed {
+		req := requests.AddItemRequestDTO{ProductName: v.ProductName, Quantity: v.Quantity, ReorderLevel: 0, CostPrice: v.CostPrice, SellingPrice: v.SellingPrice, BranchId: userData.UserDetails.Branch.BranchId, ImagePath: v.ImagePath}
+		addItemResp := functions.AddItem(&c.Controller, req, getProductTypes.Category.CategoryId, getBranchResp.Branch.Country.CountryCode, userData.UserDetails.Branch.BranchId, int(userData.UserId))
 
-			if proceed {
-				req := requests.AddItemRequestDTO{ProductName: v.ProductName, Quantity: v.Quantity, ReorderLevel: 0, CostPrice: v.CostPrice, SellingPrice: v.SellingPrice, BranchId: v.BranchId, ImagePath: v.ImagePath}
-				addItemResp := functions.AddItem(&c.Controller, req, getProductTypes.Category.CategoryId, getBranchResp.Branch.Country.CountryCode, v.BranchId, int(verifyToken.User.UserId))
-
-				itemResp := responses.Item{}
-				if addItemResp.StatusCode == 200 {
-					if addItemResp.Item != nil {
-						logs.Info("About to update item image")
-						itemImageUpdateResp := functions.UpdateItemImage(&c.Controller, addItemResp.Item.ItemId, v.ImagePath)
-						if itemImageUpdateResp.StatusCode == 200 {
-							logs.Info("Successfully updated item image")
-						} else {
-							logs.Error("Failed update")
-						}
-
-						itemResp = responses.Item{
-							ProductId:        addItemResp.Item.ItemId,
-							ProductName:      addItemResp.Item.ItemName,
-							Description:      addItemResp.Item.Description,
-							ProductType:      addItemResp.Item.Category.CategoryName,
-							ProductPrice:     float64(addItemResp.Item.ItemPrice.ItemPrice),
-							ProductCostPrice: float64(addItemResp.Item.ItemPrice.AltItemPrice),
-							ImagePath:        itemImageUpdateResp.Item.ImagePath,
-							Quantity:         addItemResp.Item.Quantity,
-							Branch:           addItemResp.Item.Branch,
-						}
-
-						isSuccess = true
-					} else {
-						isSuccess = false
-					}
-
+		itemResp := responses.Item{}
+		if addItemResp.StatusCode == 200 {
+			if addItemResp.Item != nil {
+				logs.Info("About to update item image")
+				itemImageUpdateResp := functions.UpdateItemImage(&c.Controller, addItemResp.Item.ItemId, v.ImagePath)
+				if itemImageUpdateResp.StatusCode == 200 {
+					logs.Info("Successfully updated item image")
+				} else {
+					logs.Error("Failed update")
 				}
 
-				var resp responses.ItemResponseDTO = responses.ItemResponseDTO{Success: isSuccess, Result: &itemResp, StatusDesc: addItemResp.StatusDesc}
+				itemResp = responses.Item{
+					ProductId:        addItemResp.Item.ItemId,
+					ProductName:      addItemResp.Item.ItemName,
+					Description:      addItemResp.Item.Description,
+					ProductType:      addItemResp.Item.Category.CategoryName,
+					ProductPrice:     float64(addItemResp.Item.ItemPrice.ItemPrice),
+					ProductCostPrice: float64(addItemResp.Item.ItemPrice.AltItemPrice),
+					ImagePath:        itemImageUpdateResp.Item.ImagePath,
+					Quantity:         addItemResp.Item.Quantity,
+					Branch:           addItemResp.Item.Branch,
+				}
 
-				c.Data["json"] = resp
-				// } else {
-				// 	var resp responses.ItemResponseDTO = responses.ItemResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An error occurred"}
-
-				// 	c.Data["json"] = resp
-				// }
+				isSuccess = true
 			} else {
-				var resp responses.ItemResponseDTO = responses.ItemResponseDTO{Success: isSuccess, Result: nil, StatusDesc: errorMessage}
-
-				c.Data["json"] = resp
+				isSuccess = false
 			}
 
-		} else {
-			var resp responses.ItemResponseDTO = responses.ItemResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "You are not authorized to access this resource"}
-
-			c.Data["json"] = resp
 		}
+
+		var resp responses.ItemResponseDTO = responses.ItemResponseDTO{Success: isSuccess, Result: &itemResp, StatusDesc: addItemResp.StatusDesc}
+
+		c.Data["json"] = resp
+		// } else {
+		// 	var resp responses.ItemResponseDTO = responses.ItemResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An error occurred"}
+
+		// 	c.Data["json"] = resp
+		// }
 	} else {
-		logs.Info("Token not verified")
-		var resp responses.ItemResponseDTO = responses.ItemResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred. Invalid authorization token"}
+		var resp responses.ItemResponseDTO = responses.ItemResponseDTO{Success: isSuccess, Result: nil, StatusDesc: errorMessage}
 
 		c.Data["json"] = resp
 	}
@@ -147,97 +130,82 @@ func (c *ItemsController) AddSalesItem() {
 // @Failure 403 body is empty
 // @router /add-rental-product [post]
 func (c *ItemsController) AddRentalsItem() {
+	u := c.Ctx.Input.GetData("user")
+	userData, err := u.(*responses.UsersOri)
+	logs.Info("Error is ", err)
+	// userIdStr := strconv.FormatInt(userData.UserId, 10)
 	var v requests.AddRentalItemRequestDTO
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
 
-	authorization := c.Ctx.Input.Header("Authorization")
-	token := strings.Split(authorization, " ")
-
 	var isSuccess bool = false
 
-	if token[0] == "Bearer" {
-		verifyToken := functions.VerifyToken(&c.Controller, token[1])
+	logs.Info("Received \nProduct name: ", v.ProductName, "Branch ID:: ", userData.UserDetails.Branch.BranchId, "Image path:: ", v.ImagePath, "Quantity:: ", v.Quantity, "Rental price:: ", v.RentalPrice)
+	proceed := true
+	errorMessage := "An error occurred"
+	logs.Info("Token verified!")
+	logs.Info("Branch is !", userData.UserDetails.Branch)
+	getBranchResp := functions.GetBranch(&c.Controller, userData.UserDetails.Branch.BranchId)
 
-		if verifyToken.StatusCode == 200 {
-			logs.Info("Received \nProduct name: ", v.ProductName, "Branch ID:: ", v.BranchId, "Image path:: ", v.ImagePath, "Quantity:: ", v.Quantity, "Rental price:: ", v.RentalPrice)
-			proceed := true
-			errorMessage := "An error occurred"
-			logs.Info("Token verified!")
-			logs.Info("Country is !", verifyToken.User.UserDetails.Branch)
-			getBranchResp := functions.GetBranch(&c.Controller, v.BranchId)
+	// if getBranchResp.StatusCode == 200 {
+	// userId := verifyToken.User.UserId
+	if getBranchResp.StatusCode != 200 {
+		errorMessage = "Branch provided does not exist"
+		proceed = false
+	}
 
-			// if getBranchResp.StatusCode == 200 {
-			// userId := verifyToken.User.UserId
-			if getBranchResp.StatusCode != 200 {
-				errorMessage = "Branch provided does not exist"
-				proceed = false
-			}
+	sales_product_type_name, _ := beego.AppConfig.String("rentalsProductType")
 
-			sales_product_type_name, _ := beego.AppConfig.String("rentalsProductType")
+	getProductTypes := functions.GetCategoryByName(&c.Controller, sales_product_type_name)
 
-			getProductTypes := functions.GetCategoryByName(&c.Controller, sales_product_type_name)
+	if getProductTypes.StatusCode != 200 {
+		errorMessage = "Product type provided does not exist"
+		proceed = false
+	}
 
-			if getProductTypes.StatusCode != 200 {
-				errorMessage = "Product type provided does not exist"
-				proceed = false
-			}
+	if proceed {
+		req := requests.AddItemRequestDTO{ProductName: v.ProductName, Quantity: v.Quantity, ReorderLevel: v.ReorderLevel, CostPrice: 0, SellingPrice: v.RentalPrice, BranchId: userData.UserDetails.Branch.BranchId, ImagePath: v.ImagePath}
+		addItemResp := functions.AddItem(&c.Controller, req, getProductTypes.Category.CategoryId, getBranchResp.Branch.Country.CountryCode, userData.UserDetails.Branch.BranchId, int(userData.UserId))
 
-			if proceed {
-				req := requests.AddItemRequestDTO{ProductName: v.ProductName, Quantity: v.Quantity, ReorderLevel: v.ReorderLevel, CostPrice: 0, SellingPrice: v.RentalPrice, BranchId: v.BranchId, ImagePath: v.ImagePath}
-				addItemResp := functions.AddItem(&c.Controller, req, getProductTypes.Category.CategoryId, getBranchResp.Branch.Country.CountryCode, v.BranchId, int(verifyToken.User.UserId))
-
-				itemResp := responses.Item{}
-				if addItemResp.StatusCode == 200 {
-					if addItemResp.Item != nil {
-						logs.Info("About to update item image")
-						itemImageUpdateResp := functions.UpdateItemImage(&c.Controller, addItemResp.Item.ItemId, v.ImagePath)
-						if itemImageUpdateResp.StatusCode == 200 {
-							logs.Info("Successfully updated item image")
-						} else {
-							logs.Error("Failed update")
-						}
-
-						itemResp = responses.Item{
-							ProductId:        addItemResp.Item.ItemId,
-							ProductName:      addItemResp.Item.ItemName,
-							Description:      addItemResp.Item.Description,
-							ProductType:      addItemResp.Item.Category.CategoryName,
-							ProductPrice:     float64(addItemResp.Item.ItemPrice.ItemPrice),
-							ProductCostPrice: float64(addItemResp.Item.ItemPrice.AltItemPrice),
-							ImagePath:        itemImageUpdateResp.Item.ImagePath,
-							Quantity:         addItemResp.Item.Quantity,
-							Branch:           addItemResp.Item.Branch,
-						}
-
-						isSuccess = true
-					} else {
-						isSuccess = false
-					}
-
+		itemResp := responses.Item{}
+		if addItemResp.StatusCode == 200 {
+			if addItemResp.Item != nil {
+				logs.Info("About to update item image")
+				itemImageUpdateResp := functions.UpdateItemImage(&c.Controller, addItemResp.Item.ItemId, v.ImagePath)
+				if itemImageUpdateResp.StatusCode == 200 {
+					logs.Info("Successfully updated item image")
+				} else {
+					logs.Error("Failed update")
 				}
 
-				var resp responses.ItemResponseDTO = responses.ItemResponseDTO{Success: isSuccess, Result: &itemResp, StatusDesc: addItemResp.StatusDesc}
+				itemResp = responses.Item{
+					ProductId:        addItemResp.Item.ItemId,
+					ProductName:      addItemResp.Item.ItemName,
+					Description:      addItemResp.Item.Description,
+					ProductType:      addItemResp.Item.Category.CategoryName,
+					ProductPrice:     float64(addItemResp.Item.ItemPrice.ItemPrice),
+					ProductCostPrice: float64(addItemResp.Item.ItemPrice.AltItemPrice),
+					ImagePath:        itemImageUpdateResp.Item.ImagePath,
+					Quantity:         addItemResp.Item.Quantity,
+					Branch:           addItemResp.Item.Branch,
+				}
 
-				c.Data["json"] = resp
-				// } else {
-				// 	var resp responses.ItemResponseDTO = responses.ItemResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An error occurred"}
-
-				// 	c.Data["json"] = resp
-				// }
+				isSuccess = true
 			} else {
-				var resp responses.ItemResponseDTO = responses.ItemResponseDTO{Success: isSuccess, Result: nil, StatusDesc: errorMessage}
-
-				c.Data["json"] = resp
+				isSuccess = false
 			}
 
-		} else {
-			var resp responses.ItemResponseDTO = responses.ItemResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "You are not authorized to access this resource"}
-
-			c.Data["json"] = resp
 		}
+
+		var resp responses.ItemResponseDTO = responses.ItemResponseDTO{Success: isSuccess, Result: &itemResp, StatusDesc: addItemResp.StatusDesc}
+
+		c.Data["json"] = resp
+		// } else {
+		// 	var resp responses.ItemResponseDTO = responses.ItemResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An error occurred"}
+
+		// 	c.Data["json"] = resp
+		// }
 	} else {
-		logs.Info("Token not verified")
-		var resp responses.ItemResponseDTO = responses.ItemResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred. Invalid authorization token"}
+		var resp responses.ItemResponseDTO = responses.ItemResponseDTO{Success: isSuccess, Result: nil, StatusDesc: errorMessage}
 
 		c.Data["json"] = resp
 	}
