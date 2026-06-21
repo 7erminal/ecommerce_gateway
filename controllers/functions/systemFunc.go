@@ -4,6 +4,7 @@ import (
 	"AMC_gateway/api"
 	"AMC_gateway/structs/requests"
 	"AMC_gateway/structs/responses"
+	"bytes"
 	"encoding/json"
 	"io"
 	"strconv"
@@ -47,7 +48,12 @@ func AddBranch(c *beego.Controller, req requests.BranchRequestDTO, addedBy int64
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	var data responses.BranchOriResponseDTO
 	json.Unmarshal(read, &data)
@@ -93,7 +99,12 @@ func UpdateBranch(c *beego.Controller, req requests.BranchRequestDTO, addedBy in
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	var data responses.BranchOriResponseDTO
 	json.Unmarshal(read, &data)
@@ -134,7 +145,12 @@ func GetBranch(c *beego.Controller, branchid int64) (resp responses.BranchOriRes
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	var data responses.BranchOriResponseDTO
 	json.Unmarshal(read, &data)
@@ -175,7 +191,12 @@ func DeleteBranch(c *beego.Controller, branchid string) (resp responses.StringOr
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	var data responses.StringOriResponseDTO
 	json.Unmarshal(read, &data)
@@ -214,7 +235,12 @@ func GetBranches(c *beego.Controller) (resp responses.BranchesOriResponseDTO) {
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	var data responses.BranchesOriResponseDTO
 	json.Unmarshal(read, &data)
@@ -253,7 +279,12 @@ func UpdateBranchBranchManger(c *beego.Controller, userid string, branchid strin
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	var data responses.BranchesOriResponseDTO
 	json.Unmarshal(read, &data)
@@ -293,7 +324,12 @@ func GetCountries(c *beego.Controller) (resp responses.CountriesOriResponseDTO) 
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	var data responses.CountriesOriResponseDTO
 	json.Unmarshal(read, &data)

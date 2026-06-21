@@ -4,6 +4,7 @@ import (
 	"AMC_gateway/api"
 	"AMC_gateway/structs/requests"
 	"AMC_gateway/structs/responses"
+	"bytes"
 	"encoding/json"
 	"io"
 
@@ -39,7 +40,12 @@ func SignInRequest(c *beego.Controller, req requests.SignIn) (resp responses.Log
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	var data responses.LoginTokenResponseDTO
 	json.Unmarshal(read, &data)
@@ -76,7 +82,12 @@ func ChangePassword(c *beego.Controller, userid string, req requests.ChangePassw
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	var data responses.StringOriResponseDTO
 	json.Unmarshal(read, &data)
@@ -111,7 +122,12 @@ func VerifyToken(c *beego.Controller, token string) (resp responses.UserOriRespo
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	var data responses.UserOriResponseDTO
 	json.Unmarshal(read, &data)
@@ -146,7 +162,12 @@ func VerifyTokenNew(token string) (resp responses.UserOriResponseDTO) {
 		// c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	var data responses.UserOriResponseDTO
 	json.Unmarshal(read, &data)
@@ -188,7 +209,12 @@ func RegistrationRequest(c *beego.Controller, req requests.RegisterUser) (resp r
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	var data responses.UserResponseDTO
 	json.Unmarshal(read, &data)
@@ -234,7 +260,12 @@ func VerifyInviteToken(c *beego.Controller, token string) (resp responses.Invite
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	var data responses.InviteDecodeResponseDTO
 	json.Unmarshal(read, &data)
@@ -270,7 +301,12 @@ func RefreshAccessToken(c *beego.Controller, token string) (resp responses.Login
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	var data responses.LoginTokenResponseDTO
 	json.Unmarshal(read, &data)

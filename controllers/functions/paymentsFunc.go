@@ -3,6 +3,7 @@ package functions
 import (
 	"AMC_gateway/api"
 	"AMC_gateway/structs/responses"
+	"bytes"
 	"encoding/json"
 	"io"
 
@@ -33,7 +34,12 @@ func GetPaymentMethods(c *beego.Controller) (resp responses.PaymentMethodsOriRes
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	// var dataOri responses.UserOriResponseDTO
 	var data responses.PaymentMethodsOriResponseDTO

@@ -4,6 +4,7 @@ import (
 	"AMC_gateway/api"
 	"AMC_gateway/structs/requests"
 	"AMC_gateway/structs/responses"
+	"bytes"
 	"encoding/json"
 	"io"
 	"strconv"
@@ -38,7 +39,12 @@ func GetUserDetails(c *beego.Controller, userid int64) (resp responses.UserOriRe
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	var data responses.UserOriResponseDTO
 	json.Unmarshal(read, &data)
@@ -79,7 +85,12 @@ func InviteUser(c *beego.Controller, email string, role int64, link string, invi
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	var data responses.StringOriResponseDTO
 	json.Unmarshal(read, &data)
@@ -122,7 +133,12 @@ func GetUsers(c *beego.Controller, query string, fields string, sortby string, o
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	var data responses.UsersOriResponseDTO
 	json.Unmarshal(read, &data)
@@ -166,7 +182,12 @@ func GetUsersWithRole(c *beego.Controller, role_id string, query string, fields 
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	var data responses.UsersOriResponseDTO
 	json.Unmarshal(read, &data)
@@ -210,7 +231,12 @@ func GetUsersWithBranch(c *beego.Controller, branch_id string, query string, fie
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	var data responses.UsersOriResponseDTO
 	json.Unmarshal(read, &data)
@@ -247,7 +273,12 @@ func GetRoles(c *beego.Controller) (resp responses.RolesAllResponseDTO) {
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	var data responses.RolesAllResponseDTO
 	json.Unmarshal(read, &data)
@@ -283,7 +314,12 @@ func GetInvites(c *beego.Controller) (resp responses.UserInvitesResponseDTO) {
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	var data responses.UserInvitesResponseDTO
 	json.Unmarshal(read, &data)
@@ -319,7 +355,12 @@ func GetRole(c *beego.Controller, role string) (resp responses.RoleResponseDTO) 
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	var data responses.RoleResponseDTO
 	json.Unmarshal(read, &data)
@@ -355,7 +396,12 @@ func GetRoleWithRoleName(c *beego.Controller, role string) (resp responses.RoleR
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	var data responses.RoleResponseDTO
 	json.Unmarshal(read, &data)
@@ -391,7 +437,12 @@ func GetInvite(c *beego.Controller, token string) (resp responses.UserInviteResp
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	var data responses.UserInviteResponseDTO
 	json.Unmarshal(read, &data)
@@ -437,7 +488,12 @@ func UpdateUser(c *beego.Controller, id string, req requests.UpdateUserRequestDT
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	// var dataOri responses.UserOriResponseDTO
 	var data responses.UserOriResponseDTO
@@ -476,7 +532,12 @@ func UpdateUserRole(c *beego.Controller, id string, req requests.UpdateUserRoleR
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	// var dataOri responses.UserOriResponseDTO
 	var data responses.UserOriResponseDTO
@@ -515,7 +576,12 @@ func UpdateUserBranch(c *beego.Controller, id string, req requests.UpdateUserBra
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	// var dataOri responses.UserOriResponseDTO
 	var data responses.UserOriResponseDTO
@@ -559,7 +625,12 @@ func UpdateUserImage(c *beego.Controller, userImage string, userId int64) (resp 
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	var data responses.UserOriResponseDTO
 	json.Unmarshal(read, &data)
@@ -597,7 +668,12 @@ func UpdateUserInvite(c *beego.Controller, id string, status string) (resp respo
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	// var dataOri responses.UserOriResponseDTO
 	var data responses.UserInviteResponseDTO
@@ -640,7 +716,12 @@ func LogOut(c *beego.Controller, userToken string) (resp responses.UserOriRespon
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	var data responses.UserOriResponseDTO
 	json.Unmarshal(read, &data)

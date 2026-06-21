@@ -4,6 +4,7 @@ import (
 	"AMC_gateway/api"
 	"AMC_gateway/structs/requests"
 	"AMC_gateway/structs/responses"
+	"bytes"
 	"encoding/json"
 	"io"
 	"strconv"
@@ -50,7 +51,12 @@ func AddItem(c *beego.Controller, req requests.AddItemRequestDTO, productTypeId 
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	var data responses.ItemOriResponseDTO
 	json.Unmarshal(read, &data)
@@ -98,7 +104,12 @@ func UpdateItem(c *beego.Controller, req requests.UpdateItemRequestDTO, countryC
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	var data responses.ItemOriResponseDTO
 	json.Unmarshal(read, &data)
@@ -137,7 +148,12 @@ func UpdateItemImage(c *beego.Controller, itemId int64, imagePath string) (resp 
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	var data responses.ItemOriResponseDTO
 	json.Unmarshal(read, &data)
@@ -178,7 +194,12 @@ func GetItems(c *beego.Controller, query string, fields string, sortby string, o
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	var data responses.ItemsOriResponseDTO
 	json.Unmarshal(read, &data)
@@ -218,7 +239,12 @@ func GetItem(c *beego.Controller, itemId string) (resp responses.ItemOriResponse
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	var data responses.ItemOriResponseDTO
 	json.Unmarshal(read, &data)
@@ -259,7 +285,12 @@ func GetItemsByBranch(c *beego.Controller, branchId string, query string, fields
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	var data responses.ItemsOriResponseDTO
 	json.Unmarshal(read, &data)
@@ -299,7 +330,12 @@ func GetItemStats(c *beego.Controller, branchId string) (resp responses.ItemsSta
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	var data responses.ItemsStatsOriResponseDTO
 	json.Unmarshal(read, &data)
@@ -343,7 +379,12 @@ func AddCategory(c *beego.Controller, categoryImage string, categoryName string,
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	var data responses.CategoryOriResponseDTO
 	json.Unmarshal(read, &data)
@@ -386,7 +427,12 @@ func AddFeature(c *beego.Controller, categoryImage string, categoryName string, 
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	var data responses.FeaturesOriResponseDTO
 	json.Unmarshal(read, &data)
@@ -430,7 +476,12 @@ func AddPurpose(c *beego.Controller, categoryImage string, categoryName string, 
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	var data responses.PurposesOriResponseDTO
 	json.Unmarshal(read, &data)
@@ -471,7 +522,12 @@ func UploadItemImage(c *beego.Controller, itemImage string) (resp responses.Item
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	var data responses.ItemImageOriResponseDTO
 	json.Unmarshal(read, &data)
@@ -511,7 +567,12 @@ func GetCategories(c *beego.Controller) (resp responses.CategoriesOriResponseDTO
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	var data responses.CategoriesOriResponseDTO
 	json.Unmarshal(read, &data)
@@ -551,7 +612,12 @@ func GetCategory(c *beego.Controller, categoryId string) (resp responses.Categor
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	var data responses.CategoryOriResponseDTO
 	json.Unmarshal(read, &data)
@@ -591,7 +657,12 @@ func GetCategoryByName(c *beego.Controller, category string) (resp responses.Cat
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	var data responses.CategoryOriResponseDTO
 	json.Unmarshal(read, &data)
@@ -631,7 +702,12 @@ func GetFeatures(c *beego.Controller) (resp responses.FeaturesOriResponseDTO) {
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	var data responses.FeaturesOriResponseDTO
 	json.Unmarshal(read, &data)
@@ -671,7 +747,12 @@ func GetPurposes(c *beego.Controller) (resp responses.PurposesOriResponseDTO) {
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	var data responses.PurposesOriResponseDTO
 	json.Unmarshal(read, &data)
@@ -711,9 +792,194 @@ func GetItemImages(c *beego.Controller) (resp responses.ItemImagesOriResponseDTO
 		c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", res)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
 	// data := map[string]interface{}{}
 	var data responses.ItemImagesOriResponseDTO
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	logs.Info("Resp is ", data)
+
+	return data
+}
+
+func DeleteCategory(c *beego.Controller, id string) (resp responses.StringOriResponseDTO) {
+	host, _ := beego.AppConfig.String("itemBaseUrl")
+
+	request := api.NewRequest(
+		host,
+		"/v1/categories/"+id,
+		api.DELETE)
+
+	// request.FileField["UserImage"] = userImage
+	// request.Params["UserId"] = strconv.FormatInt(userId, 10)
+	// request.HeaderField["content-type"] = "multipart/form-data"
+	// request.Params = {"UserId": strconv.Itoa(int(userid))}
+	client := api.Client{
+		Request: request,
+		Type_:   "params",
+	}
+
+	// client.Request.HeaderField["content-type"] = "multipart/form-data"
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+	// data := map[string]interface{}{}
+	var data responses.StringOriResponseDTO
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	logs.Info("Resp is ", data)
+
+	return data
+}
+
+func DeleteFeature(c *beego.Controller, id string) (resp responses.StringOriResponseDTO) {
+	host, _ := beego.AppConfig.String("itemBaseUrl")
+
+	request := api.NewRequest(
+		host,
+		"/v1/features/"+id,
+		api.DELETE)
+
+	// request.FileField["UserImage"] = userImage
+	// request.Params["UserId"] = strconv.FormatInt(userId, 10)
+	// request.HeaderField["content-type"] = "multipart/form-data"
+	// request.Params = {"UserId": strconv.Itoa(int(userid))}
+	client := api.Client{
+		Request: request,
+		Type_:   "params",
+	}
+
+	// client.Request.HeaderField["content-type"] = "multipart/form-data"
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+	// data := map[string]interface{}{}
+	var data responses.StringOriResponseDTO
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	logs.Info("Resp is ", data)
+
+	return data
+}
+
+func DeletePurpose(c *beego.Controller, id string) (resp responses.StringOriResponseDTO) {
+	host, _ := beego.AppConfig.String("itemBaseUrl")
+
+	request := api.NewRequest(
+		host,
+		"/v1/purposes/"+id,
+		api.DELETE)
+
+	// request.FileField["UserImage"] = userImage
+	// request.Params["UserId"] = strconv.FormatInt(userId, 10)
+	// request.HeaderField["content-type"] = "multipart/form-data"
+	// request.Params = {"UserId": strconv.Itoa(int(userid))}
+	client := api.Client{
+		Request: request,
+		Type_:   "params",
+	}
+
+	// client.Request.HeaderField["content-type"] = "multipart/form-data"
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+	// data := map[string]interface{}{}
+	var data responses.StringOriResponseDTO
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	logs.Info("Resp is ", data)
+
+	return data
+}
+
+func DeleteItem(c *beego.Controller, id string) (resp responses.StringOriResponseDTO) {
+	host, _ := beego.AppConfig.String("itemBaseUrl")
+
+	request := api.NewRequest(
+		host,
+		"/v1/items/"+id,
+		api.DELETE)
+
+	// request.FileField["UserImage"] = userImage
+	// request.Params["UserId"] = strconv.FormatInt(userId, 10)
+	// request.HeaderField["content-type"] = "multipart/form-data"
+	// request.Params = {"UserId": strconv.Itoa(int(userid))}
+	client := api.Client{
+		Request: request,
+		Type_:   "params",
+	}
+
+	// client.Request.HeaderField["content-type"] = "multipart/form-data"
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+	// data := map[string]interface{}{}
+	var data responses.StringOriResponseDTO
 	json.Unmarshal(read, &data)
 	c.Data["json"] = data
 

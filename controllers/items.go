@@ -849,3 +849,127 @@ func (c *ItemsController) GetProduct() {
 
 	c.ServeJSON()
 }
+
+// DeleteCategory ...
+// @Title Delete Category
+// @Description Delete Category
+// @Param	Authorization		header 	string true		"header for User"
+// @Param	id		path 	string	true		"The key for staticblock"
+// @Success 200 {object} responses.StringResponseDTO
+// @Failure 403 body is empty
+// @router /delete-category/:id [delete]
+func (c *ItemsController) DeleteCategory() {
+	var isSuccess bool = false
+
+	logs.Info("Success response received")
+	isSuccess = false
+
+	idStr := c.Ctx.Input.Param(":id")
+
+	deleteCategoryResp := functions.DeleteCategory(&c.Controller, idStr)
+
+	if deleteCategoryResp.StatusCode == 200 {
+		isSuccess = true
+
+		var resp responses.StringResponseDTO = responses.StringResponseDTO{Success: isSuccess, Result: &deleteCategoryResp.StatusDesc, StatusDesc: deleteCategoryResp.StatusDesc}
+		c.Data["json"] = resp
+	} else {
+		var resp responses.StringResponseDTO = responses.StringResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
+		c.Data["json"] = resp
+	}
+
+	c.ServeJSON()
+}
+
+// DeleteFeature ...
+// @Title Delete Feature
+// @Description Delete Feature
+// @Param	Authorization		header 	string true		"header for User"
+// @Param	id		path 	string	true		"The key for staticblock"
+// @Success 200 {object} responses.StringResponseDTO
+// @Failure 403 body is empty
+// @router /delete-feature/:id [delete]
+func (c *ItemsController) DeleteFeature() {
+	var isSuccess bool = false
+
+	logs.Info("Success response received")
+	isSuccess = false
+
+	idStr := c.Ctx.Input.Param(":id")
+
+	deleteFeatureResp := functions.DeleteFeature(&c.Controller, idStr)
+
+	if deleteFeatureResp.StatusCode == 200 {
+		isSuccess = true
+
+		var resp responses.StringResponseDTO = responses.StringResponseDTO{Success: isSuccess, Result: &deleteFeatureResp.StatusDesc, StatusDesc: deleteFeatureResp.StatusDesc}
+		c.Data["json"] = resp
+	} else {
+		var resp responses.StringResponseDTO = responses.StringResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
+		c.Data["json"] = resp
+	}
+
+	c.ServeJSON()
+}
+
+// DeletePurpose ...
+// @Title Delete Purpose
+// @Description Delete Purpose
+// @Param	Authorization		header 	string true		"header for User"
+// @Param	id		path 	string	true		"The key for staticblock"
+// @Success 200 {object} responses.StringResponseDTO
+// @Failure 403 body is empty
+// @router /delete-purpose/:id [delete]
+func (c *ItemsController) DeletePurpose() {
+	var isSuccess bool = false
+
+	logs.Info("Success response received")
+	isSuccess = false
+
+	idStr := c.Ctx.Input.Param(":id")
+
+	deletePurposeResp := functions.DeletePurpose(&c.Controller, idStr)
+
+	if deletePurposeResp.StatusCode == 200 {
+		isSuccess = true
+
+		var resp responses.StringResponseDTO = responses.StringResponseDTO{Success: isSuccess, Result: &deletePurposeResp.StatusDesc, StatusDesc: deletePurposeResp.StatusDesc}
+		c.Data["json"] = resp
+	} else {
+		var resp responses.StringResponseDTO = responses.StringResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
+		c.Data["json"] = resp
+	}
+
+	c.ServeJSON()
+}
+
+// DeleteItem ...
+// @Title Delete Item
+// @Description Delete Item
+// @Param	Authorization		header 	string true		"header for User"
+// @Param	id		path 	string	true		"The key for staticblock"
+// @Success 200 {object} responses.StringResponseDTO
+// @Failure 403 body is empty
+// @router /delete-item/:id [delete]
+func (c *ItemsController) DeleteItem() {
+	var isSuccess bool = false
+
+	logs.Info("Success response received")
+	isSuccess = false
+
+	idStr := c.Ctx.Input.Param(":id")
+
+	deleteItemResp := functions.DeleteItem(&c.Controller, idStr)
+
+	if deleteItemResp.StatusCode == 200 {
+		isSuccess = true
+
+		var resp responses.StringResponseDTO = responses.StringResponseDTO{Success: isSuccess, Result: &deleteItemResp.StatusDesc, StatusDesc: deleteItemResp.StatusDesc}
+		c.Data["json"] = resp
+	} else {
+		var resp responses.StringResponseDTO = responses.StringResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
+		c.Data["json"] = resp
+	}
+
+	c.ServeJSON()
+}

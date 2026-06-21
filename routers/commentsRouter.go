@@ -153,6 +153,42 @@ func init() {
 
     beego.GlobalControllerRouter["AMC_gateway/controllers:ItemsController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:ItemsController"],
         beego.ControllerComments{
+            Method: "DeleteCategory",
+            Router: `/delete-category/:id`,
+            AllowHTTPMethods: []string{"delete"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["AMC_gateway/controllers:ItemsController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:ItemsController"],
+        beego.ControllerComments{
+            Method: "DeleteFeature",
+            Router: `/delete-feature/:id`,
+            AllowHTTPMethods: []string{"delete"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["AMC_gateway/controllers:ItemsController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:ItemsController"],
+        beego.ControllerComments{
+            Method: "DeleteItem",
+            Router: `/delete-item/:id`,
+            AllowHTTPMethods: []string{"delete"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["AMC_gateway/controllers:ItemsController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:ItemsController"],
+        beego.ControllerComments{
+            Method: "DeletePurpose",
+            Router: `/delete-purpose/:id`,
+            AllowHTTPMethods: []string{"delete"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["AMC_gateway/controllers:ItemsController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:ItemsController"],
+        beego.ControllerComments{
             Method: "GetCategories",
             Router: `/get-categories`,
             AllowHTTPMethods: []string{"get"},
