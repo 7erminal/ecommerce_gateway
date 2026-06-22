@@ -93,10 +93,10 @@ func (c *SystemController) AddBranch() {
 					} else {
 						firstname = splitName[0]
 					}
-					userDetails := requests.UpdateUserRequestDTO{BranchId: addBranchResp.Branch.BranchId, FirstName: firstname, LastName: lastname, Username: userDetailsResp.User.Username, PhoneNumber: userDetailsResp.User.PhoneNumber, Gender: userDetailsResp.User.Gender, Dob: userDetailsResp.User.Dob.GoString(), Address: userDetailsResp.User.Address}
+					userDetails := requests.UpdateUserRequestDTO{BranchId: addBranchResp.Result.BranchId, FirstName: firstname, LastName: lastname, Username: userDetailsResp.User.Username, PhoneNumber: userDetailsResp.User.PhoneNumber, Gender: userDetailsResp.User.Gender, Dob: userDetailsResp.User.Dob.GoString(), Address: userDetailsResp.User.Address}
 					userId := strconv.FormatInt(userDetailsResp.User.UserId, 10)
 					updateUserResp := functions.UpdateUser(&c.Controller, userId, userDetails)
-					branchIdStr := strconv.FormatInt(addBranchResp.Branch.BranchId, 10)
+					branchIdStr := strconv.FormatInt(addBranchResp.Result.BranchId, 10)
 					updateBranchResp := functions.UpdateBranchBranchManger(&c.Controller, userId, branchIdStr)
 					message := "Branch Added Successfully"
 					if updateUserResp.StatusCode != 200 {
@@ -108,11 +108,11 @@ func (c *SystemController) AddBranch() {
 					// var curr responses.CurrencyResp = responses.CurrencyResp{Symbol: addBranchResp.Branch.Country.DefaultCurrency.Symbol, Currency: addBranchResp.Branch.Country.DefaultCurrency.Currency}
 					// var country responses.CountryResp = responses.CountryResp{Country: addBranchResp.Branch.Country.Country, CountryCode: addBranchResp.Branch.Country.CountryCode, Currency: &curr}
 					var data responses.BranchResp = responses.BranchResp{
-						BranchId: addBranchResp.Branch.BranchId,
-						Branch:   addBranchResp.Branch.Branch,
+						BranchId: addBranchResp.Result.BranchId,
+						Branch:   addBranchResp.Result.Branch,
 						// Country:     &country,
-						Location:    addBranchResp.Branch.Location,
-						PhoneNumber: addBranchResp.Branch.PhoneNumber,
+						Location:    addBranchResp.Result.Location,
+						PhoneNumber: addBranchResp.Result.PhoneNumber,
 					}
 
 					isSuccess = true
@@ -168,12 +168,12 @@ func (c *SystemController) GetOneBranch() {
 				// var curr responses.CurrencyResp = responses.CurrencyResp{Symbol: getBranchResp.Branch.Country.DefaultCurrency.Symbol, Currency: getBranchResp.Branch.Country.DefaultCurrency.Currency}
 				// var country responses.CountryResp = responses.CountryResp{Country: getBranchResp.Branch.Country.Country, CountryCode: getBranchResp.Branch.Country.CountryCode, Currency: &curr}
 				var data responses.BranchResp = responses.BranchResp{
-					BranchId: getBranchResp.Branch.BranchId,
-					Branch:   getBranchResp.Branch.Branch,
+					BranchId: getBranchResp.Result.BranchId,
+					Branch:   getBranchResp.Result.Branch,
 					// Country:     &country,
-					Location:    getBranchResp.Branch.Location,
-					PhoneNumber: getBranchResp.Branch.PhoneNumber,
-					DateCreated: getBranchResp.Branch.DateCreated,
+					Location:    getBranchResp.Result.Location,
+					PhoneNumber: getBranchResp.Result.PhoneNumber,
+					DateCreated: getBranchResp.Result.DateCreated,
 				}
 
 				isSuccess = true
@@ -408,12 +408,12 @@ func (c *SystemController) UpdateBranch() {
 						roleId = role.Role.RoleId
 					}
 					logs.Info("Sending role ", roleId)
-					userDetails := requests.UpdateUserRequestDTO{RoleId: roleId, BranchId: updateBranch.Branch.BranchId, FirstName: firstname, LastName: lastname, Username: userDetailsResp.User.Username, PhoneNumber: userDetailsResp.User.PhoneNumber, Gender: userDetailsResp.User.Gender, Dob: userDetailsResp.User.Dob.GoString(), Address: userDetailsResp.User.Address}
+					userDetails := requests.UpdateUserRequestDTO{RoleId: roleId, BranchId: updateBranch.Result.BranchId, FirstName: firstname, LastName: lastname, Username: userDetailsResp.User.Username, PhoneNumber: userDetailsResp.User.PhoneNumber, Gender: userDetailsResp.User.Gender, Dob: userDetailsResp.User.Dob.GoString(), Address: userDetailsResp.User.Address}
 					userId := strconv.FormatInt(userDetailsResp.User.UserId, 10)
 					updateUserResp := functions.UpdateUser(&c.Controller, userId, userDetails)
 					if updateUserResp.StatusCode == 200 {
 						logs.Info("Update user response is ", updateUserResp.StatusDesc)
-						branchIdStr := strconv.FormatInt(updateBranch.Branch.BranchId, 10)
+						branchIdStr := strconv.FormatInt(updateBranch.Result.BranchId, 10)
 						updateBranchResp := functions.UpdateBranchBranchManger(&c.Controller, userId, branchIdStr)
 						splitName := strings.Split(updateUserResp.User.FullName, " | ")
 						firstname := ""
@@ -445,11 +445,11 @@ func (c *SystemController) UpdateBranch() {
 						}
 
 						branchResp = &responses.BranchResp{
-							BranchId:      updateBranch.Branch.BranchId,
-							Branch:        updateBranch.Branch.Branch,
-							Location:      updateBranch.Branch.Location,
-							PhoneNumber:   updateBranch.Branch.PhoneNumber,
-							DateCreated:   updateBranch.Branch.DateCreated,
+							BranchId:      updateBranch.Result.BranchId,
+							Branch:        updateBranch.Result.Branch,
+							Location:      updateBranch.Result.Location,
+							PhoneNumber:   updateBranch.Result.PhoneNumber,
+							DateCreated:   updateBranch.Result.DateCreated,
 							BranchManager: &branchManager,
 						}
 

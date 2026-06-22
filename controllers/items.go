@@ -88,7 +88,7 @@ func (c *ItemsController) AddSalesItem() {
 			&c.Controller,
 			req,
 			getProductTypes.Category.CategoryId,
-			getBranchResp.Branch.Country.CountryCode,
+			getBranchResp.Result.Country.CountryCode,
 			userData.UserDetails.Branch.BranchId,
 			int(userData.UserId))
 
@@ -235,7 +235,7 @@ func (c *ItemsController) AddRentalsItem() {
 
 	if proceed {
 		req := requests.AddItemRequestDTO{ProductName: v.ProductName, Quantity: v.Quantity, ReorderLevel: v.ReorderLevel, CostPrice: 0, SellingPrice: v.RentalPrice, BranchId: userData.UserDetails.Branch.BranchId, ImagePath: v.ImagePath}
-		addItemResp := functions.AddItem(&c.Controller, req, getProductTypes.Category.CategoryId, getBranchResp.Branch.Country.CountryCode, userData.UserDetails.Branch.BranchId, int(userData.UserId))
+		addItemResp := functions.AddItem(&c.Controller, req, getProductTypes.Category.CategoryId, getBranchResp.Result.Country.CountryCode, userData.UserDetails.Branch.BranchId, int(userData.UserId))
 
 		itemResp := responses.Item{}
 		if addItemResp.StatusCode == 200 {
@@ -334,7 +334,7 @@ func (c *ItemsController) UpdateItem() {
 	}
 
 	if proceed {
-		addItemResp := functions.UpdateItem(&c.Controller, v, getBranchResp.Branch.Country.CountryCode, v.BranchId, int(userData.UserId), idStr)
+		addItemResp := functions.UpdateItem(&c.Controller, v, getBranchResp.Result.Country.CountryCode, v.BranchId, int(userData.UserId), idStr)
 
 		itemResp := responses.Item{}
 		if addItemResp.StatusCode == 200 {
