@@ -1084,13 +1084,16 @@ func AddItemFeatures(c *beego.Controller, req requests.AddProductFeatureRequestD
 	host, _ := beego.AppConfig.String("itemBaseUrl")
 
 	// logs.Info("Sending first name ", req.BranchId)
+	logs.Info("Adding feature with product id ", req.ProductId, " and feature id ", req.FeatureId)
 
+	productId := strconv.FormatInt(req.ProductId, 10)
+	featureId := strconv.FormatInt(req.FeatureId, 10)
 	request := api.NewRequest(
 		host,
 		"/v1/item-features/",
 		api.POST)
-	request.InterfaceParams["ItemId"] = req.ProductId
-	request.InterfaceParams["FeatureId"] = req.FeatureId
+	request.InterfaceParams["ItemId"] = productId
+	request.InterfaceParams["FeatureId"] = featureId
 
 	client := api.Client{
 		Request: request,
@@ -1127,13 +1130,15 @@ func AddItemPurposes(c *beego.Controller, req requests.AddProductPurposeRequestD
 	host, _ := beego.AppConfig.String("itemBaseUrl")
 
 	// logs.Info("Sending first name ", req.BranchId)
-
+	logs.Info("Adding purpose with product id ", req.ProductId, " and purpose id ", req.PurposeId)
 	request := api.NewRequest(
 		host,
 		"/v1/item-purposes/",
 		api.POST)
-	request.InterfaceParams["ItemId"] = req.ProductId
-	request.InterfaceParams["PurposeId"] = req.PurposeId
+	productId := strconv.FormatInt(req.ProductId, 10)
+	purposeId := strconv.FormatInt(req.PurposeId, 10)
+	request.InterfaceParams["ItemId"] = productId
+	request.InterfaceParams["PurposeId"] = purposeId
 
 	client := api.Client{
 		Request: request,
@@ -1217,7 +1222,8 @@ func GetItemPurposes(c *beego.Controller, req requests.AddProductPurposeRequestD
 		host,
 		"/v1/item-purposes/",
 		api.GET)
-	request.InterfaceParams["query"] = "ItemId:" + strconv.FormatInt(req.ProductId, 10)
+	productId := strconv.FormatInt(req.ProductId, 10)
+	request.InterfaceParams["query"] = "ItemId:" + productId
 
 	client := api.Client{
 		Request: request,
