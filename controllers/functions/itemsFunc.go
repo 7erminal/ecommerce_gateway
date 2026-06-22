@@ -1080,7 +1080,7 @@ func DeleteItemPurpose(c *beego.Controller, id string) (resp responses.StringOri
 	return data
 }
 
-func AddItemFeatures(c *beego.Controller, req requests.AddProductFeatureRequestDTO) (resp responses.ItemOriResponseDTO) {
+func AddItemFeatures(c *beego.Controller, req requests.AddProductFeatureRequestDTO) (resp responses.ItemFeatureResponseDTO) {
 	host, _ := beego.AppConfig.String("itemBaseUrl")
 
 	// logs.Info("Sending first name ", req.BranchId)
@@ -1117,7 +1117,7 @@ func AddItemFeatures(c *beego.Controller, req requests.AddProductFeatureRequestD
 		logs.Info("Raw response received is \n", prettyJSON.String())
 	}
 	// data := map[string]interface{}{}
-	var data responses.ItemOriResponseDTO
+	var data responses.ItemFeatureResponseDTO
 	json.Unmarshal(read, &data)
 	c.Data["json"] = data
 
@@ -1126,7 +1126,7 @@ func AddItemFeatures(c *beego.Controller, req requests.AddProductFeatureRequestD
 	return data
 }
 
-func AddItemPurposes(c *beego.Controller, req requests.AddProductPurposeRequestDTO) (resp responses.ItemOriResponseDTO) {
+func AddItemPurposes(c *beego.Controller, req requests.AddProductPurposeRequestDTO) (resp responses.ItemPurposeResponseDTO) {
 	host, _ := beego.AppConfig.String("itemBaseUrl")
 
 	// logs.Info("Sending first name ", req.BranchId)
@@ -1162,7 +1162,7 @@ func AddItemPurposes(c *beego.Controller, req requests.AddProductPurposeRequestD
 		logs.Info("Raw response received is \n", prettyJSON.String())
 	}
 	// data := map[string]interface{}{}
-	var data responses.ItemOriResponseDTO
+	var data responses.ItemPurposeResponseDTO
 	json.Unmarshal(read, &data)
 	c.Data["json"] = data
 

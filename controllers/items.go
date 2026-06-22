@@ -118,7 +118,7 @@ func (c *ItemsController) AddSalesItem() {
 
 							if addItemFeatureResp.StatusCode == 200 {
 								logs.Info("Successfully added item feature")
-								features = *addItemFeatureResp.Item.ItemFeatures
+								features = append(features, *addItemFeatureResp.Result.Feature)
 							} else {
 								logs.Error("Failed to add item feature")
 							}
@@ -140,8 +140,7 @@ func (c *ItemsController) AddSalesItem() {
 
 							if addItemPurposeResp.StatusCode == 200 {
 								logs.Info("Successfully added item purpose")
-								// purposes = append(purposes, *addItemPurposeResp.ItemPurpose.Purpose)
-								purposes = *addItemPurposeResp.Item.ItemPurposes
+								purposes = append(purposes, *addItemPurposeResp.Result.Purpose)
 							} else {
 								logs.Error("Failed to add item purpose")
 							}
