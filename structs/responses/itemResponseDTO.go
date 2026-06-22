@@ -47,8 +47,8 @@ type ItemsResp struct {
 	Active          int
 	Country         *CountryResp
 	Branch          *BranchResp
-	Purposes        *[]Purpose
-	Features        *[]Feature
+	ItemPurposes    *[]Purpose
+	ItemFeatures    *[]Feature
 }
 
 type Item struct {

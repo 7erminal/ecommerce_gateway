@@ -118,7 +118,7 @@ func (c *ItemsController) AddSalesItem() {
 
 							if addItemFeatureResp.StatusCode == 200 {
 								logs.Info("Successfully added item feature")
-								features = *addItemFeatureResp.Item.Features
+								features = *addItemFeatureResp.Item.ItemFeatures
 							} else {
 								logs.Error("Failed to add item feature")
 							}
@@ -141,7 +141,7 @@ func (c *ItemsController) AddSalesItem() {
 							if addItemPurposeResp.StatusCode == 200 {
 								logs.Info("Successfully added item purpose")
 								// purposes = append(purposes, *addItemPurposeResp.ItemPurpose.Purpose)
-								purposes = *addItemPurposeResp.Item.Purposes
+								purposes = *addItemPurposeResp.Item.ItemPurposes
 							} else {
 								logs.Error("Failed to add item purpose")
 							}
@@ -863,8 +863,8 @@ func (c *ItemsController) GetItems() {
 								Category:         item.Category,
 								AvailableSizes:   &availableSizes,
 								AvailableColors:  &availableColors,
-								Features:         item.Features,
-								Purposes:         item.Purposes,
+								Features:         item.ItemFeatures,
+								Purposes:         item.ItemPurposes,
 								Status:           "ACTIVE",
 							}
 
@@ -939,8 +939,8 @@ func (c *ItemsController) GetProduct() {
 			Branch:           itemResp.Item.Branch,
 			Status:           "ACTIVE",
 			Category:         itemResp.Item.Category,
-			Features:         itemResp.Item.Features,
-			Purposes:         itemResp.Item.Purposes,
+			Features:         itemResp.Item.ItemFeatures,
+			Purposes:         itemResp.Item.ItemPurposes,
 			AvailableSizes:   &availableSizes,
 			AvailableColors:  &availableColors,
 		}
