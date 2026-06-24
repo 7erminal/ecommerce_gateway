@@ -52,13 +52,19 @@ func (c *ItemsController) AddSalesItem() {
 	proceed := true
 	errorMessage := "An error occurred"
 	logs.Info("Token verified!")
-	getBranchResp := functions.GetBranch(&c.Controller, userData.UserDetails.Branch.BranchId)
+	branchId := strconv.FormatInt(userData.UserDetails.Branch.BranchId, 10)
 
-	// if getBranchResp.StatusCode == 200 {
-	// userId := verifyToken.User.UserId
-	if getBranchResp.StatusCode != 200 {
-		errorMessage = "Branch provided does not exist"
+	getBranchResp, erri := functions.GetSystemDetails(&c.Controller, branchId)
+	if erri != nil {
+		errorMessage = "Failed to fetch branch details"
 		proceed = false
+	}
+
+	if proceed == true {
+		if getBranchResp.Success != true {
+			errorMessage = getBranchResp.StatusDesc
+			proceed = false
+		}
 	}
 
 	getProductTypes := functions.GetCategory(&c.Controller, strconv.FormatInt(v.CategoryId, 10))
@@ -88,7 +94,7 @@ func (c *ItemsController) AddSalesItem() {
 			&c.Controller,
 			req,
 			getProductTypes.Category.CategoryId,
-			getBranchResp.Result.Country.CountryCode,
+			getBranchResp.Result.Branch.Country.CountryCode,
 			userData.UserDetails.Branch.BranchId,
 			int(userData.UserId))
 
@@ -214,13 +220,18 @@ func (c *ItemsController) AddRentalsItem() {
 	errorMessage := "An error occurred"
 	logs.Info("Token verified!")
 	logs.Info("Branch is !", userData.UserDetails.Branch)
-	getBranchResp := functions.GetBranch(&c.Controller, userData.UserDetails.Branch.BranchId)
-
-	// if getBranchResp.StatusCode == 200 {
-	// userId := verifyToken.User.UserId
-	if getBranchResp.StatusCode != 200 {
-		errorMessage = "Branch provided does not exist"
+	branchId := strconv.FormatInt(userData.UserDetails.Branch.BranchId, 10)
+	getBranchResp, erri := functions.GetSystemDetails(&c.Controller, branchId)
+	if erri != nil {
+		errorMessage = "Failed to fetch branch details"
 		proceed = false
+	}
+
+	if proceed == true {
+		if getBranchResp.Success != true {
+			errorMessage = getBranchResp.StatusDesc
+			proceed = false
+		}
 	}
 
 	sales_product_type_name, _ := beego.AppConfig.String("rentalsProductType")
@@ -234,7 +245,7 @@ func (c *ItemsController) AddRentalsItem() {
 
 	if proceed {
 		req := requests.AddItemRequestDTO{ProductName: v.ProductName, Quantity: v.Quantity, ReorderLevel: v.ReorderLevel, CostPrice: 0, SellingPrice: v.RentalPrice, BranchId: userData.UserDetails.Branch.BranchId, ImagePath: v.ImagePath}
-		addItemResp := functions.AddItem(&c.Controller, req, getProductTypes.Category.CategoryId, getBranchResp.Result.Country.CountryCode, userData.UserDetails.Branch.BranchId, int(userData.UserId))
+		addItemResp := functions.AddItem(&c.Controller, req, getProductTypes.Category.CategoryId, getBranchResp.Result.Branch.Country.CountryCode, userData.UserDetails.Branch.BranchId, int(userData.UserId))
 
 		itemResp := responses.Item{}
 		if addItemResp.StatusCode == 200 {
@@ -307,13 +318,18 @@ func (c *ItemsController) UpdateItem() {
 	proceed := true
 	errorMessage := "An error occurred"
 	logs.Info("Token verified!")
-	getBranchResp := functions.GetBranch(&c.Controller, v.BranchId)
-
-	// if getBranchResp.StatusCode == 200 {
-	// userId := verifyToken.User.UserId
-	if getBranchResp.StatusCode != 200 {
-		errorMessage = "Branch provided does not exist"
+	branchId := strconv.FormatInt(v.BranchId, 10)
+	getBranchResp, erri := functions.GetSystemDetails(&c.Controller, branchId)
+	if erri != nil {
+		errorMessage = "Failed to fetch branch details"
 		proceed = false
+	}
+
+	if proceed == true {
+		if getBranchResp.Success != true {
+			errorMessage = getBranchResp.StatusDesc
+			proceed = false
+		}
 	}
 
 	categoryId := strconv.FormatInt(v.CategoryId, 10)
@@ -333,7 +349,7 @@ func (c *ItemsController) UpdateItem() {
 	}
 
 	if proceed {
-		addItemResp := functions.UpdateItem(&c.Controller, v, getBranchResp.Result.Country.CountryCode, v.BranchId, int(userData.UserId), idStr)
+		addItemResp := functions.UpdateItem(&c.Controller, v, getBranchResp.Result.Branch.Country.CountryCode, v.BranchId, int(userData.UserId), idStr)
 
 		itemResp := responses.Item{}
 		if addItemResp.StatusCode == 200 {

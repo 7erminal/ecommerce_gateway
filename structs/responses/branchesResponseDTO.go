@@ -50,23 +50,41 @@ type CountriesOriResponseDTO struct {
 	StatusDesc string
 }
 
+type CountryOriResponseDTO struct {
+	StatusCode int
+	Result     *Countries
+	StatusDesc string
+}
+
 type CountriesResponseDTO struct {
 	Success    bool
 	Result     *[]CountryResp
 	StatusDesc string
 }
 
+type CurrencyOriResponseDTO struct {
+	StatusCode int
+	Result     *Currencies
+	StatusDesc string
+}
+
+type CurrenciesResponseDTO struct {
+	Success    bool
+	Result     *[]Currencies
+	StatusDesc string
+}
+
 type Branches struct {
-	BranchId      int64      `orm:"auto"`
-	Branch        string     `orm:"size(80)"`
-	Country       *Countries `orm:"rel(fk);column(country)"`
+	BranchId      int64
+	Branch        string
+	Country       int64
 	Location      string
 	PhoneNumber   string
-	Active        int       `orm:"omitempty"`
-	DateCreated   time.Time `orm:"type(datetime);omitempty"`
-	DateModified  time.Time `orm:"type(datetime);omitempty"`
-	CreatedBy     int       `orm:"omitempty"`
-	ModifiedBy    int       `orm:"omitempty"`
+	Active        int
+	DateCreated   time.Time
+	DateModified  time.Time
+	CreatedBy     int
+	ModifiedBy    int
 	BranchManager *Users
 }
 
@@ -80,9 +98,9 @@ type BranchRespOri struct {
 }
 
 type BranchResp struct {
-	BranchId int64
-	Branch   string
-	// Country     *CountryResp
+	BranchId      int64
+	Branch        string
+	Country       *CountryResp
 	Location      string
 	PhoneNumber   string
 	BranchManager *UserGateway
@@ -115,5 +133,15 @@ type BranchOriResponseDTO struct {
 type BranchResponseDTO struct {
 	Success    bool
 	Result     *BranchResp
+	StatusDesc string
+}
+
+type SystemDetailsData struct {
+	Branch *BranchResp
+}
+
+type SystemDetailsResponseDTO struct {
+	Success    bool
+	Result     *SystemDetailsData
 	StatusDesc string
 }

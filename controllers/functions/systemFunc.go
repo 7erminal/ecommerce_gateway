@@ -6,6 +6,7 @@ import (
 	"AMC_gateway/structs/responses"
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"strconv"
 
@@ -115,14 +116,14 @@ func UpdateBranch(c *beego.Controller, req requests.BranchRequestDTO, addedBy in
 	return data
 }
 
-func GetBranch(c *beego.Controller, branchid int64) (resp responses.BranchOriResponseDTO) {
+func GetBranch(c *beego.Controller, branchid string) (resp responses.BranchOriResponseDTO) {
 	host, _ := beego.AppConfig.String("customerBaseUrl")
 
 	logs.Info("Getting branch details for ", branchid)
 
 	request := api.NewRequest(
 		host,
-		"/v1/branches/"+strconv.FormatInt(branchid, 10),
+		"/v1/branches/"+branchid,
 		api.GET)
 	// request.Params["Dob"] = req.Dob
 	// request.Params["Gender"] = req.Gender
@@ -205,6 +206,78 @@ func DeleteBranch(c *beego.Controller, branchid string) (resp responses.StringOr
 	logs.Info("Resp is ", data)
 
 	return data
+}
+
+func GetSystemDetails(c *beego.Controller, branchid string) (resp responses.SystemDetailsResponseDTO, err error) {
+	message := "An error occurred"
+	proceed := true
+	response := responses.SystemDetailsResponseDTO{}
+
+	getBranchResp := GetBranch(c, branchid)
+
+	// if getBranchResp.StatusCode == 200 {
+	// userId := verifyToken.User.UserId
+	if getBranchResp.StatusCode != 200 {
+		err = fmt.Errorf("Branch provided does not exist")
+		message = "Branch provided does not exist"
+		proceed = false
+	}
+
+	if proceed {
+		getCountryResp := GetCountry(c, strconv.FormatInt(getBranchResp.Result.Country, 10))
+
+		if getCountryResp.StatusCode != 200 {
+			err = fmt.Errorf("Country provided does not exist")
+			message = "Country provided does not exist"
+			proceed = false
+		}
+
+		if proceed {
+			// getCurrencyResp := GetCurrency(c, strconv.FormatInt(getCountryResp.Result.DefaultCurrency, 10))
+
+			// if getCurrencyResp.StatusCode != 200 {
+			// 	err = fmt.Errorf("Currency provided does not exist")
+			// 	message = "Currency provided does not exist"
+			// 	proceed = false
+			// }
+
+			if proceed {
+				currencyResp_ := responses.CurrencyResp{
+					Currency: getCountryResp.Result.DefaultCurrency.Currency,
+					Symbol:   getCountryResp.Result.DefaultCurrency.Symbol,
+				}
+
+				countryResp_ := responses.CountryResp{
+					Country:     getCountryResp.Result.Country,
+					CountryCode: getCountryResp.Result.CountryCode,
+					Currency:    &currencyResp_,
+				}
+				branchResp_ := responses.BranchResp{
+					BranchId:      getBranchResp.Result.BranchId,
+					Branch:        getBranchResp.Result.Branch,
+					Location:      getBranchResp.Result.Location,
+					PhoneNumber:   getBranchResp.Result.PhoneNumber,
+					BranchManager: nil,
+					DateCreated:   getBranchResp.Result.DateCreated,
+					Country:       &countryResp_,
+				}
+
+				message = "System details retrieved successfully"
+
+				response = responses.SystemDetailsResponseDTO{
+					Result: &responses.SystemDetailsData{
+						Branch: &branchResp_,
+					},
+					Success:    proceed,
+					StatusDesc: message,
+				}
+				err = nil
+				resp = response
+			}
+		}
+	}
+
+	return resp, err
 }
 
 func GetBranches(c *beego.Controller) (resp responses.BranchesOriResponseDTO) {
@@ -301,6 +374,186 @@ func GetCountries(c *beego.Controller) (resp responses.CountriesOriResponseDTO) 
 	request := api.NewRequest(
 		host,
 		"/v1/countries/",
+		api.GET)
+
+	// request.Params["Dob"] = req.Dob
+	// request.Params["Gender"] = req.Gender
+	// request.Params["PhoneNumber"] = req.PhoneNumber
+	// request.Params["Username"] = req.Username
+	// request.Params["MaritalStatus"] = ""
+	// request.Params = {"UserId": strconv.Itoa(int(userid))}
+	client := api.Client{
+		Request: request,
+		Type_:   "params",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+	// data := map[string]interface{}{}
+	var data responses.CountriesOriResponseDTO
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	logs.Info("Resp is ", data)
+
+	return data
+}
+
+func GetCountry(c *beego.Controller, id string) (resp responses.CountryOriResponseDTO) {
+	host, _ := beego.AppConfig.String("systemBaseUrl")
+
+	request := api.NewRequest(
+		host,
+		"/v1/countries/"+id,
+		api.GET)
+
+	// request.Params["Dob"] = req.Dob
+	// request.Params["Gender"] = req.Gender
+	// request.Params["PhoneNumber"] = req.PhoneNumber
+	// request.Params["Username"] = req.Username
+	// request.Params["MaritalStatus"] = ""
+	// request.Params = {"UserId": strconv.Itoa(int(userid))}
+	client := api.Client{
+		Request: request,
+		Type_:   "params",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+	// data := map[string]interface{}{}
+	var data responses.CountryOriResponseDTO
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	logs.Info("Resp is ", data)
+
+	return data
+}
+
+func GetCountryByCode(c *beego.Controller, code string) (resp responses.CountryOriResponseDTO) {
+	host, _ := beego.AppConfig.String("systemBaseUrl")
+
+	request := api.NewRequest(
+		host,
+		"/v1/countries/code/"+code,
+		api.GET)
+
+	// request.Params["Dob"] = req.Dob
+	// request.Params["Gender"] = req.Gender
+	// request.Params["PhoneNumber"] = req.PhoneNumber
+	// request.Params["Username"] = req.Username
+	// request.Params["MaritalStatus"] = ""
+	// request.Params = {"UserId": strconv.Itoa(int(userid))}
+	client := api.Client{
+		Request: request,
+		Type_:   "params",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+	// data := map[string]interface{}{}
+	var data responses.CountryOriResponseDTO
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	logs.Info("Resp is ", data)
+
+	return data
+}
+
+func GetCurrency(c *beego.Controller, id string) (resp responses.CurrencyOriResponseDTO) {
+	host, _ := beego.AppConfig.String("systemBaseUrl")
+
+	request := api.NewRequest(
+		host,
+		"/v1/currencies/"+id,
+		api.GET)
+
+	// request.Params["Dob"] = req.Dob
+	// request.Params["Gender"] = req.Gender
+	// request.Params["PhoneNumber"] = req.PhoneNumber
+	// request.Params["Username"] = req.Username
+	// request.Params["MaritalStatus"] = ""
+	// request.Params = {"UserId": strconv.Itoa(int(userid))}
+	client := api.Client{
+		Request: request,
+		Type_:   "params",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+	// data := map[string]interface{}{}
+	var data responses.CurrencyOriResponseDTO
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	logs.Info("Resp is ", data)
+
+	return data
+}
+
+func GetCurrencyByCode(c *beego.Controller, code string) (resp responses.CountriesOriResponseDTO) {
+	host, _ := beego.AppConfig.String("systemBaseUrl")
+
+	request := api.NewRequest(
+		host,
+		"/v1/currencies/code/"+code,
 		api.GET)
 
 	// request.Params["Dob"] = req.Dob

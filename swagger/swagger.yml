@@ -202,6 +202,21 @@ paths:
             $ref: '#/definitions/responses.IDTypesGatewayResponseDTO'
         "403":
           description: ""
+  /app-service/get-roles:
+    get:
+      tags:
+      - app-service
+      description: |-
+        Get all roles
+        <br>
+      operationId: SystemController.Get Roles
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/responses.RolesAllGatewayResponseDTO'
+        "403":
+          description: body is empty
   /app-service/update-branch/{id}:
     put:
       tags:
@@ -261,6 +276,28 @@ paths:
             $ref: '#/definitions/responses.StringResponseDTO'
         "403":
           description: body is empty
+  /auth/refresh-access-token:
+    post:
+      tags:
+      - auth
+      description: |-
+        refresh user access token. Return new access token using refresh token.
+        <br>
+      operationId: AuthenticationController.RefreshAccessToken
+      parameters:
+      - in: body
+        name: body
+        description: body for Authentication content
+        required: true
+        schema:
+          $ref: '#/definitions/requests.StringRequestDTO'
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/responses.StringResponseDTO'
+        "403":
+          description: body is empty
   /auth/register:
     post:
       tags:
@@ -298,6 +335,28 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/requests.SignIn'
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/responses.StringResponseDTO'
+        "403":
+          description: body is empty
+  /auth/verify-token:
+    post:
+      tags:
+      - auth
+      description: |-
+        verify user token. Token provided via value param.
+        <br>
+      operationId: AuthenticationController.VerifyToken
+      parameters:
+      - in: body
+        name: body
+        description: body for Authentication content
+        required: true
+        schema:
+          $ref: '#/definitions/requests.StringRequestDTO'
       responses:
         "200":
           description: ""
@@ -483,14 +542,14 @@ paths:
             $ref: '#/definitions/responses.StringResponseDTO'
         "403":
           description: body is empty
-  /items/add-product-type:
+  /items/add-category:
     post:
       tags:
       - items
       description: |-
-        Add Product type
+        Add Category
         <br>
-      operationId: ItemsController.Add Product Type
+      operationId: ItemsController.Add Category
       parameters:
       - in: header
         name: Authorization
@@ -505,6 +564,68 @@ paths:
       - in: formData
         name: CategoryName
         description: Category name
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/responses.CategoryResponseDTO'
+        "403":
+          description: body is empty
+  /items/add-feature:
+    post:
+      tags:
+      - items
+      description: |-
+        Add Feature
+        <br>
+      operationId: ItemsController.Add Feature
+      parameters:
+      - in: header
+        name: Authorization
+        description: header for User
+        required: true
+        type: string
+      - in: formData
+        name: FeatureImage
+        description: Feature Image
+        required: true
+        type: file
+      - in: formData
+        name: FeatureName
+        description: Feature name
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/responses.CategoryResponseDTO'
+        "403":
+          description: body is empty
+  /items/add-purpose:
+    post:
+      tags:
+      - items
+      description: |-
+        Add Purpose
+        <br>
+      operationId: ItemsController.Add Purpose
+      parameters:
+      - in: header
+        name: Authorization
+        description: header for User
+        required: true
+        type: string
+      - in: formData
+        name: PurposeImage
+        description: Purpose Image
+        required: true
+        type: file
+      - in: formData
+        name: PurposeName
+        description: Purpose name
         required: true
         type: string
       responses:
@@ -568,14 +689,118 @@ paths:
             $ref: '#/definitions/responses.ItemResponseDTO'
         "403":
           description: body is empty
-  /items/get-product-types:
+  /items/delete-category/{id}:
+    delete:
+      tags:
+      - items
+      description: |-
+        Delete Category
+        <br>
+      operationId: ItemsController.Delete Category
+      parameters:
+      - in: header
+        name: Authorization
+        description: header for User
+        required: true
+        type: string
+      - in: path
+        name: id
+        description: The key for staticblock
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/responses.StringResponseDTO'
+        "403":
+          description: body is empty
+  /items/delete-feature/{id}:
+    delete:
+      tags:
+      - items
+      description: |-
+        Delete Feature
+        <br>
+      operationId: ItemsController.Delete Feature
+      parameters:
+      - in: header
+        name: Authorization
+        description: header for User
+        required: true
+        type: string
+      - in: path
+        name: id
+        description: The key for staticblock
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/responses.StringResponseDTO'
+        "403":
+          description: body is empty
+  /items/delete-item/{id}:
+    delete:
+      tags:
+      - items
+      description: |-
+        Delete Item
+        <br>
+      operationId: ItemsController.Delete Item
+      parameters:
+      - in: header
+        name: Authorization
+        description: header for User
+        required: true
+        type: string
+      - in: path
+        name: id
+        description: The key for staticblock
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/responses.StringResponseDTO'
+        "403":
+          description: body is empty
+  /items/delete-purpose/{id}:
+    delete:
+      tags:
+      - items
+      description: |-
+        Delete Purpose
+        <br>
+      operationId: ItemsController.Delete Purpose
+      parameters:
+      - in: header
+        name: Authorization
+        description: header for User
+        required: true
+        type: string
+      - in: path
+        name: id
+        description: The key for staticblock
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/responses.StringResponseDTO'
+        "403":
+          description: body is empty
+  /items/get-categories:
     get:
       tags:
       - items
       description: |-
-        Get Product types
+        Get Categories
         <br>
-      operationId: ItemsController.Get Product Types
+      operationId: ItemsController.Get Categories
       parameters:
       - in: header
         name: Authorization
@@ -589,14 +814,35 @@ paths:
             $ref: '#/definitions/responses.CategoriesResponseDTO'
         "403":
           description: body is empty
-  /items/get-product/{id}:
+  /items/get-features:
     get:
       tags:
       - items
       description: |-
-        Get Product
+        Get Features
         <br>
-      operationId: ItemsController.Get Product
+      operationId: ItemsController.Get Features
+      parameters:
+      - in: header
+        name: Authorization
+        description: header for User
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/responses.FeaturesResponseDTO'
+        "403":
+          description: body is empty
+  /items/get-item/{id}:
+    get:
+      tags:
+      - items
+      description: |-
+        Get Item
+        <br>
+      operationId: ItemsController.Get Item
       parameters:
       - in: header
         name: Authorization
@@ -615,7 +861,7 @@ paths:
             $ref: '#/definitions/responses.ItemResponseDTO'
         "403":
           description: body is empty
-  /items/get-products:
+  /items/get-items:
     get:
       tags:
       - items
@@ -659,6 +905,27 @@ paths:
           description: ""
           schema:
             $ref: '#/definitions/responses.ItemsResponseDTO'
+        "403":
+          description: body is empty
+  /items/get-purposes:
+    get:
+      tags:
+      - items
+      description: |-
+        Get Purposes
+        <br>
+      operationId: ItemsController.Get Purposes
+      parameters:
+      - in: header
+        name: Authorization
+        description: header for User
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/responses.PurposesResponseDTO'
         "403":
           description: body is empty
   /items/update-product/{id}:
@@ -1318,31 +1585,73 @@ paths:
         "403":
           description: body is empty
 definitions:
+  1064.<nil>.int64:
+    title: int64
+    type: object
+  1090.<nil>.int64:
+    title: int64
+    type: object
+  1116.<nil>.string:
+    title: string
+    type: object
+  1143.<nil>.string:
+    title: string
+    type: object
   1234.<nil>.CountryResp:
     title: CountryResp
+    type: object
+  1692.<nil>.string:
+    title: string
+    type: object
+  1719.<nil>.string:
+    title: string
+    type: object
+  1890.<nil>.int64:
+    title: int64
+    type: object
+  1916.<nil>.int64:
+    title: int64
     type: object
   2230.<nil>.BranchResp:
     title: BranchResp
     type: object
-  2819.<nil>.Categories:
+  3215.<nil>.Categories:
     title: Categories
     type: object
-  5419.<nil>.IDTypeResponse:
+  3711.<nil>.Feature:
+    title: Feature
+    type: object
+  3998.<nil>.Purpose:
+    title: Purpose
+    type: object
+  6389.<nil>.IDTypeResponse:
     title: IDTypeResponse
     type: object
-  7579.<nil>.Item:
+  8341.<nil>.string:
+    title: string
+    type: object
+  8369.<nil>.string:
+    title: string
+    type: object
+  8397.<nil>.Purpose:
+    title: Purpose
+    type: object
+  8426.<nil>.Feature:
+    title: Feature
+    type: object
+  8774.<nil>.Item:
     title: Item
     type: object
-  8570.<nil>.PaymentMethods:
+  10413.<nil>.PaymentMethods:
     title: PaymentMethods
     type: object
-  9143.<nil>.Roles:
+  10986.<nil>.Roles:
     title: Roles
     type: object
-  9541.<nil>.UserGateway:
+  11384.<nil>.UserGateway:
     title: UserGateway
     type: object
-  14104.<nil>.UserInvites:
+  16359.<nil>.UserInvites:
     title: UserInvites
     type: object
   models.Customermanagement:
@@ -1373,9 +1682,6 @@ definitions:
     title: AddRentalItemRequestDTO
     type: object
     properties:
-      BranchId:
-        type: integer
-        format: int64
       ImagePath:
         type: string
       ProductName:
@@ -1393,22 +1699,37 @@ definitions:
     title: AddSalesItemRequestDTO
     type: object
     properties:
-      BranchId:
+      AvailableColors:
+        $ref: '#/definitions/1143.<nil>.string'
+      AvailableSizes:
+        $ref: '#/definitions/1116.<nil>.string'
+      CategoryId:
         type: integer
         format: int64
       CostPrice:
         type: number
         format: double
+      Description:
+        type: string
+      Features:
+        $ref: '#/definitions/1090.<nil>.int64'
       ImagePath:
         type: string
       ProductName:
         type: string
+      Purposes:
+        $ref: '#/definitions/1064.<nil>.int64'
       Quantity:
+        type: integer
+        format: int64
+      QuantityAlert:
         type: integer
         format: int64
       SellingPrice:
         type: number
         format: double
+      Weight:
+        type: string
   requests.BranchRequestDTO:
     title: BranchRequestDTO
     type: object
@@ -1455,6 +1776,8 @@ definitions:
     title: Registration
     type: object
     properties:
+      Dob:
+        type: string
       Email:
         type: string
       FirstName:
@@ -1465,7 +1788,7 @@ definitions:
         type: string
       PhoneNumber:
         type: string
-      Token:
+      RoleId:
         type: string
   requests.RentalRequestDTO:
     title: RentalRequestDTO
@@ -1525,25 +1848,37 @@ definitions:
     title: UpdateItemRequestDTO
     type: object
     properties:
+      AvailableColors:
+        $ref: '#/definitions/1719.<nil>.string'
+      AvailableSizes:
+        $ref: '#/definitions/1692.<nil>.string'
       BranchId:
+        type: integer
+        format: int64
+      CategoryId:
         type: integer
         format: int64
       CostPrice:
         type: number
         format: double
+      Description:
+        type: string
+      Features:
+        $ref: '#/definitions/1916.<nil>.int64'
       ImagePath:
         type: string
       ProductName:
         type: string
-      ProductTypeId:
-        type: integer
-        format: int64
+      Purposes:
+        $ref: '#/definitions/1890.<nil>.int64'
       Quantity:
         type: integer
         format: int64
       SellingPrice:
         type: number
         format: double
+      Weight:
+        type: string
   requests.UpdateUserBranchRequestDTO:
     title: UpdateUserBranchRequestDTO
     type: object
@@ -1586,7 +1921,7 @@ definitions:
     title: BranchOriResponseDTO
     type: object
     properties:
-      Branch:
+      Result:
         $ref: '#/definitions/responses.Branches'
       StatusCode:
         type: integer
@@ -1690,7 +2025,7 @@ definitions:
     type: object
     properties:
       Result:
-        $ref: '#/definitions/2819.<nil>.Categories'
+        $ref: '#/definitions/3215.<nil>.Categories'
       StatusDesc:
         type: string
       Success:
@@ -1806,12 +2141,22 @@ definitions:
         type: string
       Success:
         type: boolean
+  responses.FeaturesResponseDTO:
+    title: FeaturesResponseDTO
+    type: object
+    properties:
+      Result:
+        $ref: '#/definitions/3711.<nil>.Feature'
+      StatusDesc:
+        type: string
+      Success:
+        type: boolean
   responses.IDTypesGatewayResponseDTO:
     title: IDTypesGatewayResponseDTO
     type: object
     properties:
       Result:
-        $ref: '#/definitions/5419.<nil>.IDTypeResponse'
+        $ref: '#/definitions/6389.<nil>.IDTypeResponse'
       StatusDesc:
         type: string
       Success:
@@ -1834,10 +2179,18 @@ definitions:
     title: Item
     type: object
     properties:
+      AvailableColors:
+        $ref: '#/definitions/8369.<nil>.string'
+      AvailableSizes:
+        $ref: '#/definitions/8341.<nil>.string'
       Branch:
         $ref: '#/definitions/responses.BranchResp'
+      Category:
+        $ref: '#/definitions/responses.Categories'
       Description:
         type: string
+      Features:
+        $ref: '#/definitions/8426.<nil>.Feature'
       ImagePath:
         type: string
       ProductCostPrice:
@@ -1851,11 +2204,15 @@ definitions:
       ProductPrice:
         type: number
         format: double
-      ProductType:
-        type: string
+      Purposes:
+        $ref: '#/definitions/8397.<nil>.Purpose'
       Quantity:
         type: integer
         format: int64
+      Status:
+        type: string
+      Weight:
+        type: string
   responses.ItemResponseDTO:
     title: ItemResponseDTO
     type: object
@@ -1874,7 +2231,7 @@ definitions:
         type: integer
         format: int64
       Data:
-        $ref: '#/definitions/7579.<nil>.Item'
+        $ref: '#/definitions/8774.<nil>.Item'
   responses.ItemsResponseDTO:
     title: ItemsResponseDTO
     type: object
@@ -1890,7 +2247,17 @@ definitions:
     type: object
     properties:
       Result:
-        $ref: '#/definitions/8570.<nil>.PaymentMethods'
+        $ref: '#/definitions/10413.<nil>.PaymentMethods'
+      StatusDesc:
+        type: string
+      Success:
+        type: boolean
+  responses.PurposesResponseDTO:
+    title: PurposesResponseDTO
+    type: object
+    properties:
+      Result:
+        $ref: '#/definitions/3998.<nil>.Purpose'
       StatusDesc:
         type: string
       Success:
@@ -1906,7 +2273,7 @@ definitions:
     type: object
     properties:
       Result:
-        $ref: '#/definitions/9143.<nil>.Roles'
+        $ref: '#/definitions/10986.<nil>.Roles'
       StatusDesc:
         type: string
       Success:
@@ -1998,7 +2365,7 @@ definitions:
     type: object
     properties:
       Result:
-        $ref: '#/definitions/14104.<nil>.UserInvites'
+        $ref: '#/definitions/16359.<nil>.UserInvites'
       StatusDesc:
         type: string
       Success:
@@ -2066,7 +2433,7 @@ definitions:
     type: object
     properties:
       Result:
-        $ref: '#/definitions/9541.<nil>.UserGateway'
+        $ref: '#/definitions/11384.<nil>.UserGateway'
       StatusDesc:
         type: string
       Success:

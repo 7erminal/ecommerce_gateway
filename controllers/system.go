@@ -25,6 +25,7 @@ func (c *SystemController) URLMapping() {
 	c.Mapping("Delete", c.Delete)
 	c.Mapping("UpdateBranch", c.UpdateBranch)
 	c.Mapping("GetRoles", c.GetRoles)
+	c.Mapping("GetSystemDetails", c.GetSystemDetails)
 }
 
 // GetRoles ...
@@ -50,6 +51,42 @@ func (c *SystemController) GetRoles() {
 		c.Data["json"] = resp
 	} else {
 		var resp responses.RolesAllGatewayResponseDTO = responses.RolesAllGatewayResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
+		c.Data["json"] = resp
+	}
+
+	c.ServeJSON()
+}
+
+// GetSystemDetails ...
+// @Title Get System Details
+// @Description Get system details
+// @Param	branchid		path 	string	true		"The key for staticblock"
+// @Success 200 {object} responses.SystemDetailsResponseDTO
+// @Failure 403 body is empty
+// @router /get-system-details/:branchid [get]
+func (c *SystemController) GetSystemDetails() {
+
+	var isSuccess bool = false
+	message := "An Error occurred"
+	resp := responses.SystemDetailsData{}
+
+	branchId := c.Ctx.Input.Param(":branchid")
+	systemDetails, err := functions.GetSystemDetails(&c.Controller, branchId)
+
+	// var message string
+
+	if err == nil && systemDetails.Success == true {
+
+		isSuccess = true
+		// message = "Email sent"
+
+		resp = *systemDetails.Result
+		message = systemDetails.StatusDesc
+
+		var resp responses.SystemDetailsResponseDTO = responses.SystemDetailsResponseDTO{Success: isSuccess, Result: &resp, StatusDesc: message}
+		c.Data["json"] = resp
+	} else {
+		var resp responses.SystemDetailsResponseDTO = responses.SystemDetailsResponseDTO{Success: isSuccess, Result: nil, StatusDesc: message}
 		c.Data["json"] = resp
 	}
 
@@ -150,47 +187,28 @@ func (c *SystemController) AddBranch() {
 // @router /get-branch/:id [get]
 func (c *SystemController) GetOneBranch() {
 	idStr := c.Ctx.Input.Param(":id")
-	id, _ := strconv.ParseInt(idStr, 0, 64)
-
-	authorization := c.Ctx.Input.Header("Authorization")
-	token := strings.Split(authorization, " ")
 
 	var isSuccess bool = false
 
-	if token[0] == "Bearer" {
-		logs.Info("Token is ", token[1])
-		verifyToken := functions.VerifyToken(&c.Controller, token[1])
+	getBranchResp := functions.GetBranch(&c.Controller, idStr)
 
-		if verifyToken.StatusCode == 200 {
-			getBranchResp := functions.GetBranch(&c.Controller, id)
-
-			if getBranchResp.StatusCode == 200 {
-				// var curr responses.CurrencyResp = responses.CurrencyResp{Symbol: getBranchResp.Branch.Country.DefaultCurrency.Symbol, Currency: getBranchResp.Branch.Country.DefaultCurrency.Currency}
-				// var country responses.CountryResp = responses.CountryResp{Country: getBranchResp.Branch.Country.Country, CountryCode: getBranchResp.Branch.Country.CountryCode, Currency: &curr}
-				var data responses.BranchResp = responses.BranchResp{
-					BranchId: getBranchResp.Result.BranchId,
-					Branch:   getBranchResp.Result.Branch,
-					// Country:     &country,
-					Location:    getBranchResp.Result.Location,
-					PhoneNumber: getBranchResp.Result.PhoneNumber,
-					DateCreated: getBranchResp.Result.DateCreated,
-				}
-
-				isSuccess = true
-				var resp responses.BranchResponseDTO = responses.BranchResponseDTO{Success: isSuccess, Result: &data, StatusDesc: "Branch details fetched Successfully"}
-				c.Data["json"] = resp
-			} else {
-				logs.Error("An error occurred fetching branches from api")
-				var resp responses.BranchResponseDTO = responses.BranchResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
-				c.Data["json"] = resp
-			}
-		} else {
-			logs.Error("Error verifying token")
-			var resp responses.BranchResponseDTO = responses.BranchResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
-			c.Data["json"] = resp
+	if getBranchResp.StatusCode == 200 {
+		// var curr responses.CurrencyResp = responses.CurrencyResp{Symbol: getBranchResp.Branch.Country.DefaultCurrency.Symbol, Currency: getBranchResp.Branch.Country.DefaultCurrency.Currency}
+		// var country responses.CountryResp = responses.CountryResp{Country: getBranchResp.Branch.Country.Country, CountryCode: getBranchResp.Branch.Country.CountryCode, Currency: &curr}
+		var data responses.BranchResp = responses.BranchResp{
+			BranchId: getBranchResp.Result.BranchId,
+			Branch:   getBranchResp.Result.Branch,
+			// Country:     &country,
+			Location:    getBranchResp.Result.Location,
+			PhoneNumber: getBranchResp.Result.PhoneNumber,
+			DateCreated: getBranchResp.Result.DateCreated,
 		}
 
+		isSuccess = true
+		var resp responses.BranchResponseDTO = responses.BranchResponseDTO{Success: isSuccess, Result: &data, StatusDesc: "Branch details fetched Successfully"}
+		c.Data["json"] = resp
 	} else {
+		logs.Error("An error occurred fetching branches from api")
 		var resp responses.BranchResponseDTO = responses.BranchResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
 		c.Data["json"] = resp
 	}
