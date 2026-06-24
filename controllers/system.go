@@ -190,18 +190,32 @@ func (c *SystemController) GetOneBranch() {
 
 	var isSuccess bool = false
 
-	getBranchResp := functions.GetBranch(&c.Controller, idStr)
+	getBranchResp, err := functions.GetSystemDetails(&c.Controller, idStr)
 
-	if getBranchResp.StatusCode == 200 {
+	if err != nil {
+		logs.Error("An error occurred fetching branch details: ", err)
+		var resp responses.BranchResponseDTO = responses.BranchResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
+		c.Data["json"] = resp
+		c.ServeJSON()
+		return
+	}
+
+	if getBranchResp.Success == true {
 		// var curr responses.CurrencyResp = responses.CurrencyResp{Symbol: getBranchResp.Branch.Country.DefaultCurrency.Symbol, Currency: getBranchResp.Branch.Country.DefaultCurrency.Currency}
 		// var country responses.CountryResp = responses.CountryResp{Country: getBranchResp.Branch.Country.Country, CountryCode: getBranchResp.Branch.Country.CountryCode, Currency: &curr}
+		var curr responses.CurrencyResp = responses.CurrencyResp{Symbol: getBranchResp.Result.Branch.Country.Currency.Symbol, Currency: getBranchResp.Result.Branch.Country.Currency.Currency}
+		var country responses.CountryResp = responses.CountryResp{
+			Country:     getBranchResp.Result.Branch.Country.Country,
+			CountryCode: getBranchResp.Result.Branch.Country.CountryCode,
+			Currency:    &curr,
+		}
 		var data responses.BranchResp = responses.BranchResp{
-			BranchId: getBranchResp.Result.BranchId,
-			Branch:   getBranchResp.Result.Branch,
-			// Country:     &country,
-			Location:    getBranchResp.Result.Location,
-			PhoneNumber: getBranchResp.Result.PhoneNumber,
-			DateCreated: getBranchResp.Result.DateCreated,
+			BranchId:    getBranchResp.Result.Branch.BranchId,
+			Branch:      getBranchResp.Result.Branch.Branch,
+			Country:     &country,
+			Location:    getBranchResp.Result.Branch.Location,
+			PhoneNumber: getBranchResp.Result.Branch.PhoneNumber,
+			DateCreated: getBranchResp.Result.Branch.DateCreated,
 		}
 
 		isSuccess = true
