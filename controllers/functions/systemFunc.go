@@ -224,7 +224,7 @@ func GetSystemDetails(c *beego.Controller, branchid string) (resp responses.Syst
 	}
 
 	if proceed {
-		getCountryResp := GetCountry(c, strconv.FormatInt(getBranchResp.Result.Country, 10))
+		getCountryResp := GetCountry(c, strconv.FormatInt(getBranchResp.Result.Country.CountryId, 10))
 
 		if getCountryResp.StatusCode != 200 {
 			err = fmt.Errorf("Country provided does not exist")
@@ -239,7 +239,7 @@ func GetSystemDetails(c *beego.Controller, branchid string) (resp responses.Syst
 			// 	err = fmt.Errorf("Currency provided does not exist")
 			// 	message = "Currency provided does not exist"
 			// 	proceed = false
-			// }
+			// } else {}
 
 			if proceed {
 				currencyResp_ := responses.CurrencyResp{
