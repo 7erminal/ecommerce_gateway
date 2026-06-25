@@ -77,7 +77,7 @@ type CurrenciesResponseDTO struct {
 type Branches struct {
 	BranchId      int64
 	Branch        string
-	Country       int64
+	Country       *Countries
 	Location      string
 	PhoneNumber   string
 	Active        int
