@@ -254,7 +254,8 @@ func GetSystemDetails(c *beego.Controller, branchid string) (resp responses.Syst
 				}
 				branchResp_ := responses.BranchResp{
 					BranchId:      getBranchResp.Result.BranchId,
-					Branch:        getBranchResp.Result.Branch,
+					Branch:        getBranchResp.Result.BranchName,
+					Description:   getBranchResp.Result.Description,
 					Location:      getBranchResp.Result.Location,
 					PhoneNumber:   getBranchResp.Result.PhoneNumber,
 					BranchManager: nil,
