@@ -145,8 +145,9 @@ func (c *SystemController) AddBranch() {
 					// var curr responses.CurrencyResp = responses.CurrencyResp{Symbol: addBranchResp.Branch.Country.DefaultCurrency.Symbol, Currency: addBranchResp.Branch.Country.DefaultCurrency.Currency}
 					// var country responses.CountryResp = responses.CountryResp{Country: addBranchResp.Branch.Country.Country, CountryCode: addBranchResp.Branch.Country.CountryCode, Currency: &curr}
 					var data responses.BranchResp = responses.BranchResp{
-						BranchId: addBranchResp.Result.BranchId,
-						Branch:   addBranchResp.Result.Branch,
+						BranchId:    addBranchResp.Result.BranchId,
+						Branch:      addBranchResp.Result.BranchName,
+						Description: addBranchResp.Result.Description,
 						// Country:     &country,
 						Location:    addBranchResp.Result.Location,
 						PhoneNumber: addBranchResp.Result.PhoneNumber,
@@ -351,8 +352,9 @@ func (c *SystemController) GetAllBranches() {
 						}
 
 						var data responses.BranchResp = responses.BranchResp{
-							BranchId: branch.BranchId,
-							Branch:   branch.Branch,
+							BranchId:    branch.BranchId,
+							Branch:      branch.BranchName,
+							Description: branch.Description,
 							// Country:     &country,
 							Location:      branch.Location,
 							PhoneNumber:   branch.PhoneNumber,
@@ -477,8 +479,10 @@ func (c *SystemController) UpdateBranch() {
 						}
 
 						branchResp = &responses.BranchResp{
-							BranchId:      updateBranch.Result.BranchId,
-							Branch:        updateBranch.Result.Branch,
+							BranchId:    updateBranch.Result.BranchId,
+							Branch:      updateBranch.Result.BranchName,
+							Description: updateBranch.Result.Description,
+							// Country:       &country,
 							Location:      updateBranch.Result.Location,
 							PhoneNumber:   updateBranch.Result.PhoneNumber,
 							DateCreated:   updateBranch.Result.DateCreated,
