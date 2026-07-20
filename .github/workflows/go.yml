@@ -45,7 +45,7 @@ jobs:
           cd /usr/app/shopmallafrik/ecommerce_gateway
           git stash
           git pull origin shopmallafrik
-          go build -o ecommerce-gateway-service
+          go build -o shopmallafrik-gateway-service
 
           PM2_BIN="$(command -v pm2 || true)"
           if [ -z "$PM2_BIN" ]; then
@@ -53,6 +53,6 @@ jobs:
             exit 1
           fi
 
-          "$PM2_BIN" restart ecommerce-gateway-service || \
-          "$PM2_BIN" start ./ecommerce-gateway-service --name ecommerce-gateway-service
+          "$PM2_BIN" restart shopmallafrik-gateway-service || \
+          "$PM2_BIN" start ./shopmallafrik-gateway-service --name shopmallafrik-gateway-service
         EOF
