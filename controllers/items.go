@@ -1076,7 +1076,7 @@ func (c *ItemsController) DeletePurpose() {
 func (c *ItemsController) DeleteItem() {
 	var isSuccess bool = false
 
-	logs.Info("Success response received")
+	logs.Info("Delete item request received")
 	isSuccess = false
 
 	idStr := c.Ctx.Input.Param(":id")
