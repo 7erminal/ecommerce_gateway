@@ -55,13 +55,13 @@ type CustomerGateway struct {
 
 type CustomerResponseDTO struct {
 	StatusCode int
-	Customer   *Customer
+	Result     *Customer
 	StatusDesc string
 }
 
 type CustomersResponseDTO struct {
 	StatusCode int
-	Customers  *[]Customer
+	Result     *[]Customer
 	StatusDesc string
 }
 

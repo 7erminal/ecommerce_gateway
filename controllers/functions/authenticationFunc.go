@@ -175,6 +175,45 @@ func VerifyTokenNew(token string) (resp responses.UserOriResponseDTO) {
 	return data
 }
 
+func VerifyCustomerToken(token string) (resp responses.CustomerResponseDTO) {
+	host, _ := beego.AppConfig.String("authenticationBaseUrl")
+
+	logs.Info("About to verify token ", token)
+
+	request := api.NewRequest(
+		host,
+		"/v1/auth/customer-token/check",
+		api.POST)
+	request.InterfaceParams["Value"] = token
+	// request.Params = {"UserId": strconv.Itoa(int(userid))}
+	client := api.Client{
+		Request: request,
+		Type_:   "body",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		// c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		// c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+	// data := map[string]interface{}{}
+	var data responses.CustomerResponseDTO
+	json.Unmarshal(read, &data)
+
+	return data
+}
+
 func RegistrationRequest(c *beego.Controller, req requests.RegisterUser) (resp responses.UserResponseDTO) {
 	host, _ := beego.AppConfig.String("customerBaseUrl")
 

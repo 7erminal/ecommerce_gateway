@@ -76,6 +76,12 @@ func init() {
 				&controllers.CustomermanagementController{},
 			),
 		),
+		beego.NSNamespace("/transactions",
+			beego.NSBefore(middlewares.AuthMiddleware),
+			beego.NSInclude(
+				&controllers.TransactionsController{},
+			),
+		),
 	)
 	beego.AddNamespace(ns)
 	// beego.AddNamespace(public)

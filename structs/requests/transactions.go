@@ -1,15 +1,20 @@
 package requests
 
+type GetTransactionsRequestDTO struct {
+	Limit  string
+	Offset string
+	Query  string
+}
+
 type PostTransactionRequest struct {
-	Items                []Item
-	CurrencyId           int
-	RequestType          string
-	PaymentProofImageUrl string
-	PaymentMethodId      int64
-	Comment              string
-	OrderLocation        string
-	OrderBy              int64
-	OrderStartDate       string
-	OrderEndDate         string
-	CustomerId           int64
+	Items           []Item
+	CurrencyId      string
+	RequestType     string
+	PaymentMethodId string
+	Comment         string
+	OrderLocation   string
+	OrderBy         string
+	OrderStartDate  string
+	OrderEndDate    string
+	CustomerId      string
 }

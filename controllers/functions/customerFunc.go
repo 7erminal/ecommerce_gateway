@@ -173,7 +173,7 @@ func GetCustomers(c *beego.Controller, query string, fields string, sortby strin
 	c.Data["json"] = data
 
 	logs.Info("Resp is ", data)
-	logs.Info("Resp is ", data.Customers)
+	logs.Info("Resp is ", data.Result)
 
 	return data
 }
