@@ -162,7 +162,7 @@ func GetOrders(c *beego.Controller, req requests.GetOrdersRequestDTO) (resp resp
 	request := api.NewRequest(
 		host,
 		"/v1/orders/",
-		api.POST)
+		api.GET)
 	request.Params["Limit"] = req.Limit
 	request.Params["Offset"] = req.Offset
 	request.Params["Query"] = req.Query
@@ -208,7 +208,7 @@ func GetTransactions(c *beego.Controller, req requests.GetTransactionsRequestDTO
 	request := api.NewRequest(
 		host,
 		"/v1/transactions/",
-		api.POST)
+		api.GET)
 	request.Params["Limit"] = req.Limit
 	request.Params["Offset"] = req.Offset
 	request.Params["Query"] = req.Query
