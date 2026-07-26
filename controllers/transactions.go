@@ -292,7 +292,7 @@ func (c *TransactionsController) GetAllTransactions() {
 // @Param	Authorization		header 	string true		"header for User"
 // @Success 200 {object} responses.OrdersGatewayResponseDTO
 // @Failure 403 body is empty
-// @router /get-all-orders [get]
+// @router /get-orders [get]
 func (c *TransactionsController) GetAllOrders() {
 	u := c.Ctx.Input.GetData("user")
 	userData, err := u.(*responses.UsersOri)
@@ -340,7 +340,7 @@ func (c *TransactionsController) GetAllOrders() {
 // @Param	id		path 	string	true		"The id you want to get"
 // @Success 200 {object} responses.OrderItemResponseDTO
 // @Failure 403 id is empty
-// @router /get-one-order/:id [get]
+// @router /get-order/:id [get]
 func (c *TransactionsController) GetOneOrder() {
 	idStr := c.Ctx.Input.Param(":id")
 

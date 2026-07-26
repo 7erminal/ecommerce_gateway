@@ -369,15 +369,6 @@ func init() {
 
     beego.GlobalControllerRouter["AMC_gateway/controllers:TransactionsController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:TransactionsController"],
         beego.ControllerComments{
-            Method: "GetAllOrders",
-            Router: `/get-all-orders`,
-            AllowHTTPMethods: []string{"get"},
-            MethodParams: param.Make(),
-            Filters: nil,
-            Params: nil})
-
-    beego.GlobalControllerRouter["AMC_gateway/controllers:TransactionsController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:TransactionsController"],
-        beego.ControllerComments{
             Method: "GetAllTransactions",
             Router: `/get-all-transactions`,
             AllowHTTPMethods: []string{"get"},
@@ -388,7 +379,16 @@ func init() {
     beego.GlobalControllerRouter["AMC_gateway/controllers:TransactionsController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:TransactionsController"],
         beego.ControllerComments{
             Method: "GetOneOrder",
-            Router: `/get-one-order/:id`,
+            Router: `/get-order/:id`,
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["AMC_gateway/controllers:TransactionsController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:TransactionsController"],
+        beego.ControllerComments{
+            Method: "GetAllOrders",
+            Router: `/get-orders`,
             AllowHTTPMethods: []string{"get"},
             MethodParams: param.Make(),
             Filters: nil,
