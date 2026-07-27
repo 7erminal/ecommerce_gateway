@@ -16,8 +16,15 @@ type Currencies struct {
 }
 
 type CurrencyResp struct {
-	Symbol   string
-	Currency string
+	CurrencyId string
+	Symbol     string
+	Currency   string
+}
+
+type CurrencyResp2 struct {
+	CurrencyId int64
+	Symbol     string
+	Currency   string
 }
 
 type Countries struct {
@@ -42,6 +49,12 @@ type CountryResp struct {
 	Country     string
 	CountryCode string
 	Currency    *CurrencyResp
+}
+
+type CountryResp2 struct {
+	Country     string
+	CountryCode string
+	Currency    *CurrencyResp2
 }
 
 type CountriesOriResponseDTO struct {
@@ -109,6 +122,17 @@ type BranchResp struct {
 	DateCreated   time.Time
 }
 
+type BranchResp2 struct {
+	BranchId      int64
+	Branch        string
+	Description   string
+	Country       *CountryResp2
+	Location      string
+	PhoneNumber   string
+	BranchManager *UserGateway
+	DateCreated   time.Time
+}
+
 type BranchesOriResponseDTO struct {
 	StatusCode int
 	Branches   *[]Branches
@@ -139,7 +163,7 @@ type BranchResponseDTO struct {
 }
 
 type SystemDetailsData struct {
-	Branch *BranchResp
+	Branch *BranchResp2
 }
 
 type SystemDetailsResponseDTO struct {

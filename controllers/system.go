@@ -204,7 +204,13 @@ func (c *SystemController) GetOneBranch() {
 	if getBranchResp.Success == true {
 		// var curr responses.CurrencyResp = responses.CurrencyResp{Symbol: getBranchResp.Branch.Country.DefaultCurrency.Symbol, Currency: getBranchResp.Branch.Country.DefaultCurrency.Currency}
 		// var country responses.CountryResp = responses.CountryResp{Country: getBranchResp.Branch.Country.Country, CountryCode: getBranchResp.Branch.Country.CountryCode, Currency: &curr}
-		var curr responses.CurrencyResp = responses.CurrencyResp{Symbol: getBranchResp.Result.Branch.Country.Currency.Symbol, Currency: getBranchResp.Result.Branch.Country.Currency.Currency}
+
+		currencyIdStr := strconv.FormatInt(getBranchResp.Result.Branch.Country.Currency.CurrencyId, 10)
+		var curr responses.CurrencyResp = responses.CurrencyResp{
+			CurrencyId: currencyIdStr,
+			Symbol:     getBranchResp.Result.Branch.Country.Currency.Symbol,
+			Currency:   getBranchResp.Result.Branch.Country.Currency.Currency}
+
 		var country responses.CountryResp = responses.CountryResp{
 			Country:     getBranchResp.Result.Branch.Country.Country,
 			CountryCode: getBranchResp.Result.Branch.Country.CountryCode,
