@@ -184,6 +184,13 @@ func (c *TransactionsController) PlaceOrderRequest() {
 	var v requests.OrderRequest2DTO
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
 
+	rjson, marshalErr := json.Marshal(v)
+	if marshalErr != nil {
+		logs.Error("Error marshalling user to JSON: ", marshalErr.Error())
+	} else {
+		logs.Info("Request received is \n", string(rjson))
+	}
+
 	requestType := "PURCHASE"
 
 	isSuccess := false
