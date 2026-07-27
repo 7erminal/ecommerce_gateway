@@ -243,9 +243,9 @@ func GetSystemDetails(c *beego.Controller, branchid string) (resp responses.Syst
 
 			if proceed {
 				currencyResp_ := responses.CurrencyResp{
-					CurrencyId: strconv.FormatInt(getBranchResp.Result.Country.DefaultCurrency.CurrencyId, 10),
-					Currency:   getBranchResp.Result.Country.DefaultCurrency.Currency,
-					Symbol:     getBranchResp.Result.Country.DefaultCurrency.Symbol,
+					CurrencyId: strconv.FormatInt(getBranchResp.Result.Country.Currency.CurrencyId, 10),
+					Currency:   getBranchResp.Result.Country.Currency.Currency,
+					Symbol:     getBranchResp.Result.Country.Currency.Symbol,
 				}
 
 				countryResp_ := responses.CountryResp{

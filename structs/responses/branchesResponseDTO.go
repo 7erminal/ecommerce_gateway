@@ -28,15 +28,15 @@ type CurrencyResp2 struct {
 }
 
 type Countries struct {
-	CountryId       int64  `orm:"auto"`
-	Country         string `orm:"size(255)"`
-	Description     string `orm:"size(500)"`
-	CountryCode     string `orm:"size(20)"`
-	DefaultCurrency *Currencies
-	DateCreated     time.Time `orm:"type(datetime)"`
-	DateModified    time.Time `orm:"type(datetime)"`
-	CreatedBy       int
-	ModifiedBy      int
+	CountryId    int64  `orm:"auto"`
+	Country      string `orm:"size(255)"`
+	Description  string `orm:"size(500)"`
+	CountryCode  string `orm:"size(20)"`
+	Currency     *Currencies
+	DateCreated  time.Time `orm:"type(datetime)"`
+	DateModified time.Time `orm:"type(datetime)"`
+	CreatedBy    int
+	ModifiedBy   int
 }
 
 type CountryRespOri struct {

@@ -270,10 +270,10 @@ func (c *SystemController) GetAllCountries() {
 				if getCountriesResp.Countries != nil && len(*getCountriesResp.Countries) > 0 {
 					for _, country := range *getCountriesResp.Countries {
 
-						var curr responses.CurrencyResp = responses.CurrencyResp{Symbol: country.DefaultCurrency.Symbol, Currency: country.DefaultCurrency.Currency}
-						var country responses.CountryResp = responses.CountryResp{Country: country.Country, CountryCode: country.CountryCode, Currency: &curr}
+						var curr responses.CurrencyResp = responses.CurrencyResp{Symbol: country.Currency.Symbol, Currency: country.Currency.Currency}
+						var countryResp responses.CountryResp = responses.CountryResp{Country: country.Country, CountryCode: country.CountryCode, Currency: &curr}
 
-						countries = append(countries, country)
+						countries = append(countries, countryResp)
 					}
 				} else {
 					countries = []responses.CountryResp{}
