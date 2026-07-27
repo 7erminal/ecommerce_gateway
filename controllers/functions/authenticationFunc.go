@@ -122,11 +122,17 @@ func VerifyToken(c *beego.Controller, token string) (resp responses.UserOriRespo
 		c.Data["json"] = err.Error()
 	}
 
-	var prettyJSON bytes.Buffer
-	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
-		logs.Info("Raw response received is ", string(read))
+	// var prettyJSON bytes.Buffer
+	// if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+	// 	logs.Info("Raw response received is ", string(read))
+	// } else {
+	// 	logs.Info("Raw response received is \n", prettyJSON.String())
+	// }
+	rjson, err := json.Marshal(read)
+	if err != nil {
+		logs.Error("Error marshalling user to JSON: ", err.Error())
 	} else {
-		logs.Info("Raw response received is \n", prettyJSON.String())
+		logs.Info("Raw response received is \n", string(rjson))
 	}
 	// data := map[string]interface{}{}
 	var data responses.UserOriResponseDTO
