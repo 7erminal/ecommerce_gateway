@@ -205,9 +205,8 @@ func (c *SystemController) GetOneBranch() {
 		// var curr responses.CurrencyResp = responses.CurrencyResp{Symbol: getBranchResp.Branch.Country.DefaultCurrency.Symbol, Currency: getBranchResp.Branch.Country.DefaultCurrency.Currency}
 		// var country responses.CountryResp = responses.CountryResp{Country: getBranchResp.Branch.Country.Country, CountryCode: getBranchResp.Branch.Country.CountryCode, Currency: &curr}
 
-		currencyIdStr := strconv.FormatInt(getBranchResp.Result.Branch.Country.Currency.CurrencyId, 10)
 		var curr responses.CurrencyResp = responses.CurrencyResp{
-			CurrencyId: currencyIdStr,
+			CurrencyId: getBranchResp.Result.Branch.Country.Currency.CurrencyId,
 			Symbol:     getBranchResp.Result.Branch.Country.Currency.Symbol,
 			Currency:   getBranchResp.Result.Branch.Country.Currency.Currency}
 

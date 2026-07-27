@@ -163,7 +163,7 @@ type BranchResponseDTO struct {
 }
 
 type SystemDetailsData struct {
-	Branch *BranchResp2
+	Branch *BranchResp
 }
 
 type SystemDetailsResponseDTO struct {
