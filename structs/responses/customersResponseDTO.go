@@ -61,7 +61,7 @@ type CustomerResponseDTO struct {
 
 type CustomersResponseDTO struct {
 	StatusCode int
-	Result     *[]Customer
+	Result     []Customer
 	StatusDesc string
 }
 
@@ -73,6 +73,6 @@ type CustomerGatewayResponseDTO struct {
 
 type CustomersGatewayResponseDTO struct {
 	Success    bool
-	Result     *[]CustomerGateway
+	Result     []CustomerGateway
 	StatusDesc string
 }

@@ -188,7 +188,7 @@ func (c *CustomermanagementController) GetAll() {
 
 		customers := []responses.CustomerGateway{}
 
-		for _, customer := range *customerResp.Result {
+		for _, customer := range customerResp.Result {
 			var custGateway responses.CustomerGateway = responses.CustomerGateway{
 				CustomerId:           customer.CustomerId,
 				FullName:             customer.FullName,
@@ -205,7 +205,7 @@ func (c *CustomermanagementController) GetAll() {
 			customers = append(customers, custGateway)
 		}
 
-		resp := responses.CustomersGatewayResponseDTO{Success: isSuccess, Result: &customers, StatusDesc: message}
+		resp := responses.CustomersGatewayResponseDTO{Success: isSuccess, Result: customers, StatusDesc: message}
 		c.Data["json"] = resp
 	} else {
 		logs.Error("An error occurred while fetching customer details ", customerResp.StatusDesc)
