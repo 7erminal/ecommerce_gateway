@@ -33,8 +33,9 @@ func AddCustomer(c *beego.Controller, req requests.AddCustomer, addedBy string, 
 			m_str = "0" + m_str
 		}
 		dob = strconv.Itoa(y) + "/" + m_str + "/" + d_str
-
 	}
+
+	logs.Info("DOB sent is ", dob)
 
 	request := api.NewRequest(
 		host,
