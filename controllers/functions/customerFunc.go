@@ -20,17 +20,21 @@ func AddCustomer(c *beego.Controller, req requests.AddCustomer, addedBy string, 
 	logs.Info("Sending email ", req.Email)
 
 	// Get date
-	now := time.Now()
-	y, m, d := now.Date()
-	d_str := strconv.Itoa(d)
-	m_str := strconv.Itoa(int(m))
-	if len(d_str) < 2 {
-		d_str = "0" + d_str
+	dob := req.Dob
+	if req.Dob == "" {
+		now := time.Now()
+		y, m, d := now.Date()
+		d_str := strconv.Itoa(d)
+		m_str := strconv.Itoa(int(m))
+		if len(d_str) < 2 {
+			d_str = "0" + d_str
+		}
+		if len(m_str) < 2 {
+			m_str = "0" + m_str
+		}
+		dob = strconv.Itoa(y) + "/" + m_str + "/" + d_str
+
 	}
-	if len(m_str) < 2 {
-		m_str = "0" + m_str
-	}
-	dob := strconv.Itoa(y) + "/" + m_str + "/" + d_str
 
 	request := api.NewRequest(
 		host,
@@ -48,7 +52,7 @@ func AddCustomer(c *beego.Controller, req requests.AddCustomer, addedBy string, 
 	request.InterfaceParams["Category"] = custType
 	client := api.Client{
 		Request: request,
-		Type_:   "body",
+		Type_:   "params",
 	}
 	res, err := client.SendRequest()
 	if err != nil {
