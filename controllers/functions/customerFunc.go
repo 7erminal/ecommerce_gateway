@@ -41,16 +41,16 @@ func AddCustomer(c *beego.Controller, req requests.AddCustomer, addedBy string, 
 		host,
 		"/v1/customers/add-customer",
 		api.POST)
-	request.InterfaceParams["Name"] = req.Email
-	request.InterfaceParams["Email"] = req.Email
-	request.InterfaceParams["IdType"] = req.IdType
-	request.InterfaceParams["PhoneNumber"] = req.PhoneNumber
-	request.InterfaceParams["IdNumber"] = req.IdNumber
-	request.InterfaceParams["Dob"] = dob
-	request.InterfaceParams["AddedBy"] = addedBy
-	request.InterfaceParams["Location"] = req.Location
+	request.Params["Name"] = req.Email
+	request.Params["Email"] = req.Email
+	request.Params["IdType"] = req.IdType
+	request.Params["PhoneNumber"] = req.PhoneNumber
+	request.Params["IdNumber"] = req.IdNumber
+	request.Params["Dob"] = dob
+	request.Params["AddedBy"] = addedBy
+	request.Params["Location"] = req.Location
 	request.FileField["CustomerImage"] = req.ImagePath
-	request.InterfaceParams["Category"] = custType
+	request.Params["Category"] = custType
 	client := api.Client{
 		Request: request,
 		Type_:   "params",
