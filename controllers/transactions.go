@@ -320,6 +320,7 @@ func (c *TransactionsController) GetAllOrders() {
 		Limit:  "10",
 		Offset: "0",
 		Query:  "userId=" + userIdStr,
+		Order:  "desc",
 	})
 
 	if serviceResp.StatusCode == 200 {

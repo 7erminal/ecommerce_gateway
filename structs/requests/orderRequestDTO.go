@@ -8,6 +8,7 @@ type GetOrdersRequestDTO struct {
 	Limit  string
 	Offset string
 	Query  string
+	Order  string
 }
 
 type GetOrderItemsRequestDTO struct {

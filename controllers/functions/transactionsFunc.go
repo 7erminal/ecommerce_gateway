@@ -166,6 +166,7 @@ func GetOrders(c *beego.Controller, req requests.GetOrdersRequestDTO) (resp resp
 	request.Params["Limit"] = req.Limit
 	request.Params["Offset"] = req.Offset
 	request.Params["Query"] = req.Query
+	request.Params["Order"] = req.Order
 	// request.Params = {"UserId": strconv.Itoa(int(userid))}
 	client := api.Client{
 		Request: request,
