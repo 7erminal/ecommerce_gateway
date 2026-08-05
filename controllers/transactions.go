@@ -271,7 +271,7 @@ func (c *TransactionsController) GetAllTransactions() {
 	serviceResp := functions.GetTransactions(&c.Controller, requests.GetTransactionsRequestDTO{
 		Limit:  "20",
 		Offset: "0",
-		Query:  "userId=" + userIdStr,
+		Query:  "CreatedBy:" + userIdStr,
 		Order:  "desc",
 	})
 
@@ -327,7 +327,7 @@ func (c *TransactionsController) GetAllOrders() {
 	serviceResp := functions.GetOrders(&c.Controller, requests.GetOrdersRequestDTO{
 		Limit:  "10",
 		Offset: "0",
-		Query:  "userId=" + userIdStr,
+		Query:  "CreatedBy:" + userIdStr,
 		Order:  order,
 	})
 
