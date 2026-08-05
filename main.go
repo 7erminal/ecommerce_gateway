@@ -16,7 +16,7 @@ func main() {
 		beego.BConfig.WebConfig.StaticDir["/swagger"] = "swagger"
 	}
 
-	logs.SetLogger(logs.AdapterFile, `{"filename":"../logs/AMC-gateway.log"}`)
+	logs.SetLogger(logs.AdapterFile, `{"filename":"../logs/ecommerce-gateway.log"}`)
 
 	beego.InsertFilter("*", beego.BeforeRouter, cors.Allow(&cors.Options{
 		AllowOrigins:     []string{"http://localhost:5173", "http://localhost:5174", "https://70b8-154-161-28-82.ngrok-free.app", "https://ecommerce.admin.readils.com"},
