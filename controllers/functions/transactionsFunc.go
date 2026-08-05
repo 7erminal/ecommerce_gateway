@@ -204,6 +204,7 @@ func GetTransactions(c *beego.Controller, req requests.GetTransactionsRequestDTO
 	host, _ := beego.AppConfig.String("transactionsBaseUrl")
 
 	logs.Info("Fetching orders with query ", req.Query)
+	logs.Info("Ordering by ", req.Order)
 
 	request := api.NewRequest(
 		host,

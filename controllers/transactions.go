@@ -267,8 +267,9 @@ func (c *TransactionsController) GetAllTransactions() {
 
 	userIdStr := strconv.FormatInt(userData.UserId, 10)
 
+	logs.Info("About to get transactions. Ordering by desc")
 	serviceResp := functions.GetTransactions(&c.Controller, requests.GetTransactionsRequestDTO{
-		Limit:  "10",
+		Limit:  "20",
 		Offset: "0",
 		Query:  "userId=" + userIdStr,
 		Order:  "desc",
