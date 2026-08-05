@@ -10,8 +10,8 @@ type CustomersAlt struct {
 }
 
 type OrdersCustom struct {
-	OrderId      int64
-	OrderNumber  int64
+	OrderId      string
+	OrderNumber  string
 	Quantity     int
 	Cost         float32
 	Currency     string
