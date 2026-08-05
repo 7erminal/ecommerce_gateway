@@ -4,6 +4,7 @@ type GetTransactionsRequestDTO struct {
 	Limit  string
 	Offset string
 	Query  string
+	Order  string
 }
 
 type PostTransactionRequest struct {
