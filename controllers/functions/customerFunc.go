@@ -177,8 +177,8 @@ func GetCustomers(c *beego.Controller, query string, fields string, sortby strin
 	json.Unmarshal(read, &data)
 	c.Data["json"] = data
 
-	logs.Info("Resp is ", data)
-	logs.Info("Resp is ", data.Result)
+	// logs.Info("Resp is ", data)
+	// logs.Info("Resp is ", data.Customers)
 
 	return data
 }

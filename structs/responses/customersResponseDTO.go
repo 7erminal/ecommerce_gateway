@@ -61,7 +61,7 @@ type CustomerResponseDTO struct {
 
 type CustomersResponseDTO struct {
 	StatusCode int
-	Result     []Customer
+	Customers  []Customer
 	StatusDesc string
 }
 

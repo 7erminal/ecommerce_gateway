@@ -188,7 +188,7 @@ func (c *CustomermanagementController) GetAll() {
 
 		customers := []responses.CustomerGateway{}
 
-		for _, customer := range customerResp.Result {
+		for _, customer := range customerResp.Customers {
 			var custGateway responses.CustomerGateway = responses.CustomerGateway{
 				CustomerId:           customer.CustomerId,
 				FullName:             customer.FullName,

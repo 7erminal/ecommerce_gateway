@@ -8,12 +8,12 @@ type IDTypeResponse struct {
 
 type IDTypeResponseDTO struct {
 	StatusCode int
-	IdTypes    *[]IDTypeResponse
+	IdTypes    []IDTypeResponse
 	StatusDesc string
 }
 
 type IDTypesGatewayResponseDTO struct {
 	Success    bool
-	Result     *[]IDTypeResponse
+	Result     []IDTypeResponse
 	StatusDesc string
 }
