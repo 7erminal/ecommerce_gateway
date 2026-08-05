@@ -273,6 +273,7 @@ func (c *TransactionsController) GetAllTransactions() {
 		Offset: "0",
 		Query:  "CreatedBy:" + userIdStr,
 		Order:  "desc",
+		SortBy: "CreatedAt",
 	})
 
 	if serviceResp.StatusCode == 200 {
@@ -307,6 +308,7 @@ func (c *TransactionsController) GetAllOrders() {
 	userData, err := u.(*responses.UsersOri)
 
 	var order string
+	var sortBy string
 
 	fmt.Printf("Type of v: %T\n", u)
 	fmt.Printf("Value of v: %+v\n", u)
@@ -321,6 +323,11 @@ func (c *TransactionsController) GetAllOrders() {
 		order = v
 	}
 
+	if v := c.GetString("sortby"); v != "" {
+		logs.Info("SortBy is ", v)
+		sortBy = v
+	}
+
 	userIdStr := strconv.FormatInt(userData.UserId, 10)
 
 	logs.Info("Order from frontend is by ", order)
@@ -329,6 +336,7 @@ func (c *TransactionsController) GetAllOrders() {
 		Offset: "0",
 		Query:  "CreatedBy:" + userIdStr,
 		Order:  order,
+		SortBy: sortBy,
 	})
 
 	if serviceResp.StatusCode == 200 {
