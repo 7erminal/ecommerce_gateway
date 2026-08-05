@@ -9,6 +9,7 @@ type GetOrdersRequestDTO struct {
 	Offset string
 	Query  string
 	Order  string
+	SortBy string
 }
 
 type GetOrderItemsRequestDTO struct {

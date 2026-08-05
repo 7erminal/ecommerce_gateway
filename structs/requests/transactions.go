@@ -5,6 +5,7 @@ type GetTransactionsRequestDTO struct {
 	Offset string
 	Query  string
 	Order  string
+	SortBy string
 }
 
 type PostTransactionRequest struct {
