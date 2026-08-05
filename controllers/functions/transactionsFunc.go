@@ -164,10 +164,10 @@ func GetOrders(c *beego.Controller, req requests.GetOrdersRequestDTO) (resp resp
 		host,
 		"/v1/orders/",
 		api.GET)
-	request.Params["Limit"] = req.Limit
-	request.Params["Offset"] = req.Offset
-	request.Params["Query"] = req.Query
-	request.Params["Order"] = req.Order
+	request.Params["limit"] = req.Limit
+	request.Params["offset"] = req.Offset
+	request.Params["query"] = req.Query
+	request.Params["order"] = req.Order
 	// request.Params = {"UserId": strconv.Itoa(int(userid))}
 	client := api.Client{
 		Request: request,
@@ -212,10 +212,10 @@ func GetTransactions(c *beego.Controller, req requests.GetTransactionsRequestDTO
 		host,
 		"/v1/transactions/",
 		api.GET)
-	request.Params["Limit"] = req.Limit
-	request.Params["Offset"] = req.Offset
-	request.Params["Query"] = req.Query
-	request.Params["Order"] = req.Order
+	request.Params["limit"] = req.Limit
+	request.Params["offset"] = req.Offset
+	request.Params["query"] = req.Query
+	request.Params["order"] = req.Order
 	// request.Params = {"UserId": strconv.Itoa(int(userid))}
 	client := api.Client{
 		Request: request,

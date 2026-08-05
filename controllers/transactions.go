@@ -306,6 +306,8 @@ func (c *TransactionsController) GetAllOrders() {
 	u := c.Ctx.Input.GetData("user")
 	userData, err := u.(*responses.UsersOri)
 
+	var order string
+
 	fmt.Printf("Type of v: %T\n", u)
 	fmt.Printf("Value of v: %+v\n", u)
 
@@ -314,13 +316,19 @@ func (c *TransactionsController) GetAllOrders() {
 		return
 	}
 
+	if v := c.GetString("order"); v != "" {
+		logs.Info("Order is ", v)
+		order = v
+	}
+
 	userIdStr := strconv.FormatInt(userData.UserId, 10)
 
+	logs.Info("Order from frontend is by ", order)
 	serviceResp := functions.GetOrders(&c.Controller, requests.GetOrdersRequestDTO{
 		Limit:  "10",
 		Offset: "0",
 		Query:  "userId=" + userIdStr,
-		Order:  "desc",
+		Order:  order,
 	})
 
 	if serviceResp.StatusCode == 200 {
