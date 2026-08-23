@@ -5,15 +5,15 @@ name: Go
 
 on:
   push:
-    branches: [ "shopmallafrik" ]
+    branches: [ "ecommerce" ]
   pull_request:
-    branches: [ "shopmallafrik" ]
+    branches: [ "ecommerce" ]
 
 jobs:
 
   build:
     runs-on: ubuntu-latest
-    environment: shopmallafrik
+    environment: ecommerce
     steps:
     - uses: actions/checkout@v4
 
@@ -35,24 +35,10 @@ jobs:
 
         ssh -o StrictHostKeyChecking=no root@$SSH_SERVER << 'EOF'
           set -e
-
-          # Load login shell environment so PATH/NVM-installed pm2 is available.
-          [ -f ~/.bashrc ] && . ~/.bashrc || true
-          [ -f ~/.profile ] && . ~/.profile || true
-          export NVM_DIR="$HOME/.nvm"
-          [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" || true
-
-          cd /usr/app/shopmallafrik/ecommerce_gateway
+          cd /usr/app/ecommerce/ecommerce_main/ecommerce_gateway
           git stash
-          git pull origin shopmallafrik
-          go build -o shopmallafrik-gateway-service
-
-          PM2_BIN="$(command -v pm2 || true)"
-          if [ -z "$PM2_BIN" ]; then
-            echo "pm2 not found in PATH: $PATH"
-            exit 1
-          fi
-
-          "$PM2_BIN" restart shopmallafrik-gateway-service || \
-          "$PM2_BIN" start ./shopmallafrik-gateway-service --name shopmallafrik-gateway-service
+          git pull origin ecommerce
+          go build -o ecommerce-gateway-service
+          pm2 restart ecommerce-gateway-service || \
+          pm2 start ecommerce-gateway-service --name ecommerce-gateway-service
         EOF

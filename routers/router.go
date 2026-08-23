@@ -35,7 +35,7 @@ func init() {
 			),
 		),
 		beego.NSNamespace("/user",
-			beego.NSBefore(middlewares.AuthMiddleware),
+			beego.NSBefore(middlewares.AuthWithRoleBasedAppMiddleware),
 			beego.NSInclude(
 				&controllers.UserManagementController{},
 			),
@@ -47,36 +47,66 @@ func init() {
 			),
 		),
 		beego.NSNamespace("/items",
-			beego.NSBefore(middlewares.AuthMiddleware),
+			beego.NSBefore(middlewares.AuthWithRoleBasedAppMiddleware),
 			beego.NSInclude(
 				&controllers.ItemsController{},
 			),
 		),
 		beego.NSNamespace("/order",
-			beego.NSBefore(middlewares.AuthMiddleware),
+			beego.NSBefore(middlewares.AuthWithRoleBasedAppMiddleware),
 			beego.NSInclude(
 				&controllers.TransactionsController{},
 			),
 		),
 		beego.NSNamespace("/stats",
-			beego.NSBefore(middlewares.AuthMiddleware),
+			beego.NSBefore(middlewares.AuthWithRoleBasedAppMiddleware),
 			beego.NSInclude(
 				&controllers.StatsController{},
 			),
 		),
 		beego.NSNamespace("/payments",
-			beego.NSBefore(middlewares.AuthMiddleware),
+			beego.NSBefore(middlewares.AuthWithRoleBasedAppMiddleware),
 			beego.NSInclude(
 				&controllers.PaymentController{},
 			),
 		),
 		beego.NSNamespace("/customers",
-			beego.NSBefore(middlewares.AuthMiddleware),
+			beego.NSBefore(middlewares.AuthWithRoleBasedAppMiddleware),
 			beego.NSInclude(
 				&controllers.CustomermanagementController{},
 			),
 		),
+		beego.NSNamespace("/transactions",
+			beego.NSBefore(middlewares.AuthWithRoleBasedAppMiddleware),
+			beego.NSInclude(
+				&controllers.TransactionsController{},
+			),
+		),
 	)
+
+	// Mobile App Routes with Application Verification and Authentication
+	appNs := beego.NewNamespace("/v1/app",
+		beego.NSNamespace("/items",
+			beego.NSBefore(middlewares.AuthAndAppMiddleware),
+			beego.NSInclude(
+				&controllers.ItemsController{},
+			),
+		),
+		beego.NSNamespace("/orders",
+			beego.NSBefore(middlewares.AuthAndAppMiddleware),
+			beego.NSInclude(
+				&controllers.TransactionsController{},
+			),
+		),
+		beego.NSNamespace("/payments",
+			beego.NSBefore(middlewares.AuthAndAppMiddleware),
+			beego.NSInclude(
+				&controllers.PaymentController{},
+			),
+		),
+	)
+
 	beego.AddNamespace(ns)
+	beego.AddNamespace(appNs)
 	// beego.AddNamespace(public)
 }

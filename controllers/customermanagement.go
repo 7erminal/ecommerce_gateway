@@ -64,15 +64,15 @@ func (c *CustomermanagementController) Post() {
 		message = "Customer successfully added"
 
 		var custGateway responses.CustomerGateway = responses.CustomerGateway{
-			CustomerId:           customerResp.Customer.CustomerId,
-			FullName:             customerResp.Customer.FullName,
-			Email:                customerResp.Customer.Email,
-			PhoneNumber:          customerResp.Customer.PhoneNumber,
-			Location:             customerResp.Customer.Location,
-			IdentificationType:   customerResp.Customer.IdentificationType,
-			IdentificationNumber: customerResp.Customer.IdentificationNumber,
-			DateCreated:          customerResp.Customer.DateCreated,
-			Status:               customerResp.Customer.Active,
+			CustomerId:           customerResp.Result.CustomerId,
+			FullName:             customerResp.Result.FullName,
+			Email:                customerResp.Result.Email,
+			PhoneNumber:          customerResp.Result.PhoneNumber,
+			Location:             customerResp.Result.Location,
+			IdentificationType:   customerResp.Result.IdentificationType,
+			IdentificationNumber: customerResp.Result.IdentificationNumber,
+			DateCreated:          customerResp.Result.DateCreated,
+			Status:               customerResp.Result.Active,
 		}
 		resp := responses.CustomerGatewayResponseDTO{Success: isSuccess, Result: &custGateway, StatusDesc: message}
 		c.Data["json"] = resp
@@ -105,15 +105,15 @@ func (c *CustomermanagementController) GetOne() {
 		message = "Customer successfully added"
 
 		var custGateway responses.CustomerGateway = responses.CustomerGateway{
-			CustomerId:           customerResp.Customer.CustomerId,
-			FullName:             customerResp.Customer.FullName,
-			Email:                customerResp.Customer.Email,
-			PhoneNumber:          customerResp.Customer.PhoneNumber,
-			Location:             customerResp.Customer.Location,
-			IdentificationType:   customerResp.Customer.IdentificationType,
-			IdentificationNumber: customerResp.Customer.IdentificationNumber,
-			DateCreated:          customerResp.Customer.DateCreated,
-			Status:               customerResp.Customer.Active,
+			CustomerId:           customerResp.Result.CustomerId,
+			FullName:             customerResp.Result.FullName,
+			Email:                customerResp.Result.Email,
+			PhoneNumber:          customerResp.Result.PhoneNumber,
+			Location:             customerResp.Result.Location,
+			IdentificationType:   customerResp.Result.IdentificationType,
+			IdentificationNumber: customerResp.Result.IdentificationNumber,
+			DateCreated:          customerResp.Result.DateCreated,
+			Status:               customerResp.Result.Active,
 		}
 		resp := responses.CustomerGatewayResponseDTO{Success: isSuccess, Result: &custGateway, StatusDesc: message}
 		c.Data["json"] = resp
@@ -188,7 +188,7 @@ func (c *CustomermanagementController) GetAll() {
 
 		customers := []responses.CustomerGateway{}
 
-		for _, customer := range *customerResp.Customers {
+		for _, customer := range customerResp.Customers {
 			var custGateway responses.CustomerGateway = responses.CustomerGateway{
 				CustomerId:           customer.CustomerId,
 				FullName:             customer.FullName,
@@ -205,7 +205,7 @@ func (c *CustomermanagementController) GetAll() {
 			customers = append(customers, custGateway)
 		}
 
-		resp := responses.CustomersGatewayResponseDTO{Success: isSuccess, Result: &customers, StatusDesc: message}
+		resp := responses.CustomersGatewayResponseDTO{Success: isSuccess, Result: customers, StatusDesc: message}
 		c.Data["json"] = resp
 	} else {
 		logs.Error("An error occurred while fetching customer details ", customerResp.StatusDesc)

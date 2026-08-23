@@ -3,6 +3,7 @@ package requests
 type AddCustomer struct {
 	Email       string
 	Name        string
+	Dob         string
 	PhoneNumber string
 	Location    string
 	IdType      string

@@ -16,20 +16,27 @@ type Currencies struct {
 }
 
 type CurrencyResp struct {
-	Symbol   string
-	Currency string
+	CurrencyId string
+	Symbol     string
+	Currency   string
+}
+
+type CurrencyResp2 struct {
+	CurrencyId int64
+	Symbol     string
+	Currency   string
 }
 
 type Countries struct {
-	CountryId       int64  `orm:"auto"`
-	Country         string `orm:"size(255)"`
-	Description     string `orm:"size(500)"`
-	CountryCode     string `orm:"size(20)"`
-	DefaultCurrency *Currencies
-	DateCreated     time.Time `orm:"type(datetime)"`
-	DateModified    time.Time `orm:"type(datetime)"`
-	CreatedBy       int
-	ModifiedBy      int
+	CountryId    int64  `orm:"auto"`
+	Country      string `orm:"size(255)"`
+	Description  string `orm:"size(500)"`
+	CountryCode  string `orm:"size(20)"`
+	Currency     *Currencies
+	DateCreated  time.Time `orm:"type(datetime)"`
+	DateModified time.Time `orm:"type(datetime)"`
+	CreatedBy    int
+	ModifiedBy   int
 }
 
 type CountryRespOri struct {
@@ -42,6 +49,12 @@ type CountryResp struct {
 	Country     string
 	CountryCode string
 	Currency    *CurrencyResp
+}
+
+type CountryResp2 struct {
+	Country     string
+	CountryCode string
+	Currency    *CurrencyResp2
 }
 
 type CountriesOriResponseDTO struct {
@@ -103,6 +116,17 @@ type BranchResp struct {
 	Branch        string
 	Description   string
 	Country       *CountryResp
+	Location      string
+	PhoneNumber   string
+	BranchManager *UserGateway
+	DateCreated   time.Time
+}
+
+type BranchResp2 struct {
+	BranchId      int64
+	Branch        string
+	Description   string
+	Country       *CountryResp2
 	Location      string
 	PhoneNumber   string
 	BranchManager *UserGateway

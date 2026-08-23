@@ -20,35 +20,40 @@ func AddCustomer(c *beego.Controller, req requests.AddCustomer, addedBy string, 
 	logs.Info("Sending email ", req.Email)
 
 	// Get date
-	now := time.Now()
-	y, m, d := now.Date()
-	d_str := strconv.Itoa(d)
-	m_str := strconv.Itoa(int(m))
-	if len(d_str) < 2 {
-		d_str = "0" + d_str
+	dob := req.Dob
+	if req.Dob == "" {
+		now := time.Now()
+		y, m, d := now.Date()
+		d_str := strconv.Itoa(d)
+		m_str := strconv.Itoa(int(m))
+		if len(d_str) < 2 {
+			d_str = "0" + d_str
+		}
+		if len(m_str) < 2 {
+			m_str = "0" + m_str
+		}
+		dob = strconv.Itoa(y) + "/" + m_str + "/" + d_str
 	}
-	if len(m_str) < 2 {
-		m_str = "0" + m_str
-	}
-	dob := strconv.Itoa(y) + "/" + m_str + "/" + d_str
+
+	logs.Info("DOB sent is ", dob)
 
 	request := api.NewRequest(
 		host,
 		"/v1/customers/add-customer",
 		api.POST)
-	request.InterfaceParams["Name"] = req.Email
-	request.InterfaceParams["Email"] = req.Email
-	request.InterfaceParams["IdType"] = req.IdType
-	request.InterfaceParams["PhoneNumber"] = req.PhoneNumber
-	request.InterfaceParams["IdNumber"] = req.IdNumber
-	request.InterfaceParams["Dob"] = dob
-	request.InterfaceParams["AddedBy"] = addedBy
-	request.InterfaceParams["Location"] = req.Location
+	request.Params["Name"] = req.Email
+	request.Params["Email"] = req.Email
+	request.Params["IdType"] = req.IdType
+	request.Params["PhoneNumber"] = req.PhoneNumber
+	request.Params["IdNumber"] = req.IdNumber
+	request.Params["Dob"] = dob
+	request.Params["AddedBy"] = addedBy
+	request.Params["Location"] = req.Location
 	request.FileField["CustomerImage"] = req.ImagePath
-	request.InterfaceParams["Category"] = custType
+	request.Params["Category"] = custType
 	client := api.Client{
 		Request: request,
-		Type_:   "body",
+		Type_:   "params",
 	}
 	res, err := client.SendRequest()
 	if err != nil {
@@ -112,12 +117,13 @@ func GetCustomerDetails(c *beego.Controller, userid int64) (resp responses.Custo
 		c.Data["json"] = err.Error()
 	}
 
-	var prettyJSON bytes.Buffer
-	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
-		logs.Info("Raw response received is ", string(read))
-	} else {
-		logs.Info("Raw response received is \n", prettyJSON.String())
-	}
+	// var prettyJSON bytes.Buffer
+	// if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+	// 	logs.Info("Raw response received is ", string(read))
+	// } else {
+	// 	logs.Info("Raw response received is \n", prettyJSON.String())
+	// }
+	logs.Info("Raw response received is ", string(read))
 	// data := map[string]interface{}{}
 	var data responses.CustomerResponseDTO
 	json.Unmarshal(read, &data)
@@ -172,8 +178,8 @@ func GetCustomers(c *beego.Controller, query string, fields string, sortby strin
 	json.Unmarshal(read, &data)
 	c.Data["json"] = data
 
-	logs.Info("Resp is ", data)
-	logs.Info("Resp is ", data.Customers)
+	// logs.Info("Resp is ", data)
+	// logs.Info("Resp is ", data.Customers)
 
 	return data
 }

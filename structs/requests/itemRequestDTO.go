@@ -69,22 +69,22 @@ type UpdateItemRequestDTO struct {
 }
 
 type Product struct {
-	ProductId int64
-	Quantity  int64
+	ProductId string
+	Quantity  int
 }
 
 type Item struct {
-	ItemId   int64
-	Quantity int64
+	ItemId   string
+	Quantity int
 }
 
 type RentalRequestDTO struct {
 	// Currency        int64
 	Products             []Product
 	PaymentProofImageUrl string
-	PaymentMethodId      int64
+	PaymentMethodId      string
 	OrderLocation        string
-	CustomerId           int64
+	CustomerId           string
 	OrderStartDate       string
 	OrderEndDate         string
 }
@@ -93,7 +93,7 @@ type SalesRequestDTO struct {
 	// Currency        int64
 	Products             []Product
 	PaymentProofImageUrl string
-	PaymentMethodId      int64
-	CustomerId           int64
+	PaymentMethodId      string
+	CustomerId           string
 	OrderDate            string
 }

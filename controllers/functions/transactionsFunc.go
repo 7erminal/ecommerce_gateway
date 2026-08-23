@@ -109,3 +109,145 @@ func UploadPaymentProof(c *beego.Controller, paymentProofImage string) (resp res
 
 	return data
 }
+
+func GetOrder(c *beego.Controller, req requests.GetOrderRequestDTO) (resp responses.OrderResponseDTO) {
+	host, _ := beego.AppConfig.String("transactionsBaseUrl")
+
+	logs.Info("Fetching order ", req.OrderId)
+
+	request := api.NewRequest(
+		host,
+		"/v1/orders/"+req.OrderId,
+		api.GET)
+
+	// request.Params = {"UserId": strconv.Itoa(int(userid))}
+	client := api.Client{
+		Request: request,
+		Type_:   "params",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+	// data := map[string]interface{}{}
+	// var dataOri responses.UserOriResponseDTO
+	var data responses.OrderResponseDTO
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	logs.Info("Resp is ", data)
+	// logs.Info("Resp is ", data.User.Branch.Country.DefaultCurrency)
+
+	return data
+}
+
+func GetOrders(c *beego.Controller, req requests.GetOrdersRequestDTO) (resp responses.OrdersResponseDTO) {
+	host, _ := beego.AppConfig.String("transactionsBaseUrl")
+
+	logs.Info("Fetching orders with query ", req.Query)
+	logs.Info("Order by ", req.Order)
+
+	request := api.NewRequest(
+		host,
+		"/v1/orders/",
+		api.GET)
+	request.Params["limit"] = req.Limit
+	request.Params["offset"] = req.Offset
+	request.Params["query"] = req.Query
+	request.Params["order"] = req.Order
+	request.Params["sortby"] = req.SortBy
+	// request.Params = {"UserId": strconv.Itoa(int(userid))}
+	client := api.Client{
+		Request: request,
+		Type_:   "params",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+	// data := map[string]interface{}{}
+	// var dataOri responses.UserOriResponseDTO
+	var data responses.OrdersResponseDTO
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	logs.Info("Resp is ", data)
+	// logs.Info("Resp is ", data.User.Branch.Country.DefaultCurrency)
+
+	return data
+}
+
+func GetTransactions(c *beego.Controller, req requests.GetTransactionsRequestDTO) (resp responses.OrdersResponseDTO) {
+	host, _ := beego.AppConfig.String("transactionsBaseUrl")
+
+	logs.Info("Fetching orders with query ", req.Query)
+	logs.Info("Ordering by ", req.Order)
+
+	request := api.NewRequest(
+		host,
+		"/v1/transactions/",
+		api.GET)
+	request.Params["limit"] = req.Limit
+	request.Params["offset"] = req.Offset
+	request.Params["query"] = req.Query
+	request.Params["order"] = req.Order
+	request.Params["sortby"] = req.SortBy
+	// request.Params = {"UserId": strconv.Itoa(int(userid))}
+	client := api.Client{
+		Request: request,
+		Type_:   "params",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+	// data := map[string]interface{}{}
+	// var dataOri responses.UserOriResponseDTO
+	var data responses.OrdersResponseDTO
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	logs.Info("Resp is ", data)
+	// logs.Info("Resp is ", data.User.Branch.Country.DefaultCurrency)
+
+	return data
+}
