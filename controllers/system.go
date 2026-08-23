@@ -26,6 +26,11 @@ func (c *SystemController) URLMapping() {
 	c.Mapping("UpdateBranch", c.UpdateBranch)
 	c.Mapping("GetRoles", c.GetRoles)
 	c.Mapping("GetSystemDetails", c.GetSystemDetails)
+	c.Mapping("AddApplication", c.AddApplication)
+	c.Mapping("UpdateApplication", c.UpdateApplication)
+	c.Mapping("GetApplication", c.GetApplication)
+	c.Mapping("AddTheme", c.AddTheme)
+	c.Mapping("UpdateTheme", c.UpdateTheme)
 }
 
 // GetRoles ...
@@ -637,6 +642,185 @@ func (c *SystemController) GetIdTypes() {
 		logs.Error("An error occurred fetching id types from api ", idTypes.StatusDesc)
 		message = "Id type fetch error"
 		var resp responses.IDTypesGatewayResponseDTO = responses.IDTypesGatewayResponseDTO{Success: isSuccess, Result: nil, StatusDesc: message}
+		c.Data["json"] = resp
+	}
+
+	c.ServeJSON()
+}
+
+// AddApplication ...
+// @Title Create Application
+// @Description create an application
+// @Param	Authorization		header 	string true		"header for User"
+// @Param	body		body 	requests.ApplicationRequest	true		"body for Application content"
+// @Success 200 {object} responses.ApplicationResponseDTO
+// @Failure 403 body is empty
+// @router /add-application [post]
+func (c *SystemController) AddApplication() {
+	var v requests.ApplicationRequest
+	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
+
+	authorization := c.Ctx.Input.Header("Authorization")
+	token := strings.Split(authorization, " ")
+
+	var isSuccess bool = false
+
+	if token[0] == "Bearer" {
+		logs.Info("Token is ", token[1])
+		verifyToken := functions.VerifyToken(&c.Controller, token[1])
+
+		if verifyToken.StatusCode == 200 {
+			logs.Info("Token verified")
+			isSuccess = true
+			addedBy := verifyToken.User.UserId
+			appResp := functions.AddApplication(&c.Controller, v, addedBy)
+			c.Data["json"] = appResp
+		} else {
+			var resp responses.ApplicationResponseDTO = responses.ApplicationResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "You are not authorized to perform this request"}
+			c.Data["json"] = resp
+		}
+
+	} else {
+		var resp responses.ApplicationResponseDTO = responses.ApplicationResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "You are not authorized to perform this request"}
+		c.Data["json"] = resp
+	}
+
+	c.ServeJSON()
+}
+
+// GetApplication ...
+// @Title Get Application
+// @Description get an application by code
+// @Param	code		path 	string	true		"The application code"
+// @Success 200 {object} responses.ApplicationResponseDTO
+// @Failure 403 code is empty
+// @router /get-application/:code [get]
+func (c *SystemController) GetApplication() {
+	code := c.Ctx.Input.Param(":code")
+
+	logs.Info("Getting application with code: ", code)
+
+	appResp := functions.GetApplicationByCode(&c.Controller, code)
+	c.Data["json"] = appResp
+
+	c.ServeJSON()
+}
+
+// UpdateApplication ...
+// @Title Update Application
+// @Description update an application
+// @Param	Authorization		header 	string true		"header for User"
+// @Param	id		path 	string	true		"The id you want to update"
+// @Param	body		body 	requests.ApplicationRequest	true		"body for Application content"
+// @Success 200 {object} responses.ApplicationResponseDTO
+// @Failure 403 :id is not int
+// @router /update-application/:id [put]
+func (c *SystemController) UpdateApplication() {
+	idStr := c.Ctx.Input.Param(":id")
+	var v requests.ApplicationRequest
+	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
+
+	authorization := c.Ctx.Input.Header("Authorization")
+	token := strings.Split(authorization, " ")
+
+	var isSuccess bool = false
+
+	if token[0] == "Bearer" {
+		logs.Info("Token is ", token[1])
+		verifyToken := functions.VerifyToken(&c.Controller, token[1])
+
+		if verifyToken.StatusCode == 200 {
+			logs.Info("Token verified")
+			isSuccess = true
+			appResp := functions.UpdateApplication(&c.Controller, v, idStr)
+			c.Data["json"] = appResp
+		} else {
+			var resp responses.ApplicationResponseDTO = responses.ApplicationResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "You are not authorized to perform this request"}
+			c.Data["json"] = resp
+		}
+
+	} else {
+		var resp responses.ApplicationResponseDTO = responses.ApplicationResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "You are not authorized to perform this request"}
+		c.Data["json"] = resp
+	}
+
+	c.ServeJSON()
+}
+
+// AddTheme ...
+// @Title Create Theme
+// @Description create a theme
+// @Param	Authorization		header 	string true		"header for User"
+// @Param	body		body 	requests.ThemeRequest	true		"body for Theme content"
+// @Success 200 {object} responses.ThemeResponseDTO
+// @Failure 403 body is empty
+// @router /add-theme [post]
+func (c *SystemController) AddTheme() {
+	var v requests.ThemeRequest
+	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
+
+	authorization := c.Ctx.Input.Header("Authorization")
+	token := strings.Split(authorization, " ")
+
+	var isSuccess bool = false
+
+	if token[0] == "Bearer" {
+		logs.Info("Token is ", token[1])
+		verifyToken := functions.VerifyToken(&c.Controller, token[1])
+
+		if verifyToken.StatusCode == 200 {
+			logs.Info("Token verified")
+			isSuccess = true
+			themeResp := functions.AddTheme(&c.Controller, v)
+			c.Data["json"] = themeResp
+		} else {
+			var resp responses.ThemeResponseDTO = responses.ThemeResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "You are not authorized to perform this request"}
+			c.Data["json"] = resp
+		}
+
+	} else {
+		var resp responses.ThemeResponseDTO = responses.ThemeResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "You are not authorized to perform this request"}
+		c.Data["json"] = resp
+	}
+
+	c.ServeJSON()
+}
+
+// UpdateTheme ...
+// @Title Update Theme
+// @Description update a theme
+// @Param	Authorization		header 	string true		"header for User"
+// @Param	id		path 	string	true		"The id you want to update"
+// @Param	body		body 	requests.ThemeRequest	true		"body for Theme content"
+// @Success 200 {object} responses.ThemeResponseDTO
+// @Failure 403 :id is not int
+// @router /update-theme/:id [put]
+func (c *SystemController) UpdateTheme() {
+	idStr := c.Ctx.Input.Param(":id")
+	var v requests.ThemeRequest
+	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
+
+	authorization := c.Ctx.Input.Header("Authorization")
+	token := strings.Split(authorization, " ")
+
+	var isSuccess bool = false
+
+	if token[0] == "Bearer" {
+		logs.Info("Token is ", token[1])
+		verifyToken := functions.VerifyToken(&c.Controller, token[1])
+
+		if verifyToken.StatusCode == 200 {
+			logs.Info("Token verified")
+			isSuccess = true
+			themeResp := functions.UpdateTheme(&c.Controller, v, idStr)
+			c.Data["json"] = themeResp
+		} else {
+			var resp responses.ThemeResponseDTO = responses.ThemeResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "You are not authorized to perform this request"}
+			c.Data["json"] = resp
+		}
+
+	} else {
+		var resp responses.ThemeResponseDTO = responses.ThemeResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "You are not authorized to perform this request"}
 		c.Data["json"] = resp
 	}
 

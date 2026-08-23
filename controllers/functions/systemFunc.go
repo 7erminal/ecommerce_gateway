@@ -594,3 +594,347 @@ func GetCurrencyByCode(c *beego.Controller, code string) (resp responses.Countri
 
 	return data
 }
+
+func AddApplication(c *beego.Controller, req requests.ApplicationRequest, addedBy int64) (resp responses.ApplicationResponseDTO) {
+	host, _ := beego.AppConfig.String("systemBaseUrl")
+
+	logs.Info("Adding application with code: ", req.ApplicationCode)
+
+	request := api.NewRequest(
+		host,
+		"/v1/applications/",
+		api.POST)
+	request.InterfaceParams["ApplicationCode"] = req.ApplicationCode
+	request.InterfaceParams["ApplicationName"] = req.ApplicationName
+	request.InterfaceParams["ApplicationLogo"] = req.ApplicationLogo
+	request.InterfaceParams["ThemeColors"] = req.ThemeColors
+	request.InterfaceParams["DefaultFontsize"] = req.DefaultFontsize
+	request.InterfaceParams["ApplicationImage"] = req.ApplicationImage
+	request.InterfaceParams["ThemeCode"] = req.ThemeCode
+
+	client := api.Client{
+		Request: request,
+		Type_:   "body",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+
+	var backendResp responses.ApplicationResponse
+	json.Unmarshal(read, &backendResp)
+
+	// Transform backend response to gateway response
+	if backendResp.StatusCode == 201 || backendResp.StatusCode == 200 {
+		resp = responses.ApplicationResponseDTO{
+			Success: true,
+			Result: &responses.ApplicationResp{
+				ApplicationId:    backendResp.Result.ApplicationId,
+				ApplicationCode:  backendResp.Result.ApplicationCode,
+				ApplicationName:  backendResp.Result.ApplicationName,
+				ApplicationLogo:  backendResp.Result.ApplicationLogo,
+				ThemeColors:      backendResp.Result.ThemeColors,
+				DefaultFontsize:  backendResp.Result.DefaultFontsize,
+				ApplicationImage: backendResp.Result.ApplicationImage,
+				DateCreated:      backendResp.Result.DateCreated,
+				DateModified:     backendResp.Result.DateModified,
+				Active:           backendResp.Result.Active,
+				Theme: &responses.ThemeResp{
+					ThemeId:   backendResp.Result.Theme.ThemeId,
+					ThemeCode: backendResp.Result.Theme.ThemeCode,
+					ThemeName: backendResp.Result.Theme.ThemeName,
+				},
+			},
+			StatusDesc: backendResp.StatusMessage,
+		}
+	} else {
+		resp = responses.ApplicationResponseDTO{
+			Success:    false,
+			Result:     nil,
+			StatusDesc: backendResp.StatusMessage,
+		}
+	}
+
+	logs.Info("Resp is ", resp)
+	return resp
+}
+
+func UpdateApplication(c *beego.Controller, req requests.ApplicationRequest, applicationId string) (resp responses.ApplicationResponseDTO) {
+	host, _ := beego.AppConfig.String("systemBaseUrl")
+
+	logs.Info("Updating application with id: ", applicationId)
+
+	request := api.NewRequest(
+		host,
+		"/v1/applications/"+applicationId,
+		api.PUT)
+	request.InterfaceParams["ApplicationCode"] = req.ApplicationCode
+	request.InterfaceParams["ApplicationName"] = req.ApplicationName
+	request.InterfaceParams["ApplicationLogo"] = req.ApplicationLogo
+	request.InterfaceParams["ThemeColors"] = req.ThemeColors
+	request.InterfaceParams["DefaultFontsize"] = req.DefaultFontsize
+	request.InterfaceParams["ApplicationImage"] = req.ApplicationImage
+	request.InterfaceParams["ThemeCode"] = req.ThemeCode
+
+	client := api.Client{
+		Request: request,
+		Type_:   "body",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+
+	var backendResp responses.ApplicationResponse
+	json.Unmarshal(read, &backendResp)
+
+	// Transform backend response to gateway response
+	if backendResp.StatusCode == 200 {
+		resp = responses.ApplicationResponseDTO{
+			Success: true,
+			Result: &responses.ApplicationResp{
+				ApplicationId:    backendResp.Result.ApplicationId,
+				ApplicationCode:  backendResp.Result.ApplicationCode,
+				ApplicationName:  backendResp.Result.ApplicationName,
+				ApplicationLogo:  backendResp.Result.ApplicationLogo,
+				ThemeColors:      backendResp.Result.ThemeColors,
+				DefaultFontsize:  backendResp.Result.DefaultFontsize,
+				ApplicationImage: backendResp.Result.ApplicationImage,
+				DateCreated:      backendResp.Result.DateCreated,
+				DateModified:     backendResp.Result.DateModified,
+				Active:           backendResp.Result.Active,
+				Theme: &responses.ThemeResp{
+					ThemeId:   backendResp.Result.Theme.ThemeId,
+					ThemeCode: backendResp.Result.Theme.ThemeCode,
+					ThemeName: backendResp.Result.Theme.ThemeName,
+				},
+			},
+			StatusDesc: backendResp.StatusMessage,
+		}
+	} else {
+		resp = responses.ApplicationResponseDTO{
+			Success:    false,
+			Result:     nil,
+			StatusDesc: backendResp.StatusMessage,
+		}
+	}
+
+	logs.Info("Resp is ", resp)
+	return resp
+}
+
+func AddTheme(c *beego.Controller, req requests.ThemeRequest) (resp responses.ThemeResponseDTO) {
+	host, _ := beego.AppConfig.String("systemBaseUrl")
+
+	logs.Info("Adding theme with code: ", req.ThemeCode)
+
+	request := api.NewRequest(
+		host,
+		"/v1/themes/",
+		api.POST)
+	request.InterfaceParams["ThemeCode"] = req.ThemeCode
+	request.InterfaceParams["ThemeName"] = req.ThemeName
+
+	client := api.Client{
+		Request: request,
+		Type_:   "body",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+
+	var backendResp responses.ThemeResponse
+	json.Unmarshal(read, &backendResp)
+
+	// Transform backend response to gateway response
+	if backendResp.StatusCode == 201 || backendResp.StatusCode == 200 {
+		resp = responses.ThemeResponseDTO{
+			Success: true,
+			Result: &responses.ThemeResp{
+				ThemeId:   backendResp.Result.ThemeId,
+				ThemeCode: backendResp.Result.ThemeCode,
+				ThemeName: backendResp.Result.ThemeName,
+			},
+			StatusDesc: backendResp.StatusMessage,
+		}
+	} else {
+		resp = responses.ThemeResponseDTO{
+			Success:    false,
+			Result:     nil,
+			StatusDesc: backendResp.StatusMessage,
+		}
+	}
+
+	logs.Info("Resp is ", resp)
+	return resp
+}
+
+func UpdateTheme(c *beego.Controller, req requests.ThemeRequest, themeId string) (resp responses.ThemeResponseDTO) {
+	host, _ := beego.AppConfig.String("systemBaseUrl")
+
+	logs.Info("Updating theme with id: ", themeId)
+
+	request := api.NewRequest(
+		host,
+		"/v1/themes/"+themeId,
+		api.PUT)
+	request.InterfaceParams["ThemeCode"] = req.ThemeCode
+	request.InterfaceParams["ThemeName"] = req.ThemeName
+
+	client := api.Client{
+		Request: request,
+		Type_:   "body",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+
+	var backendResp responses.ThemeResponse
+	json.Unmarshal(read, &backendResp)
+
+	// Transform backend response to gateway response
+	if backendResp.StatusCode == 200 {
+		resp = responses.ThemeResponseDTO{
+			Success: true,
+			Result: &responses.ThemeResp{
+				ThemeId:   backendResp.Result.ThemeId,
+				ThemeCode: backendResp.Result.ThemeCode,
+				ThemeName: backendResp.Result.ThemeName,
+			},
+			StatusDesc: backendResp.StatusMessage,
+		}
+	} else {
+		resp = responses.ThemeResponseDTO{
+			Success:    false,
+			Result:     nil,
+			StatusDesc: backendResp.StatusMessage,
+		}
+	}
+
+	logs.Info("Resp is ", resp)
+	return resp
+}
+
+func GetApplicationByCode(c *beego.Controller, code string) (resp responses.ApplicationResponseDTO) {
+	host, _ := beego.AppConfig.String("systemBaseUrl")
+
+	logs.Info("Getting application by code: ", code)
+
+	request := api.NewRequest(
+		host,
+		"/v1/applications/"+code,
+		api.GET)
+
+	client := api.Client{
+		Request: request,
+		Type_:   "params",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+
+	var backendResp responses.ApplicationResponse
+	json.Unmarshal(read, &backendResp)
+
+	// Transform backend response to gateway response
+	if backendResp.StatusCode == 200 {
+		resp = responses.ApplicationResponseDTO{
+			Success: true,
+			Result: &responses.ApplicationResp{
+				ApplicationId:    backendResp.Result.ApplicationId,
+				ApplicationCode:  backendResp.Result.ApplicationCode,
+				ApplicationName:  backendResp.Result.ApplicationName,
+				ApplicationLogo:  backendResp.Result.ApplicationLogo,
+				ThemeColors:      backendResp.Result.ThemeColors,
+				DefaultFontsize:  backendResp.Result.DefaultFontsize,
+				ApplicationImage: backendResp.Result.ApplicationImage,
+				DateCreated:      backendResp.Result.DateCreated,
+				DateModified:     backendResp.Result.DateModified,
+				Active:           backendResp.Result.Active,
+				Theme: &responses.ThemeResp{
+					ThemeId:   backendResp.Result.Theme.ThemeId,
+					ThemeCode: backendResp.Result.Theme.ThemeCode,
+					ThemeName: backendResp.Result.Theme.ThemeName,
+				},
+			},
+			StatusDesc: backendResp.StatusMessage,
+		}
+	} else {
+		resp = responses.ApplicationResponseDTO{
+			Success:    false,
+			Result:     nil,
+			StatusDesc: backendResp.StatusMessage,
+		}
+	}
+
+	logs.Info("Resp is ", resp)
+	return resp
+}
