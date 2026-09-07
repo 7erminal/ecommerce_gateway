@@ -657,34 +657,25 @@ func (c *SystemController) GetIdTypes() {
 // @Failure 403 body is empty
 // @router /add-application [post]
 func (c *SystemController) AddApplication() {
+	userData, _ := c.Ctx.Input.GetData("user").(*responses.UsersOri)
 	var v requests.ApplicationRequest
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
 
-	authorization := c.Ctx.Input.Header("Authorization")
-	token := strings.Split(authorization, " ")
-
 	var isSuccess bool = false
 
-	if token[0] == "Bearer" {
-		logs.Info("Token is ", token[1])
-		verifyToken := functions.VerifyToken(&c.Controller, token[1])
-
-		if verifyToken.StatusCode == 200 {
-			logs.Info("Token verified")
-			isSuccess = true
-			addedBy := verifyToken.User.UserId
-			appResp := functions.AddApplication(&c.Controller, v, addedBy)
-			c.Data["json"] = appResp
-		} else {
-			var resp responses.ApplicationResponseDTO = responses.ApplicationResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "You are not authorized to perform this request"}
-			c.Data["json"] = resp
-		}
-
+	logs.Info("Token verified")
+	isSuccess = false
+	addedBy := userData.UserId
+	appResp := functions.AddApplication(&c.Controller, v, addedBy)
+	if appResp.Success {
+		isSuccess = true
+		message := "Application added successfully"
+		var resp responses.ApplicationResponseDTO = responses.ApplicationResponseDTO{Success: isSuccess, Result: appResp.Result, StatusDesc: message}
+		c.Data["json"] = resp
 	} else {
-		var resp responses.ApplicationResponseDTO = responses.ApplicationResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "You are not authorized to perform this request"}
+		var resp responses.ApplicationResponseDTO = responses.ApplicationResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An error occurred while adding the application"}
 		c.Data["json"] = resp
 	}
-
 	c.ServeJSON()
 }
 
@@ -700,8 +691,18 @@ func (c *SystemController) GetApplication() {
 
 	logs.Info("Getting application with code: ", code)
 
+	isSuccess := false
+
 	appResp := functions.GetApplicationByCode(&c.Controller, code)
-	c.Data["json"] = appResp
+	if appResp.Success {
+		isSuccess = true
+		message := "Application fetched successfully"
+		var resp responses.ApplicationResponseDTO = responses.ApplicationResponseDTO{Success: isSuccess, Result: appResp.Result, StatusDesc: message}
+		c.Data["json"] = resp
+	} else {
+		var resp responses.ApplicationResponseDTO = responses.ApplicationResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An error occurred while fetching the application"}
+		c.Data["json"] = resp
+	}
 
 	c.ServeJSON()
 }
@@ -716,31 +717,34 @@ func (c *SystemController) GetApplication() {
 // @Failure 403 :id is not int
 // @router /update-application/:id [put]
 func (c *SystemController) UpdateApplication() {
+	userData, _ := c.Ctx.Input.GetData("user").(*responses.UsersOri)
 	idStr := c.Ctx.Input.Param(":id")
 	var v requests.ApplicationRequest
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
 
-	authorization := c.Ctx.Input.Header("Authorization")
-	token := strings.Split(authorization, " ")
-
 	var isSuccess bool = false
 
-	if token[0] == "Bearer" {
-		logs.Info("Token is ", token[1])
-		verifyToken := functions.VerifyToken(&c.Controller, token[1])
-
-		if verifyToken.StatusCode == 200 {
-			logs.Info("Token verified")
-			isSuccess = true
-			appResp := functions.UpdateApplication(&c.Controller, v, idStr)
-			c.Data["json"] = appResp
-		} else {
-			var resp responses.ApplicationResponseDTO = responses.ApplicationResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "You are not authorized to perform this request"}
-			c.Data["json"] = resp
-		}
-
+	logs.Info("Token verified")
+	isSuccess = true
+	updateRequest := requests.UpdateApplicationRequest{
+		ApplicationCode:  v.ApplicationCode,
+		ApplicationName:  v.ApplicationName,
+		ApplicationLogo:  v.ApplicationLogo,
+		ThemeColors:      v.ThemeColors,
+		DefaultFontsize:  v.DefaultFontsize,
+		ApplicationImage: v.ApplicationImage,
+		ThemeCode:        v.ThemeCode,
+		UpdatedBy:        userData.UserId,
+	}
+	appResp := functions.UpdateApplication(&c.Controller, updateRequest, idStr)
+	if appResp.Success {
+		isSuccess = true
+		message := "Application updated successfully"
+		var resp responses.ApplicationResponseDTO = responses.ApplicationResponseDTO{Success: isSuccess, Result: appResp.Result, StatusDesc: message}
+		c.Data["json"] = resp
 	} else {
-		var resp responses.ApplicationResponseDTO = responses.ApplicationResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "You are not authorized to perform this request"}
+		message := "An error occurred while updating the application"
+		var resp responses.ApplicationResponseDTO = responses.ApplicationResponseDTO{Success: isSuccess, Result: nil, StatusDesc: message}
 		c.Data["json"] = resp
 	}
 

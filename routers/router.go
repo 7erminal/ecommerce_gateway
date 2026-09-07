@@ -86,6 +86,11 @@ func init() {
 
 	// Mobile App Routes with Application Verification and Authentication
 	appNs := beego.NewNamespace("/v1/app",
+		beego.NSNamespace("/auth",
+			beego.NSInclude(
+				&controllers.AuthenticationController{},
+			),
+		),
 		beego.NSNamespace("/items",
 			beego.NSBefore(middlewares.AuthAndAppMiddleware),
 			beego.NSInclude(
@@ -102,6 +107,12 @@ func init() {
 			beego.NSBefore(middlewares.AuthAndAppMiddleware),
 			beego.NSInclude(
 				&controllers.PaymentController{},
+			),
+		),
+		beego.NSNamespace("/customers",
+			beego.NSBefore(middlewares.AuthAndAppMiddleware),
+			beego.NSInclude(
+				&controllers.CustomermanagementController{},
 			),
 		),
 	)

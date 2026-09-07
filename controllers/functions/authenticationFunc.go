@@ -359,3 +359,86 @@ func RefreshAccessToken(c *beego.Controller, token string) (resp responses.Login
 
 	return data
 }
+
+func CustomerLogin(c *beego.Controller, req requests.SignIn) (resp responses.LoginTokenResponseDTO) {
+	host, _ := beego.AppConfig.String("authenticationBaseUrl")
+
+	logs.Info("Sending email ", req.Email)
+	logs.Info("Sending password ", req.Password)
+
+	request := api.NewRequest(
+		host,
+		"/v1/auth/login/token",
+		api.POST)
+	request.InterfaceParams["Username"] = req.Email
+	request.InterfaceParams["Password"] = req.Password
+	// request.Params = {"UserId": strconv.Itoa(int(userid))}
+	client := api.Client{
+		Request: request,
+		Type_:   "body",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+	// data := map[string]interface{}{}
+	var data responses.LoginTokenResponseDTO
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	return data
+}
+
+func RefreshCustomerAccessToken(c *beego.Controller, token string) (resp responses.LoginTokenResponseDTO) {
+	host, _ := beego.AppConfig.String("authenticationBaseUrl")
+
+	logs.Info("About to refresh access token ", token)
+
+	request := api.NewRequest(
+		host,
+		"/v1/auth/refresh/customer/token",
+		api.POST)
+	request.InterfaceParams["Value"] = token
+	request.HeaderField["RefreshToken"] = token
+	// request.Params = {"UserId": strconv.Itoa(int(userid))}
+	client := api.Client{
+		Request: request,
+		Type_:   "body",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+	// data := map[string]interface{}{}
+	var data responses.LoginTokenResponseDTO
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	return data
+}

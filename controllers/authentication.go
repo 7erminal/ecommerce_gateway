@@ -24,6 +24,7 @@ func (c *AuthenticationController) URLMapping() {
 	c.Mapping("Register", c.Register)
 	c.Mapping("ChangePassword", c.ChangePassword)
 	c.Mapping("RefreshAccessToken", c.RefreshAccessToken)
+	c.Mapping("RefreshCustomerAccessToken", c.RefreshCustomerAccessToken)
 }
 
 // Register User ...
@@ -277,6 +278,38 @@ func (c *AuthenticationController) RefreshAccessToken() {
 	logs.Info("Received ", v.Value)
 
 	loginResp := functions.RefreshAccessToken(&c.Controller, v.Value)
+
+	var isSuccess bool = false
+	var tkn *responses.LoginDataResponseDTO
+
+	if loginResp.StatusCode == 200 {
+		isSuccess = true
+		tkn = loginResp.Result
+	} else {
+		logs.Error("Unable to verify user")
+	}
+
+	var resp responses.LoginResponseDTO = responses.LoginResponseDTO{Success: isSuccess, Result: tkn, StatusDesc: loginResp.StatusDesc}
+
+	c.Data["json"] = resp
+
+	c.ServeJSON()
+}
+
+// RefreshCustomerAccessToken ...
+// @Title RefreshCustomerAccessToken
+// @Description refresh customer access token. Return new access token using refresh token.
+// @Param	body		body 	requests.StringRequestDTO	true		"body for Authentication content"
+// @Success 200 {object} responses.StringResponseDTO
+// @Failure 403 body is empty
+// @router /refresh-customer-access-token [post]
+func (c *AuthenticationController) RefreshCustomerAccessToken() {
+	var v requests.StringRequestDTO
+	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
+
+	logs.Info("Received ", v.Value)
+
+	loginResp := functions.RefreshCustomerAccessToken(&c.Controller, v.Value)
 
 	var isSuccess bool = false
 	var tkn *responses.LoginDataResponseDTO

@@ -672,7 +672,7 @@ func AddApplication(c *beego.Controller, req requests.ApplicationRequest, addedB
 	return resp
 }
 
-func UpdateApplication(c *beego.Controller, req requests.ApplicationRequest, applicationId string) (resp responses.ApplicationResponseDTO) {
+func UpdateApplication(c *beego.Controller, req requests.UpdateApplicationRequest, applicationId string) (resp responses.ApplicationResponseDTO) {
 	host, _ := beego.AppConfig.String("systemBaseUrl")
 
 	logs.Info("Updating application with id: ", applicationId)
@@ -688,6 +688,7 @@ func UpdateApplication(c *beego.Controller, req requests.ApplicationRequest, app
 	request.InterfaceParams["DefaultFontsize"] = req.DefaultFontsize
 	request.InterfaceParams["ApplicationImage"] = req.ApplicationImage
 	request.InterfaceParams["ThemeCode"] = req.ThemeCode
+	request.InterfaceParams["UpdatedBy"] = req.UpdatedBy
 
 	client := api.Client{
 		Request: request,

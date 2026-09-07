@@ -9,6 +9,7 @@ type AddCustomer struct {
 	IdType      string
 	IdNumber    string
 	ImagePath   string
+	CreatedBy   string
 }
 
 type UpdateCustomer struct {
