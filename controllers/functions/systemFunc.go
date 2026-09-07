@@ -869,7 +869,58 @@ func UpdateTheme(c *beego.Controller, req requests.ThemeRequest, themeId string)
 	logs.Info("Resp is ", resp)
 	return resp
 }
+func GetAllApplications(c *beego.Controller) (resp responses.ApplicationsResponseDTO) {
+	host, _ := beego.AppConfig.String("systemBaseUrl")
 
+	logs.Info("Getting all applications")
+
+	request := api.NewRequest(
+		host,
+		"/v1/applications/",
+		api.GET)
+
+	client := api.Client{
+		Request: request,
+		Type_:   "params",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+
+	var backendResp responses.ApplicationsResponse
+	json.Unmarshal(read, &backendResp)
+
+	// Transform backend response to gateway response
+	if backendResp.StatusCode == 200 {
+		resp = responses.ApplicationsResponseDTO{
+			Success:    true,
+			Result:     backendResp.Result,
+			StatusDesc: backendResp.StatusMessage,
+		}
+	} else {
+		resp = responses.ApplicationsResponseDTO{
+			Success:    false,
+			Result:     nil,
+			StatusDesc: "An error occurred while fetching the applications",
+		}
+	}
+	logs.Info("Resp is ", resp)
+	return resp
+}
 func GetApplicationByCode(c *beego.Controller, code string) (resp responses.ApplicationResponseDTO) {
 	host, _ := beego.AppConfig.String("systemBaseUrl")
 

@@ -47,6 +47,12 @@ type ApplicationsResponseDTO struct {
 	StatusDesc string            `json:"status_desc"`
 }
 
+type ApplicationsResponse struct {
+	StatusCode    int               `json:"status_code"`
+	StatusMessage string            `json:"status_message"`
+	Result        *ApplicationsData `json:"result"`
+}
+
 type ThemeResponseDTO struct {
 	Success    bool       `json:"success"`
 	Result     *ThemeResp `json:"result"`

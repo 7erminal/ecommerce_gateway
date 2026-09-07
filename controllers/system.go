@@ -707,6 +707,29 @@ func (c *SystemController) GetApplication() {
 	c.ServeJSON()
 }
 
+// GetApplications ...
+// @Title Get Applications
+// @Description get all applications
+// @Success 200 {object} responses.ApplicationsResponseDTO
+// @Failure 403 an error occurred
+// @router /get-applications [get]
+func (c *SystemController) GetApplications() {
+	isSuccess := false
+
+	appResp := functions.GetAllApplications(&c.Controller)
+	if appResp.Success {
+		isSuccess = true
+		message := "Applications fetched successfully"
+		var resp responses.ApplicationsResponseDTO = responses.ApplicationsResponseDTO{Success: isSuccess, Result: appResp.Result, StatusDesc: message}
+		c.Data["json"] = resp
+	} else {
+		var resp responses.ApplicationsResponseDTO = responses.ApplicationsResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An error occurred while fetching the applications"}
+		c.Data["json"] = resp
+	}
+
+	c.ServeJSON()
+}
+
 // UpdateApplication ...
 // @Title Update Application
 // @Description update an application
