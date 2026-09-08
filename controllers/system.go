@@ -31,6 +31,7 @@ func (c *SystemController) URLMapping() {
 	c.Mapping("GetApplication", c.GetApplication)
 	c.Mapping("AddTheme", c.AddTheme)
 	c.Mapping("UpdateTheme", c.UpdateTheme)
+	c.Mapping("GetApplications", c.GetApplications)
 }
 
 // GetRoles ...
