@@ -430,6 +430,15 @@ func init() {
             Filters: nil,
             Params: nil})
 
+    beego.GlobalControllerRouter["AMC_gateway/controllers:SystemController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:SystemController"],
+        beego.ControllerComments{
+            Method: "UploadSystemImage",
+            Router: `/upload-system-image`,
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
     beego.GlobalControllerRouter["AMC_gateway/controllers:TransactionsController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:TransactionsController"],
         beego.ControllerComments{
             Method: "GetAllTransactions",

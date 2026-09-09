@@ -2,7 +2,7 @@ package responses
 
 type SystemImageOriResponseDTO struct {
 	StatusCode int
-	Value      *string
+	Result     *string
 	StatusDesc string
 }
 

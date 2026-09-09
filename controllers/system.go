@@ -32,6 +32,7 @@ func (c *SystemController) URLMapping() {
 	c.Mapping("AddTheme", c.AddTheme)
 	c.Mapping("UpdateTheme", c.UpdateTheme)
 	c.Mapping("GetApplications", c.GetApplications)
+	c.Mapping("UploadSystemImage", c.UploadSystemImage)
 }
 
 // GetRoles ...
@@ -882,11 +883,11 @@ func (c *SystemController) UploadSystemImage() {
 			itemImage := functions.UploadSystemImage(&c.Controller, filePath, system)
 
 			if itemImage.StatusCode == 200 {
-				logs.Info("Item image returned: ", itemImage.Value)
+				logs.Info("Item image returned: ", itemImage.Result)
 
 				isSuccess = true
 
-				var resp responses.SystemImageResponseDTO = responses.SystemImageResponseDTO{Success: isSuccess, Result: itemImage.Value, StatusDesc: itemImage.StatusDesc}
+				var resp responses.SystemImageResponseDTO = responses.SystemImageResponseDTO{Success: isSuccess, Result: itemImage.Result, StatusDesc: itemImage.StatusDesc}
 				c.Data["json"] = resp
 			} else {
 				var resp responses.SystemImageResponseDTO = responses.SystemImageResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
