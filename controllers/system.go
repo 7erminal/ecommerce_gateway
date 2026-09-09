@@ -854,3 +854,50 @@ func (c *SystemController) UpdateTheme() {
 
 	c.ServeJSON()
 }
+
+// UpdateImage ...
+// @Title UpdateImage
+// @Description Update User's Image
+// @Param	Authorization		header 	string true		"header for User"
+// @Param	Image		formData 	file	true		"System Image"
+// @Success 200 {object} responses.StringResponseDTO
+// @Failure 403 body is empty
+// @router /upload-system-image [post]
+func (c *SystemController) UploadSystemImage() {
+
+	var isSuccess bool = false
+
+	image, header, err := c.GetFile("Image")
+
+	if err != nil {
+		var resp responses.SystemImageResponseDTO = responses.SystemImageResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "No file uploaded"}
+		c.Data["json"] = resp
+	} else {
+		system := c.Ctx.Input.Query("System")
+		logs.Info("Success response received")
+		isSuccess = false
+		respCode, filePath := functions.SaveImage(&c.Controller, "Image", image, *header)
+
+		if respCode == 200 {
+			itemImage := functions.UploadSystemImage(&c.Controller, filePath, system)
+
+			if itemImage.StatusCode == 200 {
+				logs.Info("Item image returned: ", itemImage.Value)
+
+				isSuccess = true
+
+				var resp responses.SystemImageResponseDTO = responses.SystemImageResponseDTO{Success: isSuccess, Result: itemImage.Value, StatusDesc: itemImage.StatusDesc}
+				c.Data["json"] = resp
+			} else {
+				var resp responses.SystemImageResponseDTO = responses.SystemImageResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
+				c.Data["json"] = resp
+			}
+		} else {
+			var resp responses.SystemImageResponseDTO = responses.SystemImageResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "Failed to upload file. Tmp"}
+			c.Data["json"] = resp
+		}
+
+	}
+
+	c.ServeJSON()
+}
