@@ -10,70 +10,70 @@ type ThemeConfigResp struct {
 }
 
 type ThemeResp struct {
-	ThemeId     int64              `json:"theme_id"`
-	ThemeCode   string             `json:"theme_code"`
-	ThemeName   string             `json:"theme_name"`
-	ThemeConfig []*ThemeConfigResp `json:"theme_config"`
+	ThemeId     int64
+	ThemeCode   string
+	ThemeName   string
+	ThemeConfig []*ThemeConfigResp
 }
 
 type ApplicationResp struct {
-	ApplicationId    int64      `json:"application_id"`
-	ApplicationCode  string     `json:"application_code"`
-	ApplicationName  string     `json:"application_name"`
-	ApplicationLogo  string     `json:"application_logo"`
-	ThemeColors      string     `json:"theme_colors"`
-	DefaultFontsize  string     `json:"default_fontsize"`
-	ApplicationImage string     `json:"application_image"`
-	DateCreated      time.Time  `json:"date_created"`
-	DateModified     time.Time  `json:"date_modified"`
-	Active           int        `json:"active"`
-	Theme            *ThemeResp `json:"theme"`
+	ApplicationId    int64
+	ApplicationCode  string
+	ApplicationName  string
+	ApplicationLogo  string
+	ThemeColors      string
+	DefaultFontsize  string
+	ApplicationImage string
+	DateCreated      time.Time
+	DateModified     time.Time
+	Active           int
+	Theme            *ThemeResp
 }
 
 type ApplicationResponseDTO struct {
-	Success    bool             `json:"success"`
-	Result     *ApplicationResp `json:"result"`
-	StatusDesc string           `json:"status_desc"`
+	Success    bool
+	Result     *ApplicationResp
+	StatusDesc string
 }
 
 type ApplicationsData struct {
-	Data  *[]ApplicationResp `json:"data"`
-	Count int                `json:"count"`
+	Data  *[]ApplicationResp
+	Count int
 }
 
 type ApplicationsResponseDTO struct {
-	Success    bool              `json:"success"`
-	Result     *ApplicationsData `json:"result"`
-	StatusDesc string            `json:"status_desc"`
+	Success    bool
+	Result     *ApplicationsData
+	StatusDesc string
 }
 
 type ApplicationsResponse struct {
-	StatusCode    int               `json:"status_code"`
-	StatusMessage string            `json:"status_message"`
-	Result        *ApplicationsData `json:"result"`
+	StatusCode    int
+	StatusMessage string
+	Result        *ApplicationsData
 }
 
 type ThemeResponseDTO struct {
-	Success    bool       `json:"success"`
-	Result     *ThemeResp `json:"result"`
-	StatusDesc string     `json:"status_desc"`
+	Success    bool
+	Result     *ThemeResp
+	StatusDesc string
 }
 
 type ThemesData struct {
-	Data  *[]ThemeResp `json:"data"`
-	Count int          `json:"count"`
+	Data  *[]ThemeResp
+	Count int
 }
 
 type ThemesResponseDTO struct {
-	Success    bool        `json:"success"`
-	Result     *ThemesData `json:"result"`
-	StatusDesc string      `json:"status_desc"`
+	Success    bool
+	Result     *ThemesData
+	StatusDesc string
 }
 
 type ThemeResponse struct {
-	StatusCode    int                `json:"status_code"`
-	StatusMessage string             `json:"status_message"`
-	Result        *ThemeResponseData `json:"result"`
+	StatusCode    int
+	StatusMessage string
+	Result        *ThemeResponseData
 }
 
 type Theme_configs struct {
@@ -89,28 +89,28 @@ type Theme_configs struct {
 }
 
 type ThemeResponseData struct {
-	ThemeId     int64            `json:"theme_id"`
-	ThemeCode   string           `json:"theme_code"`
-	ThemeName   string           `json:"theme_name"`
-	ThemeConfig []*Theme_configs `json:"theme_config"`
+	ThemeId     int64
+	ThemeCode   string
+	ThemeName   string
+	ThemeConfig []*Theme_configs
 }
 
 type ApplicationResponseData struct {
-	ApplicationId    int64              `json:"application_id"`
-	ApplicationCode  string             `json:"application_code"`
-	ApplicationName  string             `json:"application_name"`
-	ApplicationLogo  string             `json:"application_logo"`
-	ThemeColors      string             `json:"theme_colors"`
-	DefaultFontsize  string             `json:"default_fontsize"`
-	ApplicationImage string             `json:"application_image"`
-	DateCreated      time.Time          `json:"date_created"`
-	DateModified     time.Time          `json:"date_modified"`
-	Active           int                `json:"active"`
-	Theme            *ThemeResponseData `json:"theme"`
+	ApplicationId    int64
+	ApplicationCode  string
+	ApplicationName  string
+	ApplicationLogo  string
+	ThemeColors      string
+	DefaultFontsize  string
+	ApplicationImage string
+	DateCreated      time.Time
+	DateModified     time.Time
+	Active           int
+	Theme            *ThemeResponseData
 }
 
 type ApplicationResponse struct {
-	StatusCode    int                      `json:"status_code"`
-	StatusMessage string                   `json:"status_message"`
-	Result        *ApplicationResponseData `json:"result"`
+	StatusCode    int
+	StatusMessage string
+	Result        *ApplicationResponseData
 }
