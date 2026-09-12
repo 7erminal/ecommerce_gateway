@@ -31,6 +31,7 @@ func (c *SystemController) URLMapping() {
 	c.Mapping("UpdateApplicationTheme", c.UpdateApplicationTheme)
 	c.Mapping("GetApplication", c.GetApplication)
 	c.Mapping("AddTheme", c.AddTheme)
+	c.Mapping("RemoveTheme", c.RemoveTheme)
 	c.Mapping("UpdateTheme", c.UpdateTheme)
 	c.Mapping("AddThemeConfig", c.AddThemeConfig)
 	c.Mapping("RemoveThemeConfig", c.RemoveThemeConfig)
@@ -858,6 +859,43 @@ func (c *SystemController) AddTheme() {
 	} else {
 		var resp responses.ThemeResponseDTO = responses.ThemeResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "You are not authorized to perform this request"}
 		c.Data["json"] = resp
+	}
+
+	c.ServeJSON()
+}
+
+// RemoveTheme ...
+// @Title Remove Theme
+// @Description remove a theme
+// @Param	Authorization		header  	string true		"header for User"
+// @Param	id		path 	string	true		"The theme id"
+// @Success 200 {object} responses.ThemeResponseDTO
+// @Failure 403 body is empty
+// @router /remove-theme/:id [delete]
+func (c *SystemController) RemoveTheme() {
+	idStr := c.Ctx.Input.Param(":id")
+
+	var isSuccess bool = false
+	message := "You are not authorized to perform this request"
+
+	logs.Info("Token verified")
+	themeResp := functions.RemoveTheme(&c.Controller, idStr)
+	if themeResp.StatusCode == 200 {
+		isSuccess = true
+		message = themeResp.StatusMessage
+
+		c.Data["json"] = responses.ThemeResponseDTO{
+			Success:    isSuccess,
+			Result:     themeResp.Result,
+			StatusDesc: message,
+		}
+	} else {
+		c.Data["json"] = responses.ThemeResponseDTO{
+			Success:    isSuccess,
+			Result:     nil,
+			StatusDesc: message,
+		}
+
 	}
 
 	c.ServeJSON()

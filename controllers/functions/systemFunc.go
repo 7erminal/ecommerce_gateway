@@ -1137,6 +1137,45 @@ func RemoveThemeConfig(c *beego.Controller, themeConfigId string) (resp response
 	return resp
 }
 
+func RemoveTheme(c *beego.Controller, themeId string) (resp responses.ThemeResponseOriDTO) {
+	host, _ := beego.AppConfig.String("systemBaseUrl")
+
+	logs.Info("Removing theme with id: ", themeId)
+
+	request := api.NewRequest(
+		host,
+		"/v1/themes/"+themeId,
+		api.DELETE)
+
+	client := api.Client{
+		Request: request,
+		Type_:   "params",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+
+	var backendResp responses.ThemeResponseOriDTO
+	json.Unmarshal(read, &backendResp)
+
+	logs.Info("Resp is ", resp)
+	return resp
+}
+
 func GetAllApplications(c *beego.Controller) (resp responses.ApplicationsResponseDTO) {
 	host, _ := beego.AppConfig.String("systemBaseUrl")
 

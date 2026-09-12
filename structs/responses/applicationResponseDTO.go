@@ -54,7 +54,7 @@ type ApplicationsResponse struct {
 }
 
 type ThemeResponseOriDTO struct {
-	Success       int
+	StatusCode    int
 	Result        *ThemeResp
 	StatusMessage string
 }
