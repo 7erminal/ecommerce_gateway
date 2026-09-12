@@ -1172,6 +1172,8 @@ func RemoveTheme(c *beego.Controller, themeId string) (resp responses.ThemeRespo
 	var backendResp responses.ThemeResponseOriDTO
 	json.Unmarshal(read, &backendResp)
 
+	resp = backendResp
+
 	logs.Info("Resp is ", resp)
 	return resp
 }
