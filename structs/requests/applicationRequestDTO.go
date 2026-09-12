@@ -1,31 +1,31 @@
 package requests
 
 type ApplicationRequest struct {
-	ApplicationName  string `json:"application_name"`
-	ApplicationLogo  string `json:"application_logo"`
-	ThemeColors      string `json:"theme_colors"`
-	DefaultFontsize  string `json:"default_fontsize"`
-	ApplicationImage string `json:"application_image"`
-	ThemeCode        string `json:"theme_code"`
+	ApplicationName  string
+	ApplicationLogo  string
+	ThemeColors      string
+	DefaultFontsize  string
+	ApplicationImage string
+	ThemeCode        string
 }
 
 type ApplicationApiRequest struct {
-	ApplicationName  string `json:"application_name"`
-	ApplicationLogo  string `json:"application_logo"`
-	ThemeColors      string `json:"theme_colors"`
-	DefaultFontsize  string `json:"default_fontsize"`
-	ApplicationImage string `json:"application_image"`
-	ThemeCode        string `json:"theme_code"`
+	ApplicationName  string
+	ApplicationLogo  string
+	ThemeColors      string
+	DefaultFontsize  string
+	ApplicationImage string
+	ThemeCode        string
 }
 
 type UpdateApplicationRequest struct {
-	ApplicationName  string `json:"application_name"`
-	ApplicationLogo  string `json:"application_logo"`
-	ThemeColors      string `json:"theme_colors"`
-	DefaultFontsize  string `json:"default_fontsize"`
-	ApplicationImage string `json:"application_image"`
-	ThemeCode        string `json:"theme_code"`
-	UpdatedBy        int64  `json:"updated_by"`
+	ApplicationName  string
+	ApplicationLogo  string
+	ThemeColors      string
+	DefaultFontsize  string
+	ApplicationImage string
+	ThemeCode        string
+	UpdatedBy        int64
 }
 
 type ThemeRequest struct {
