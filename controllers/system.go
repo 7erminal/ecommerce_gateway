@@ -890,6 +890,7 @@ func (c *SystemController) RemoveTheme() {
 			StatusDesc: message,
 		}
 	} else {
+		message = themeResp.StatusMessage
 		c.Data["json"] = responses.ThemeResponseDTO{
 			Success:    isSuccess,
 			Result:     nil,
