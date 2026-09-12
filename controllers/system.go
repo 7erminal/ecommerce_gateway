@@ -1060,7 +1060,7 @@ func (c *SystemController) UploadSystemImage() {
 		c.Data["json"] = resp
 	} else {
 		system := c.Ctx.Input.Query("System")
-		logs.Info("Success response received")
+		logs.Info("System to be saved to is ", system)
 		isSuccess = false
 		respCode, filePath := functions.SaveImage(&c.Controller, "Image", image, *header)
 
