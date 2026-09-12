@@ -1225,7 +1225,7 @@ func UploadSystemImage(c *beego.Controller, systemImage string, system string) (
 
 	request := api.NewRequest(
 		host,
-		"/v1/application/upload-image",
+		"/v1/applications/upload-image",
 		api.POST)
 
 	request.FileField["Image"] = systemImage
