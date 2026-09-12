@@ -596,7 +596,7 @@ func GetCurrencyByCode(c *beego.Controller, code string) (resp responses.Countri
 	return data
 }
 
-func AddApplication(c *beego.Controller, req requests.ApplicationRequest, addedBy int64) (resp responses.ApplicationResponseDTO) {
+func AddApplication(c *beego.Controller, req requests.ApplicationApiRequest, addedBy int64) (resp responses.ApplicationResponseDTO) {
 	host, _ := beego.AppConfig.String("systemBaseUrl")
 
 	logs.Info("Adding application with code: ", req.ApplicationCode)
@@ -682,7 +682,6 @@ func UpdateApplication(c *beego.Controller, req requests.UpdateApplicationReques
 		host,
 		"/v1/applications/"+applicationId,
 		api.PUT)
-	request.InterfaceParams["ApplicationCode"] = req.ApplicationCode
 	request.InterfaceParams["ApplicationName"] = req.ApplicationName
 	request.InterfaceParams["ApplicationLogo"] = req.ApplicationLogo
 	request.InterfaceParams["ThemeColors"] = req.ThemeColors

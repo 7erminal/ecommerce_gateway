@@ -1,6 +1,15 @@
 package requests
 
 type ApplicationRequest struct {
+	ApplicationName  string `json:"application_name"`
+	ApplicationLogo  string `json:"application_logo"`
+	ThemeColors      string `json:"theme_colors"`
+	DefaultFontsize  string `json:"default_fontsize"`
+	ApplicationImage string `json:"application_image"`
+	ThemeCode        string `json:"theme_code"`
+}
+
+type ApplicationApiRequest struct {
 	ApplicationCode  string `json:"application_code"`
 	ApplicationName  string `json:"application_name"`
 	ApplicationLogo  string `json:"application_logo"`
@@ -11,7 +20,6 @@ type ApplicationRequest struct {
 }
 
 type UpdateApplicationRequest struct {
-	ApplicationCode  string `json:"application_code"`
 	ApplicationName  string `json:"application_name"`
 	ApplicationLogo  string `json:"application_logo"`
 	ThemeColors      string `json:"theme_colors"`

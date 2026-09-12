@@ -5,8 +5,10 @@ import (
 	"AMC_gateway/structs/requests"
 	"AMC_gateway/structs/responses"
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/beego/beego/v2/core/logs"
 	beego "github.com/beego/beego/v2/server/web"
@@ -671,7 +673,19 @@ func (c *SystemController) AddApplication() {
 	logs.Info("Token verified")
 	isSuccess = false
 	addedBy := userData.UserId
-	appResp := functions.AddApplication(&c.Controller, v, addedBy)
+
+	// Generate application code
+	applicationCode := fmt.Sprintf("APP-%d", time.Now().Unix())
+	req := requests.ApplicationApiRequest{
+		ApplicationCode:  applicationCode,
+		ApplicationName:  v.ApplicationName,
+		ApplicationLogo:  v.ApplicationLogo,
+		ThemeColors:      v.ThemeColors,
+		DefaultFontsize:  v.DefaultFontsize,
+		ApplicationImage: v.ApplicationImage,
+		ThemeCode:        v.ThemeCode,
+	}
+	appResp := functions.AddApplication(&c.Controller, req, addedBy)
 	if appResp.Success {
 		isSuccess = true
 		message := "Application added successfully"
@@ -755,7 +769,6 @@ func (c *SystemController) UpdateApplication() {
 	logs.Info("Token verified")
 	isSuccess = true
 	updateRequest := requests.UpdateApplicationRequest{
-		ApplicationCode:  v.ApplicationCode,
 		ApplicationName:  v.ApplicationName,
 		ApplicationLogo:  v.ApplicationLogo,
 		ThemeColors:      v.ThemeColors,
