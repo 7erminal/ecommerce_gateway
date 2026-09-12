@@ -904,6 +904,37 @@ func (c *SystemController) UpdateTheme() {
 	c.ServeJSON()
 }
 
+// FetchThemes ...
+// @Title Fetch Themes
+// @Description fetch all themes
+// @Param	Authorization		header 	string true		"header for User"
+// @Success 200 {object} responses.ThemesResponseDTO
+// @Failure 403 :id is not int
+// @router /fetch-themes [get]
+func (c *SystemController) FetchThemes() {
+
+	var isSuccess bool = false
+	message := "You are not authorized to perform this request"
+
+	logs.Info("Token verified")
+	isSuccess = true
+	themesResp := functions.FetchThemes(&c.Controller)
+
+	if themesResp.StatusCode == 200 {
+		isSuccess = true
+		message = "Successfully fetched themes"
+	} else {
+		isSuccess = false
+		message = "Failed to fetch themes. " + themesResp.StatusMessage
+	}
+
+	var resp responses.ThemesResponseDTO = responses.ThemesResponseDTO{Success: isSuccess, Result: themesResp.Result, StatusDesc: message}
+
+	c.Data["json"] = resp
+
+	c.ServeJSON()
+}
+
 // AddThemeConfig ...
 // @Title Add Theme Config
 // @Description add a config to a theme

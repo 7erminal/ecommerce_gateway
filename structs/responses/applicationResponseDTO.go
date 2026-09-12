@@ -53,21 +53,28 @@ type ApplicationsResponse struct {
 	Result        *ApplicationsData
 }
 
+type ThemeResponseOriDTO struct {
+	Success       int
+	Result        *ThemeResp
+	StatusMessage string
+}
+
 type ThemeResponseDTO struct {
 	Success    bool
 	Result     *ThemeResp
 	StatusDesc string
 }
 
-type ThemesData struct {
-	Data  *[]ThemeResp
-	Count int
-}
-
 type ThemesResponseDTO struct {
 	Success    bool
-	Result     *ThemesData
+	Result     *[]ThemeResp
 	StatusDesc string
+}
+
+type ThemesResponseOriDTO struct {
+	StatusCode    int
+	Result        *[]ThemeResp
+	StatusMessage string
 }
 
 type ThemeResponse struct {

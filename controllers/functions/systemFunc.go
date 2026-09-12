@@ -937,6 +937,47 @@ func UpdateTheme(c *beego.Controller, req requests.ThemeRequest, themeId string)
 	return resp
 }
 
+func FetchThemes(c *beego.Controller) (resp responses.ThemesResponseOriDTO) {
+	host, _ := beego.AppConfig.String("systemBaseUrl")
+
+	logs.Info("Fetching all themes")
+
+	request := api.NewRequest(
+		host,
+		"/v1/themes",
+		api.GET)
+
+	client := api.Client{
+		Request: request,
+		Type_:   "body",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+
+	var backendResp responses.ThemesResponseOriDTO
+	json.Unmarshal(read, &backendResp)
+
+	resp = backendResp
+
+	logs.Info("Resp is ", resp)
+	return resp
+}
+
 func AddThemeConfig(c *beego.Controller, themeId string, config string) (resp responses.ThemeResponseDTO) {
 	host, _ := beego.AppConfig.String("systemBaseUrl")
 
