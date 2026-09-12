@@ -29,10 +29,10 @@ type UpdateApplicationRequest struct {
 }
 
 type ThemeRequest struct {
-	ThemeCode string `json:"theme_code"`
-	ThemeName string `json:"theme_name"`
+	ThemeCode string
+	ThemeName string
 }
 
 type ThemeConfigRequest struct {
-	Config string `json:"config"`
+	Config string
 }
