@@ -1063,6 +1063,8 @@ func (c *SystemController) UploadSystemImage() {
 		logs.Info("System to be saved to is ", system)
 		isSuccess = false
 		respCode, filePath := functions.SaveImage(&c.Controller, "Image", image, *header)
+		logs.Info("Response code from SaveImage is ", respCode)
+		logs.Info("File path from SaveImage is ", filePath)
 
 		if respCode == 200 {
 			itemImage := functions.UploadSystemImage(&c.Controller, filePath, system)
