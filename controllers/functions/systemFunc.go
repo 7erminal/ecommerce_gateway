@@ -1312,7 +1312,7 @@ func UploadSystemImage(c *beego.Controller, systemImage string, system string) (
 		api.POST)
 
 	request.FileField["Image"] = systemImage
-	request.InterfaceParams["System"] = system
+	request.Params["System"] = system
 	// request.HeaderField["content-type"] = "multipart/form-data"
 	// request.Params = {"UserId": strconv.Itoa(int(userid))}
 	client := api.Client{
