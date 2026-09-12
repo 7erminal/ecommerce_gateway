@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+	"strings"
 
 	"github.com/beego/beego/v2/core/logs"
 	beego "github.com/beego/beego/v2/server/web"
@@ -750,6 +751,76 @@ func UpdateApplication(c *beego.Controller, req requests.UpdateApplicationReques
 	return resp
 }
 
+func UpdateApplicationTheme(c *beego.Controller, applicationId string, themeCode string) (resp responses.ApplicationResponseDTO) {
+	host, _ := beego.AppConfig.String("systemBaseUrl")
+
+	logs.Info("Updating application theme for application id: ", applicationId)
+
+	request := api.NewRequest(
+		host,
+		"/v1/applications/"+applicationId+"/theme",
+		api.PUT)
+	request.InterfaceParams["ThemeCode"] = strings.TrimSpace(themeCode)
+
+	client := api.Client{
+		Request: request,
+		Type_:   "body",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+
+	var backendResp responses.ApplicationResponse
+	json.Unmarshal(read, &backendResp)
+
+	if backendResp.StatusCode == 200 {
+		resp = responses.ApplicationResponseDTO{
+			Success: true,
+			Result: &responses.ApplicationResp{
+				ApplicationId:    backendResp.Result.ApplicationId,
+				ApplicationCode:  backendResp.Result.ApplicationCode,
+				ApplicationName:  backendResp.Result.ApplicationName,
+				ApplicationLogo:  backendResp.Result.ApplicationLogo,
+				ThemeColors:      backendResp.Result.ThemeColors,
+				DefaultFontsize:  backendResp.Result.DefaultFontsize,
+				ApplicationImage: backendResp.Result.ApplicationImage,
+				DateCreated:      backendResp.Result.DateCreated,
+				DateModified:     backendResp.Result.DateModified,
+				Active:           backendResp.Result.Active,
+				Theme: &responses.ThemeResp{
+					ThemeId:   backendResp.Result.Theme.ThemeId,
+					ThemeCode: backendResp.Result.Theme.ThemeCode,
+					ThemeName: backendResp.Result.Theme.ThemeName,
+				},
+			},
+			StatusDesc: backendResp.StatusMessage,
+		}
+	} else {
+		resp = responses.ApplicationResponseDTO{
+			Success:    false,
+			Result:     nil,
+			StatusDesc: backendResp.StatusMessage,
+		}
+	}
+
+	logs.Info("Resp is ", resp)
+	return resp
+}
+
 func AddTheme(c *beego.Controller, req requests.ThemeRequest) (resp responses.ThemeResponseDTO) {
 	host, _ := beego.AppConfig.String("systemBaseUrl")
 
@@ -869,6 +940,166 @@ func UpdateTheme(c *beego.Controller, req requests.ThemeRequest, themeId string)
 	logs.Info("Resp is ", resp)
 	return resp
 }
+
+func AddThemeConfig(c *beego.Controller, themeId string, config string) (resp responses.ThemeResponseDTO) {
+	host, _ := beego.AppConfig.String("systemBaseUrl")
+
+	logs.Info("Adding theme config for theme id: ", themeId)
+
+	request := api.NewRequest(
+		host,
+		"/v1/themes/"+themeId+"/config",
+		api.POST)
+	request.InterfaceParams["Config"] = config
+
+	client := api.Client{
+		Request: request,
+		Type_:   "body",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+
+	var backendResp responses.ThemeResponse
+	json.Unmarshal(read, &backendResp)
+
+	if backendResp.StatusCode == 200 {
+		themeResp := responses.ThemeResp{
+			ThemeId:   backendResp.Result.ThemeId,
+			ThemeCode: backendResp.Result.ThemeCode,
+			ThemeName: backendResp.Result.ThemeName,
+		}
+
+		if backendResp.Result.ThemeConfig != nil {
+			mappedConfigs := make([]*responses.ThemeConfigResp, 0, len(backendResp.Result.ThemeConfig))
+			for _, cfg := range backendResp.Result.ThemeConfig {
+				if cfg == nil {
+					continue
+				}
+				themeIdValue := int64(0)
+				if cfg.ThemeId != nil {
+					themeIdValue = *cfg.ThemeId
+				}
+				mappedConfigs = append(mappedConfigs, &responses.ThemeConfigResp{
+					ConfigId:    cfg.ThemeConfigId,
+					ThemeId:     themeIdValue,
+					ConfigKey:   cfg.ThemeConfigCode,
+					ConfigValue: cfg.ThemeProperties,
+				})
+			}
+			themeResp.ThemeConfig = mappedConfigs
+		}
+
+		resp = responses.ThemeResponseDTO{
+			Success:    true,
+			Result:     &themeResp,
+			StatusDesc: backendResp.StatusMessage,
+		}
+	} else {
+		resp = responses.ThemeResponseDTO{
+			Success:    false,
+			Result:     nil,
+			StatusDesc: backendResp.StatusMessage,
+		}
+	}
+
+	logs.Info("Resp is ", resp)
+	return resp
+}
+
+func RemoveThemeConfig(c *beego.Controller, themeConfigId string) (resp responses.ThemeResponseDTO) {
+	host, _ := beego.AppConfig.String("systemBaseUrl")
+
+	logs.Info("Removing theme config with id: ", themeConfigId)
+
+	request := api.NewRequest(
+		host,
+		"/v1/themes/config/"+themeConfigId,
+		api.DELETE)
+
+	client := api.Client{
+		Request: request,
+		Type_:   "params",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+
+	var backendResp responses.ThemeResponse
+	json.Unmarshal(read, &backendResp)
+
+	if backendResp.StatusCode == 200 {
+		themeResp := responses.ThemeResp{
+			ThemeId:   backendResp.Result.ThemeId,
+			ThemeCode: backendResp.Result.ThemeCode,
+			ThemeName: backendResp.Result.ThemeName,
+		}
+
+		if backendResp.Result.ThemeConfig != nil {
+			mappedConfigs := make([]*responses.ThemeConfigResp, 0, len(backendResp.Result.ThemeConfig))
+			for _, cfg := range backendResp.Result.ThemeConfig {
+				if cfg == nil {
+					continue
+				}
+				themeIdValue := int64(0)
+				if cfg.ThemeId != nil {
+					themeIdValue = *cfg.ThemeId
+				}
+				mappedConfigs = append(mappedConfigs, &responses.ThemeConfigResp{
+					ConfigId:    cfg.ThemeConfigId,
+					ThemeId:     themeIdValue,
+					ConfigKey:   cfg.ThemeConfigCode,
+					ConfigValue: cfg.ThemeProperties,
+				})
+			}
+			themeResp.ThemeConfig = mappedConfigs
+		}
+
+		resp = responses.ThemeResponseDTO{
+			Success:    true,
+			Result:     &themeResp,
+			StatusDesc: backendResp.StatusMessage,
+		}
+	} else {
+		resp = responses.ThemeResponseDTO{
+			Success:    false,
+			Result:     nil,
+			StatusDesc: backendResp.StatusMessage,
+		}
+	}
+
+	logs.Info("Resp is ", resp)
+	return resp
+}
+
 func GetAllApplications(c *beego.Controller) (resp responses.ApplicationsResponseDTO) {
 	host, _ := beego.AppConfig.String("systemBaseUrl")
 

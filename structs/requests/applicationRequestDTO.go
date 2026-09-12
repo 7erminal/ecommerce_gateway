@@ -25,3 +25,7 @@ type ThemeRequest struct {
 	ThemeCode string `json:"theme_code"`
 	ThemeName string `json:"theme_name"`
 }
+
+type ThemeConfigRequest struct {
+	Config string `json:"config"`
+}

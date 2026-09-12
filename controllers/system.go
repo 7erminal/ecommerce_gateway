@@ -28,9 +28,12 @@ func (c *SystemController) URLMapping() {
 	c.Mapping("GetSystemDetails", c.GetSystemDetails)
 	c.Mapping("AddApplication", c.AddApplication)
 	c.Mapping("UpdateApplication", c.UpdateApplication)
+	c.Mapping("UpdateApplicationTheme", c.UpdateApplicationTheme)
 	c.Mapping("GetApplication", c.GetApplication)
 	c.Mapping("AddTheme", c.AddTheme)
 	c.Mapping("UpdateTheme", c.UpdateTheme)
+	c.Mapping("AddThemeConfig", c.AddThemeConfig)
+	c.Mapping("RemoveThemeConfig", c.RemoveThemeConfig)
 	c.Mapping("GetApplications", c.GetApplications)
 	c.Mapping("UploadSystemImage", c.UploadSystemImage)
 }
@@ -776,6 +779,42 @@ func (c *SystemController) UpdateApplication() {
 	c.ServeJSON()
 }
 
+// UpdateApplicationTheme ...
+// @Title Update Application Theme
+// @Description update an application's theme by application id
+// @Param	Authorization		header  	string true		"header for User"
+// @Param	id		path 	string	true		"The application id"
+// @Param	body		body 	requests.ThemeRequest	true		"body with theme_code"
+// @Success 200 {object} responses.ApplicationResponseDTO
+// @Failure 403 :id is not int
+// @router /update-application-theme/:id [put]
+func (c *SystemController) UpdateApplicationTheme() {
+	idStr := c.Ctx.Input.Param(":id")
+	var v requests.ThemeRequest
+	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
+
+	isSuccess := false
+
+	if strings.TrimSpace(v.ThemeCode) == "" {
+		resp := responses.ApplicationResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "theme_code is required"}
+		c.Data["json"] = resp
+		c.ServeJSON()
+		return
+	}
+
+	appResp := functions.UpdateApplicationTheme(&c.Controller, idStr, v.ThemeCode)
+	if appResp.Success {
+		isSuccess = true
+		resp := responses.ApplicationResponseDTO{Success: isSuccess, Result: appResp.Result, StatusDesc: "Application theme updated successfully"}
+		c.Data["json"] = resp
+	} else {
+		resp := responses.ApplicationResponseDTO{Success: isSuccess, Result: nil, StatusDesc: appResp.StatusDesc}
+		c.Data["json"] = resp
+	}
+
+	c.ServeJSON()
+}
+
 // AddTheme ...
 // @Title Create Theme
 // @Description create a theme
@@ -842,6 +881,73 @@ func (c *SystemController) UpdateTheme() {
 			logs.Info("Token verified")
 			isSuccess = true
 			themeResp := functions.UpdateTheme(&c.Controller, v, idStr)
+			c.Data["json"] = themeResp
+		} else {
+			var resp responses.ThemeResponseDTO = responses.ThemeResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "You are not authorized to perform this request"}
+			c.Data["json"] = resp
+		}
+
+	} else {
+		var resp responses.ThemeResponseDTO = responses.ThemeResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "You are not authorized to perform this request"}
+		c.Data["json"] = resp
+	}
+
+	c.ServeJSON()
+}
+
+// AddThemeConfig ...
+// @Title Add Theme Config
+// @Description add a config to a theme
+// @Param	Authorization		header  	string true		"header for User"
+// @Param	id		path 	string	true		"The theme id"
+// @Param	body		body 	requests.ThemeConfigRequest	true		"body for Theme config"
+// @Success 200 {object} responses.ThemeResponseDTO
+// @Failure 403 body is empty
+// @router /add-theme-config/:id [post]
+func (c *SystemController) AddThemeConfig() {
+	idStr := c.Ctx.Input.Param(":id")
+	var v requests.ThemeConfigRequest
+	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
+
+	var isSuccess bool = false
+
+	logs.Info("Token verified")
+	if strings.TrimSpace(v.Config) == "" {
+		resp := responses.ThemeResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "config is required"}
+		c.Data["json"] = resp
+		c.ServeJSON()
+		return
+	}
+
+	themeResp := functions.AddThemeConfig(&c.Controller, idStr, v.Config)
+	c.Data["json"] = themeResp
+
+	c.ServeJSON()
+}
+
+// RemoveThemeConfig ...
+// @Title Remove Theme Config
+// @Description remove a config from a theme
+// @Param	Authorization		header  	string true		"header for User"
+// @Param	id		path 	string	true		"The theme config id"
+// @Success 200 {object} responses.ThemeResponseDTO
+// @Failure 403 body is empty
+// @router /remove-theme-config/:id [delete]
+func (c *SystemController) RemoveThemeConfig() {
+	idStr := c.Ctx.Input.Param(":id")
+
+	authorization := c.Ctx.Input.Header("Authorization")
+	token := strings.Split(authorization, " ")
+
+	var isSuccess bool = false
+
+	if token[0] == "Bearer" {
+		logs.Info("Token is ", token[1])
+		verifyToken := functions.VerifyToken(&c.Controller, token[1])
+
+		if verifyToken.StatusCode == 200 {
+			logs.Info("Token verified")
+			themeResp := functions.RemoveThemeConfig(&c.Controller, idStr)
 			c.Data["json"] = themeResp
 		} else {
 			var resp responses.ThemeResponseDTO = responses.ThemeResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "You are not authorized to perform this request"}
