@@ -1303,7 +1303,8 @@ func GetApplicationByCode(c *beego.Controller, code string) (resp responses.Appl
 func UploadSystemImage(c *beego.Controller, systemImage string, system string) (resp responses.SystemImageOriResponseDTO) {
 	host, _ := beego.AppConfig.String("systemBaseUrl")
 
-	logs.Info("Sending file ", systemImage)
+	logs.Info("System image to be uploaded is ", systemImage)
+	logs.Info("System to which the image belongs is ", system)
 
 	request := api.NewRequest(
 		host,
