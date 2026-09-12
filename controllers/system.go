@@ -5,10 +5,8 @@ import (
 	"AMC_gateway/structs/requests"
 	"AMC_gateway/structs/responses"
 	"encoding/json"
-	"fmt"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/beego/beego/v2/core/logs"
 	beego "github.com/beego/beego/v2/server/web"
@@ -675,9 +673,7 @@ func (c *SystemController) AddApplication() {
 	addedBy := userData.UserId
 
 	// Generate application code
-	applicationCode := fmt.Sprintf("APP-%d", time.Now().Unix())
 	req := requests.ApplicationApiRequest{
-		ApplicationCode:  applicationCode,
 		ApplicationName:  v.ApplicationName,
 		ApplicationLogo:  v.ApplicationLogo,
 		ThemeColors:      v.ThemeColors,

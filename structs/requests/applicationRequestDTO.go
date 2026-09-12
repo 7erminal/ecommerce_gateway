@@ -10,7 +10,6 @@ type ApplicationRequest struct {
 }
 
 type ApplicationApiRequest struct {
-	ApplicationCode  string `json:"application_code"`
 	ApplicationName  string `json:"application_name"`
 	ApplicationLogo  string `json:"application_logo"`
 	ThemeColors      string `json:"theme_colors"`
