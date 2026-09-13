@@ -1203,12 +1203,13 @@ func GetAllApplications(c *beego.Controller) (resp responses.ApplicationsRespons
 		c.Data["json"] = err.Error()
 	}
 
-	var prettyJSON bytes.Buffer
-	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
-		logs.Info("Raw response received is ", string(read))
-	} else {
-		logs.Info("Raw response received is \n", prettyJSON.String())
-	}
+	// var prettyJSON bytes.Buffer
+	// if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+	// 	logs.Info("Raw response received is ", string(read))
+	// } else {
+	// 	logs.Info("Raw response received is \n", prettyJSON.String())
+	// }
+	logs.Info("Raw response received is ", string(read))
 
 	var backendResp responses.ApplicationsResponse
 	json.Unmarshal(read, &backendResp)
