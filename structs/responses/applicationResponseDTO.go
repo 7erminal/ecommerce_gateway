@@ -3,17 +3,48 @@ package responses
 import "time"
 
 type ThemeConfigResp struct {
-	ConfigId    int64  `json:"config_id"`
-	ThemeId     int64  `json:"theme_id"`
-	ConfigKey   string `json:"config_key"`
-	ConfigValue string `json:"config_value"`
+	ThemeConfigCode string
+	ThemeProperties string
+	DateCreated     time.Time
+	DateModified    time.Time
+	CreatedBy       int
+	ModifiedBy      int
+	Active          int
+}
+
+type ThemeConfigPersonalResp struct {
+	ThemeConfigCode string
+	ThemeProperties string
+	ShowBanner      bool
+	BannerImages    string
+	BorderRadius    float64
+	DateCreated     time.Time
+	DateModified    time.Time
+	CreatedBy       int
+	ModifiedBy      int
+	Active          int
 }
 
 type ThemeResp struct {
-	ThemeId     int64
-	ThemeCode   string
-	ThemeName   string
-	ThemeConfig []*ThemeConfigResp
+	ThemeId      int64
+	ThemeCode    string
+	ThemeName    string
+	ThemeConfig  []*ThemeConfigResp
+	DateCreated  time.Time
+	DateModified time.Time
+	CreatedBy    int
+	ModifiedBy   int
+}
+
+type ThemePersonalResp struct {
+	ThemeId      int64
+	ThemeCode    string
+	ThemeName    string
+	ThemeConfig  []*ThemeConfigPersonalResp
+	DateCreated  time.Time
+	DateModified time.Time
+	CreatedBy    int
+	ModifiedBy   int
 }
 
 type ApplicationResp struct {
@@ -27,7 +58,7 @@ type ApplicationResp struct {
 	DateCreated      time.Time
 	DateModified     time.Time
 	Active           int
-	Theme            *ThemeResp
+	Theme            *ThemePersonalResp
 }
 
 type ApplicationResponseDTO struct {
@@ -113,7 +144,7 @@ type ApplicationResponseData struct {
 	DateCreated      time.Time
 	DateModified     time.Time
 	Active           int
-	Theme            *ThemeResponseData
+	Theme            *ThemePersonalResp
 }
 
 type ApplicationResponse struct {

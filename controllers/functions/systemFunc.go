@@ -650,10 +650,15 @@ func AddApplication(c *beego.Controller, req requests.ApplicationApiRequest, add
 				DateCreated:      backendResp.Result.DateCreated,
 				DateModified:     backendResp.Result.DateModified,
 				Active:           backendResp.Result.Active,
-				Theme: &responses.ThemeResp{
-					ThemeId:   backendResp.Result.Theme.ThemeId,
-					ThemeCode: backendResp.Result.Theme.ThemeCode,
-					ThemeName: backendResp.Result.Theme.ThemeName,
+				Theme: &responses.ThemePersonalResp{
+					ThemeId:      backendResp.Result.Theme.ThemeId,
+					ThemeCode:    backendResp.Result.Theme.ThemeCode,
+					ThemeName:    backendResp.Result.Theme.ThemeName,
+					ThemeConfig:  backendResp.Result.Theme.ThemeConfig,
+					DateCreated:  backendResp.Result.Theme.DateCreated,
+					DateModified: backendResp.Result.Theme.DateModified,
+					CreatedBy:    backendResp.Result.Theme.CreatedBy,
+					ModifiedBy:   backendResp.Result.Theme.ModifiedBy,
 				},
 			},
 			StatusDesc: backendResp.StatusMessage,
@@ -727,10 +732,15 @@ func UpdateApplication(c *beego.Controller, req requests.UpdateApplicationReques
 				DateCreated:      backendResp.Result.DateCreated,
 				DateModified:     backendResp.Result.DateModified,
 				Active:           backendResp.Result.Active,
-				Theme: &responses.ThemeResp{
-					ThemeId:   backendResp.Result.Theme.ThemeId,
-					ThemeCode: backendResp.Result.Theme.ThemeCode,
-					ThemeName: backendResp.Result.Theme.ThemeName,
+				Theme: &responses.ThemePersonalResp{
+					ThemeId:      backendResp.Result.Theme.ThemeId,
+					ThemeCode:    backendResp.Result.Theme.ThemeCode,
+					ThemeName:    backendResp.Result.Theme.ThemeName,
+					ThemeConfig:  backendResp.Result.Theme.ThemeConfig,
+					DateCreated:  backendResp.Result.Theme.DateCreated,
+					DateModified: backendResp.Result.Theme.DateModified,
+					CreatedBy:    backendResp.Result.Theme.CreatedBy,
+					ModifiedBy:   backendResp.Result.Theme.ModifiedBy,
 				},
 			},
 			StatusDesc: backendResp.StatusMessage,
@@ -797,10 +807,15 @@ func UpdateApplicationTheme(c *beego.Controller, applicationId string, themeCode
 				DateCreated:      backendResp.Result.DateCreated,
 				DateModified:     backendResp.Result.DateModified,
 				Active:           backendResp.Result.Active,
-				Theme: &responses.ThemeResp{
-					ThemeId:   backendResp.Result.Theme.ThemeId,
-					ThemeCode: backendResp.Result.Theme.ThemeCode,
-					ThemeName: backendResp.Result.Theme.ThemeName,
+				Theme: &responses.ThemePersonalResp{
+					ThemeId:      backendResp.Result.Theme.ThemeId,
+					ThemeCode:    backendResp.Result.Theme.ThemeCode,
+					ThemeName:    backendResp.Result.Theme.ThemeName,
+					ThemeConfig:  backendResp.Result.Theme.ThemeConfig,
+					DateCreated:  backendResp.Result.Theme.DateCreated,
+					DateModified: backendResp.Result.Theme.DateModified,
+					CreatedBy:    backendResp.Result.Theme.CreatedBy,
+					ModifiedBy:   backendResp.Result.Theme.ModifiedBy,
 				},
 			},
 			StatusDesc: backendResp.StatusMessage,
@@ -1027,15 +1042,18 @@ func AddThemeConfig(c *beego.Controller, themeId string, config string) (resp re
 				if cfg == nil {
 					continue
 				}
-				themeIdValue := int64(0)
-				if cfg.ThemeId != nil {
-					themeIdValue = *cfg.ThemeId
-				}
+				// themeIdValue := int64(0)
+				// if cfg.ThemeId != nil {
+				// 	themeIdValue = *cfg.ThemeId
+				// }
 				mappedConfigs = append(mappedConfigs, &responses.ThemeConfigResp{
-					ConfigId:    cfg.ThemeConfigId,
-					ThemeId:     themeIdValue,
-					ConfigKey:   cfg.ThemeConfigCode,
-					ConfigValue: cfg.ThemeProperties,
+					ThemeConfigCode: cfg.ThemeConfigCode,
+					ThemeProperties: cfg.ThemeProperties,
+					DateCreated:     cfg.DateCreated,
+					DateModified:    cfg.DateModified,
+					CreatedBy:       cfg.CreatedBy,
+					ModifiedBy:      cfg.ModifiedBy,
+					Active:          cfg.Active,
 				})
 			}
 			themeResp.ThemeConfig = mappedConfigs
@@ -1106,15 +1124,18 @@ func RemoveThemeConfig(c *beego.Controller, themeConfigId string) (resp response
 				if cfg == nil {
 					continue
 				}
-				themeIdValue := int64(0)
-				if cfg.ThemeId != nil {
-					themeIdValue = *cfg.ThemeId
-				}
+				// themeIdValue := int64(0)
+				// if cfg.ThemeId != nil {
+				// 	themeIdValue = *cfg.ThemeId
+				// }
 				mappedConfigs = append(mappedConfigs, &responses.ThemeConfigResp{
-					ConfigId:    cfg.ThemeConfigId,
-					ThemeId:     themeIdValue,
-					ConfigKey:   cfg.ThemeConfigCode,
-					ConfigValue: cfg.ThemeProperties,
+					ThemeConfigCode: cfg.ThemeConfigCode,
+					ThemeProperties: cfg.ThemeProperties,
+					DateCreated:     cfg.DateCreated,
+					DateModified:    cfg.DateModified,
+					CreatedBy:       cfg.CreatedBy,
+					ModifiedBy:      cfg.ModifiedBy,
+					Active:          cfg.Active,
 				})
 			}
 			themeResp.ThemeConfig = mappedConfigs
@@ -1268,6 +1289,21 @@ func GetApplicationByCode(c *beego.Controller, code string) (resp responses.Appl
 
 	// Transform backend response to gateway response
 	if backendResp.StatusCode == 200 {
+		themeConfigs := []*responses.ThemeConfigPersonalResp{}
+		for _, tc := range backendResp.Result.Theme.ThemeConfig {
+			themeConfigs = append(themeConfigs, &responses.ThemeConfigPersonalResp{
+				ThemeConfigCode: tc.ThemeConfigCode,
+				ThemeProperties: tc.ThemeProperties,
+				ShowBanner:      tc.ShowBanner,
+				BannerImages:    tc.BannerImages,
+				BorderRadius:    tc.BorderRadius,
+				DateCreated:     tc.DateCreated,
+				DateModified:    tc.DateModified,
+				CreatedBy:       tc.CreatedBy,
+				ModifiedBy:      tc.ModifiedBy,
+				Active:          tc.Active,
+			})
+		}
 		resp = responses.ApplicationResponseDTO{
 			Success: true,
 			Result: &responses.ApplicationResp{
@@ -1281,10 +1317,11 @@ func GetApplicationByCode(c *beego.Controller, code string) (resp responses.Appl
 				DateCreated:      backendResp.Result.DateCreated,
 				DateModified:     backendResp.Result.DateModified,
 				Active:           backendResp.Result.Active,
-				Theme: &responses.ThemeResp{
-					ThemeId:   backendResp.Result.Theme.ThemeId,
-					ThemeCode: backendResp.Result.Theme.ThemeCode,
-					ThemeName: backendResp.Result.Theme.ThemeName,
+				Theme: &responses.ThemePersonalResp{
+					ThemeId:     backendResp.Result.Theme.ThemeId,
+					ThemeCode:   backendResp.Result.Theme.ThemeCode,
+					ThemeName:   backendResp.Result.Theme.ThemeName,
+					ThemeConfig: themeConfigs,
 				},
 			},
 			StatusDesc: backendResp.StatusMessage,
