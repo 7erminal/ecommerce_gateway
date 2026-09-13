@@ -168,12 +168,7 @@ func VerifyTokenNew(token string) (resp responses.UserOriResponseDTO) {
 		// c.Data["json"] = err.Error()
 	}
 
-	var prettyJSON bytes.Buffer
-	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
-		logs.Info("Raw response received is ", string(read))
-	} else {
-		logs.Info("Raw response received is \n", prettyJSON.String())
-	}
+	logs.Info("Raw response received is ", string(read))
 	// data := map[string]interface{}{}
 	var data responses.UserOriResponseDTO
 	json.Unmarshal(read, &data)
