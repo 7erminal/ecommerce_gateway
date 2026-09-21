@@ -315,6 +315,24 @@ func init() {
 
     beego.GlobalControllerRouter["AMC_gateway/controllers:SystemController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:SystemController"],
         beego.ControllerComments{
+            Method: "AddShop",
+            Router: `/add-shop`,
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["AMC_gateway/controllers:SystemController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:SystemController"],
+        beego.ControllerComments{
+            Method: "AddStatus",
+            Router: `/add-status`,
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["AMC_gateway/controllers:SystemController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:SystemController"],
+        beego.ControllerComments{
             Method: "AddTheme",
             Router: `/add-theme`,
             AllowHTTPMethods: []string{"post"},
@@ -336,6 +354,24 @@ func init() {
             Method: "Delete",
             Router: `/delete-branch/:id`,
             AllowHTTPMethods: []string{"delete"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["AMC_gateway/controllers:SystemController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:SystemController"],
+        beego.ControllerComments{
+            Method: "DeleteShop",
+            Router: `/delete-shop`,
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["AMC_gateway/controllers:SystemController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:SystemController"],
+        beego.ControllerComments{
+            Method: "DeleteStatus",
+            Router: `/delete-status`,
+            AllowHTTPMethods: []string{"post"},
             MethodParams: param.Make(),
             Filters: nil,
             Params: nil})
@@ -414,6 +450,42 @@ func init() {
 
     beego.GlobalControllerRouter["AMC_gateway/controllers:SystemController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:SystemController"],
         beego.ControllerComments{
+            Method: "GetShop",
+            Router: `/get-shop/:id`,
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["AMC_gateway/controllers:SystemController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:SystemController"],
+        beego.ControllerComments{
+            Method: "GetShops",
+            Router: `/get-shops`,
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["AMC_gateway/controllers:SystemController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:SystemController"],
+        beego.ControllerComments{
+            Method: "GetStatus",
+            Router: `/get-status/:id`,
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["AMC_gateway/controllers:SystemController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:SystemController"],
+        beego.ControllerComments{
+            Method: "GetStatuses",
+            Router: `/get-statuses`,
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["AMC_gateway/controllers:SystemController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:SystemController"],
+        beego.ControllerComments{
             Method: "GetSystemDetails",
             Router: `/get-system-details/:branchid`,
             AllowHTTPMethods: []string{"get"},
@@ -441,6 +513,24 @@ func init() {
 
     beego.GlobalControllerRouter["AMC_gateway/controllers:SystemController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:SystemController"],
         beego.ControllerComments{
+            Method: "AddShopBranch",
+            Router: `/shop/add-branch`,
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["AMC_gateway/controllers:SystemController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:SystemController"],
+        beego.ControllerComments{
+            Method: "RemoveShopBranch",
+            Router: `/shop/remove-branch`,
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["AMC_gateway/controllers:SystemController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:SystemController"],
+        beego.ControllerComments{
             Method: "UpdateApplicationTheme",
             Router: `/update-application-theme/:id`,
             AllowHTTPMethods: []string{"put"},
@@ -462,6 +552,24 @@ func init() {
             Method: "UpdateBranch",
             Router: `/update-branch/:id`,
             AllowHTTPMethods: []string{"put"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["AMC_gateway/controllers:SystemController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:SystemController"],
+        beego.ControllerComments{
+            Method: "UpdateShop",
+            Router: `/update-shop`,
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["AMC_gateway/controllers:SystemController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:SystemController"],
+        beego.ControllerComments{
+            Method: "UpdateStatus",
+            Router: `/update-status`,
+            AllowHTTPMethods: []string{"post"},
             MethodParams: param.Make(),
             Filters: nil,
             Params: nil})
