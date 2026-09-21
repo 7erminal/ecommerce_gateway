@@ -37,6 +37,16 @@ func (c *SystemController) URLMapping() {
 	c.Mapping("RemoveThemeConfig", c.RemoveThemeConfig)
 	c.Mapping("GetApplications", c.GetApplications)
 	c.Mapping("UploadSystemImage", c.UploadSystemImage)
+	c.Mapping("AddStatus", c.AddStatus)
+	c.Mapping("UpdateStatus", c.UpdateStatus)
+	c.Mapping("DeleteStatus", c.DeleteStatus)
+	c.Mapping("GetStatuses", c.GetStatuses)
+	c.Mapping("GetStatus", c.GetStatus)
+	c.Mapping("AddShop", c.AddShop)
+	c.Mapping("UpdateShop", c.UpdateShop)
+	c.Mapping("DeleteShop", c.DeleteShop)
+	c.Mapping("GetShops", c.GetShops)
+	c.Mapping("GetShop", c.GetShop)
 }
 
 // GetRoles ...
@@ -62,6 +72,222 @@ func (c *SystemController) GetRoles() {
 		c.Data["json"] = resp
 	} else {
 		var resp responses.RolesAllGatewayResponseDTO = responses.RolesAllGatewayResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
+		c.Data["json"] = resp
+	}
+
+	c.ServeJSON()
+}
+
+// GetStatuses ...
+// @Title Get Statuses
+// @Description Get all statuses
+// @Success 200 {object} responses.StatusesAllGatewayResponseDTO
+// @Failure 403 body is empty
+// @router /get-statuses [get]
+func (c *SystemController) GetStatuses() {
+
+	var isSuccess bool = false
+	message := ""
+
+	statusesResp := functions.GetStatuses(&c.Controller)
+	result := []responses.StatusResponseDTO{}
+
+	// var message string
+
+	if statusesResp.StatusCode == 200 {
+
+		isSuccess = true
+		// message = "Email sent"
+		message = "Status retrieved successfully"
+
+		for _, status := range statusesResp.Result {
+			result = append(result, responses.StatusResponseDTO{
+				StatusCode: status.StatusCode,
+				Status:     status.Status,
+				StatusId:   status.StatusId,
+			})
+		}
+
+		var resp responses.StatusesResponse = responses.StatusesResponse{Success: isSuccess, Result: result, StatusDesc: message}
+		c.Data["json"] = resp
+	} else {
+		message = "An Error occurred"
+		var resp responses.StatusesResponse = responses.StatusesResponse{Success: isSuccess, Result: result, StatusDesc: message}
+		c.Data["json"] = resp
+	}
+
+	c.ServeJSON()
+}
+
+// GetStatus ...
+// @Title Get Status
+// @Description Get a single status by ID
+// @Success 200 {object} responses.StatusResponse
+// @Failure 403 body is empty
+// @router /get-status/:id [get]
+func (c *SystemController) GetStatus() {
+	id := c.Ctx.Input.Param(":id")
+	var isSuccess bool = false
+	message := ""
+
+	statusesResp := functions.GetStatus(&c.Controller, id)
+
+	// var message string
+
+	if statusesResp.StatusCode == 200 {
+
+		isSuccess = true
+		// message = "Email sent"
+
+		message = "Status retrieved successfully"
+		result := responses.StatusResponseDTO{
+			StatusCode: statusesResp.Result.StatusCode,
+			Status:     statusesResp.Result.Status,
+			StatusId:   statusesResp.Result.StatusId,
+		}
+		var resp responses.StatusResponse = responses.StatusResponse{Success: isSuccess, Result: &result, StatusDesc: message}
+		c.Data["json"] = resp
+	} else {
+		message = "An Error occurred"
+		var resp responses.StatusResponse = responses.StatusResponse{Success: isSuccess, Result: nil, StatusDesc: message}
+		c.Data["json"] = resp
+	}
+
+	c.ServeJSON()
+}
+
+// AddStatus ...
+// @Title Add Status
+// @Description add a new status
+// @Param	Authorization		header 	string true		"header for User"
+// @Param	body		body 	requests.StatusRequestDTO	true		"body for Status content"
+// @Success 200 {object} responses.StatusResponseDTO
+// @Failure 403 body is empty
+// @router /add-status [post]
+func (c *SystemController) AddStatus() {
+	u := c.Ctx.Input.GetData("user")
+	userData, err := u.(*responses.UsersOri)
+	// fmt.Printf("Type of v: %T\n", v)
+	// fmt.Printf("Value of v: %+v\n", v)
+	if err != false {
+		logs.Error("Error retrieving user data: ", err)
+	}
+	var v requests.Status
+	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
+
+	var isSuccess bool = false
+
+	userIdStr := strconv.Itoa(int(userData.UserId))
+	addStatusResp := functions.AddStatus(&c.Controller, v, userIdStr)
+
+	if addStatusResp.StatusCode == 200 {
+
+		if addStatusResp.StatusCode == 200 {
+			message := "Status Added Successfully"
+			isSuccess = true
+			result := responses.StatusResponseDTO{
+				StatusCode: addStatusResp.Result.StatusCode,
+				Status:     addStatusResp.Result.Status,
+				StatusId:   addStatusResp.Result.StatusId,
+			}
+			var resp responses.StatusResponse = responses.StatusResponse{Success: isSuccess, Result: &result, StatusDesc: message}
+			c.Data["json"] = resp
+		} else {
+			var resp responses.StatusResponse = responses.StatusResponse{Success: isSuccess, Result: nil, StatusDesc: addStatusResp.StatusDesc}
+			c.Data["json"] = resp
+		}
+	} else {
+		var resp responses.StatusResponse = responses.StatusResponse{Success: isSuccess, Result: nil, StatusDesc: "Status could not be added"}
+		c.Data["json"] = resp
+	}
+
+	c.ServeJSON()
+}
+
+// UpdateStatus ...
+// @Title Update Status
+// @Description update an existing status
+// @Param	Authorization		header 	string true		"header for User"
+// @Param	body		body 	requests.StatusRequestDTO	true		"body for Status content"
+// @Success 200 {object} responses.StatusResponseDTO
+// @Failure 403 body is empty
+// @router /update-status [post]
+func (c *SystemController) UpdateStatus() {
+	u := c.Ctx.Input.GetData("user")
+	userData, err := u.(*responses.UsersOri)
+	// fmt.Printf("Type of v: %T\n", v)
+	// fmt.Printf("Value of v: %+v\n", v)
+	if err != false {
+		logs.Error("Error retrieving user data: ", err)
+	}
+	var v requests.UpdateStatus
+	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
+
+	var isSuccess bool = false
+
+	statusReq := requests.Status{
+		Status:     v.Status,
+		StatusCode: v.StatusCode,
+	}
+
+	userIdStr := strconv.Itoa(int(userData.UserId))
+	addStatusResp := functions.UpdateStatus(&c.Controller, statusReq, v.StatusId, userIdStr)
+
+	if addStatusResp.StatusCode == 200 {
+
+		if addStatusResp.StatusCode == 200 {
+			message := "Status Updated Successfully"
+			isSuccess = true
+			var resp responses.StatusResponse = responses.StatusResponse{Success: isSuccess, Result: addStatusResp.Result, StatusDesc: message}
+			c.Data["json"] = resp
+		} else {
+			var resp responses.StatusResponse = responses.StatusResponse{Success: isSuccess, Result: nil, StatusDesc: addStatusResp.StatusDesc}
+			c.Data["json"] = resp
+		}
+	} else {
+		var resp responses.StatusResponse = responses.StatusResponse{Success: isSuccess, Result: nil, StatusDesc: "Status could not be updated"}
+		c.Data["json"] = resp
+	}
+
+	c.ServeJSON()
+}
+
+// DeleteStatus ...
+// @Title Delete Status
+// @Description delete an existing status
+// @Param	Authorization		header 	string true		"header for User"
+// @Param	body		body 	requests.StatusRequestDTO	true		"body for Status content"
+// @Success 200 {object} responses.StatusResponseDTO
+// @Failure 403 body is empty
+// @router /delete-status [post]
+func (c *SystemController) DeleteStatus() {
+	u := c.Ctx.Input.GetData("user")
+	userData, err := u.(*responses.UsersOri)
+	// fmt.Printf("Type of v: %T\n", v)
+	// fmt.Printf("Value of v: %+v\n", v)
+	if err != false {
+		logs.Error("Error retrieving user data: ", err)
+	}
+	var v requests.UpdateStatus
+	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
+
+	var isSuccess bool = false
+
+	addStatusResp := functions.DeleteStatus(&c.Controller, strconv.Itoa(int(userData.UserId)))
+
+	if addStatusResp.StatusCode == 200 {
+
+		if addStatusResp.StatusCode == 200 {
+			message := "Status Deleted Successfully"
+			isSuccess = true
+			var resp responses.StatusResponse = responses.StatusResponse{Success: isSuccess, Result: addStatusResp.Result, StatusDesc: message}
+			c.Data["json"] = resp
+		} else {
+			var resp responses.StatusResponse = responses.StatusResponse{Success: isSuccess, Result: nil, StatusDesc: addStatusResp.StatusDesc}
+			c.Data["json"] = resp
+		}
+	} else {
+		var resp responses.StatusResponse = responses.StatusResponse{Success: isSuccess, Result: nil, StatusDesc: "Status could not be deleted"}
 		c.Data["json"] = resp
 	}
 
@@ -113,76 +339,65 @@ func (c *SystemController) GetSystemDetails() {
 // @Failure 403 body is empty
 // @router /add-branch [post]
 func (c *SystemController) AddBranch() {
+	u := c.Ctx.Input.GetData("user")
+	userData, err := u.(*responses.UsersOri)
+	// fmt.Printf("Type of v: %T\n", v)
+	// fmt.Printf("Value of v: %+v\n", v)
+	if err != false {
+		logs.Error("Error retrieving user data: ", err)
+	}
 	var v requests.BranchRequestDTO
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
 
-	authorization := c.Ctx.Input.Header("Authorization")
-	token := strings.Split(authorization, " ")
-
 	var isSuccess bool = false
 
-	if token[0] == "Bearer" {
-		logs.Info("Token is ", token[1])
-		verifyToken := functions.VerifyToken(&c.Controller, token[1])
+	userDetailsResp := functions.GetUserDetails(&c.Controller, v.BranchManager)
+	if userDetailsResp.StatusCode == 200 {
+		addBranchResp := functions.AddBranch(&c.Controller, v, userData.UserId)
 
-		if verifyToken.StatusCode == 200 {
-			userDetailsResp := functions.GetUserDetails(&c.Controller, v.BranchManager)
-			if userDetailsResp.StatusCode == 200 {
-				addBranchResp := functions.AddBranch(&c.Controller, v, verifyToken.User.UserId)
-
-				if addBranchResp.StatusCode == 200 {
-					// Assign branch manager to added branch
-					splitName := strings.Split(userDetailsResp.User.FullName, " | ")
-					firstname := ""
-					lastname := ""
-					if len(splitName) > 1 {
-						firstname = splitName[0]
-						lastname = splitName[1]
-					} else {
-						firstname = splitName[0]
-					}
-					userDetails := requests.UpdateUserRequestDTO{BranchId: addBranchResp.Result.BranchId, FirstName: firstname, LastName: lastname, Username: userDetailsResp.User.Username, PhoneNumber: userDetailsResp.User.PhoneNumber, Gender: userDetailsResp.User.Gender, Dob: userDetailsResp.User.Dob.GoString(), Address: userDetailsResp.User.Address}
-					userId := strconv.FormatInt(userDetailsResp.User.UserId, 10)
-					updateUserResp := functions.UpdateUser(&c.Controller, userId, userDetails)
-					branchIdStr := strconv.FormatInt(addBranchResp.Result.BranchId, 10)
-					updateBranchResp := functions.UpdateBranchBranchManger(&c.Controller, userId, branchIdStr)
-					message := "Branch Added Successfully"
-					if updateUserResp.StatusCode != 200 {
-						message = "Branch added but failed to assign manager"
-					}
-					if updateBranchResp.StatusCode != 200 {
-						message = "Branch added but failed to assign branch manager"
-					}
-					// var curr responses.CurrencyResp = responses.CurrencyResp{Symbol: addBranchResp.Branch.Country.DefaultCurrency.Symbol, Currency: addBranchResp.Branch.Country.DefaultCurrency.Currency}
-					// var country responses.CountryResp = responses.CountryResp{Country: addBranchResp.Branch.Country.Country, CountryCode: addBranchResp.Branch.Country.CountryCode, Currency: &curr}
-					var data responses.BranchResp = responses.BranchResp{
-						BranchId:    addBranchResp.Result.BranchId,
-						Branch:      addBranchResp.Result.BranchName,
-						Description: addBranchResp.Result.Description,
-						// Country:     &country,
-						Location:    addBranchResp.Result.Location,
-						PhoneNumber: addBranchResp.Result.PhoneNumber,
-					}
-
-					isSuccess = true
-					var resp responses.BranchResponseDTO = responses.BranchResponseDTO{Success: isSuccess, Result: &data, StatusDesc: message}
-					c.Data["json"] = resp
-				} else {
-					var resp responses.BranchResponseDTO = responses.BranchResponseDTO{Success: isSuccess, Result: nil, StatusDesc: addBranchResp.StatusDesc}
-					c.Data["json"] = resp
-				}
+		if addBranchResp.StatusCode == 200 {
+			// Assign branch manager to added branch
+			splitName := strings.Split(userDetailsResp.User.FullName, " | ")
+			firstname := ""
+			lastname := ""
+			if len(splitName) > 1 {
+				firstname = splitName[0]
+				lastname = splitName[1]
 			} else {
-				var resp responses.BranchResponseDTO = responses.BranchResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "Branch manager does not exist"}
-				c.Data["json"] = resp
+				firstname = splitName[0]
 			}
+			userDetails := requests.UpdateUserRequestDTO{BranchId: addBranchResp.Result.BranchId, FirstName: firstname, LastName: lastname, Username: userDetailsResp.User.Username, PhoneNumber: userDetailsResp.User.PhoneNumber, Gender: userDetailsResp.User.Gender, Dob: userDetailsResp.User.Dob.GoString(), Address: userDetailsResp.User.Address}
+			userId := strconv.FormatInt(userDetailsResp.User.UserId, 10)
+			updateUserResp := functions.UpdateUser(&c.Controller, userId, userDetails)
+			branchIdStr := strconv.FormatInt(addBranchResp.Result.BranchId, 10)
+			updateBranchResp := functions.UpdateBranchBranchManger(&c.Controller, userId, branchIdStr)
+			message := "Branch Added Successfully"
+			if updateUserResp.StatusCode != 200 {
+				message = "Branch added but failed to assign manager"
+			}
+			if updateBranchResp.StatusCode != 200 {
+				message = "Branch added but failed to assign branch manager"
+			}
+			// var curr responses.CurrencyResp = responses.CurrencyResp{Symbol: addBranchResp.Branch.Country.DefaultCurrency.Symbol, Currency: addBranchResp.Branch.Country.DefaultCurrency.Currency}
+			// var country responses.CountryResp = responses.CountryResp{Country: addBranchResp.Branch.Country.Country, CountryCode: addBranchResp.Branch.Country.CountryCode, Currency: &curr}
+			var data responses.BranchResp = responses.BranchResp{
+				BranchId:    addBranchResp.Result.BranchId,
+				Branch:      addBranchResp.Result.BranchName,
+				Description: addBranchResp.Result.Description,
+				// Country:     &country,
+				Location:    addBranchResp.Result.Location,
+				PhoneNumber: addBranchResp.Result.PhoneNumber,
+			}
+
+			isSuccess = true
+			var resp responses.BranchResponseDTO = responses.BranchResponseDTO{Success: isSuccess, Result: &data, StatusDesc: message}
+			c.Data["json"] = resp
 		} else {
-			logs.Error("Error verifying token")
-			var resp responses.BranchResponseDTO = responses.BranchResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred." + verifyToken.StatusDesc}
+			var resp responses.BranchResponseDTO = responses.BranchResponseDTO{Success: isSuccess, Result: nil, StatusDesc: addBranchResp.StatusDesc}
 			c.Data["json"] = resp
 		}
-
 	} else {
-		var resp responses.BranchResponseDTO = responses.BranchResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "You are not authorized to perform this request"}
+		var resp responses.BranchResponseDTO = responses.BranchResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "Branch manager does not exist"}
 		c.Data["json"] = resp
 	}
 
@@ -419,124 +634,113 @@ func (c *SystemController) GetAllBranches() {
 // @Failure 403 :id is not int
 // @router /update-branch/:id [put]
 func (c *SystemController) UpdateBranch() {
-	authorization := c.Ctx.Input.Header("Authorization")
-	token := strings.Split(authorization, " ")
+	u := c.Ctx.Input.GetData("user")
+	userData, err := u.(*responses.UsersOri)
+
+	if err != false {
+		logs.Error("Error asserting user data")
+	}
 
 	var isSuccess bool = false
 
-	if token[0] == "Bearer" {
-		logs.Info("Token is ", token[1])
-		verifyToken := functions.VerifyToken(&c.Controller, token[1])
+	idStr := c.Ctx.Input.Param(":id")
+	var r requests.BranchRequestDTO
+	json.Unmarshal(c.Ctx.Input.RequestBody, &r)
+	message := "Branch updated successfully"
+	userDetailsResp := functions.GetUserDetails(&c.Controller, r.BranchManager)
+	branchResp := &responses.BranchResp{}
 
-		if verifyToken.StatusCode == 200 {
-			idStr := c.Ctx.Input.Param(":id")
-			var r requests.BranchRequestDTO
-			json.Unmarshal(c.Ctx.Input.RequestBody, &r)
-			message := "Branch updated successfully"
-			userDetailsResp := functions.GetUserDetails(&c.Controller, r.BranchManager)
-			branchResp := &responses.BranchResp{}
+	if userDetailsResp.StatusCode == 200 {
+		updateBranch := functions.UpdateBranch(&c.Controller, r, userData.UserId, idStr)
 
-			if userDetailsResp.StatusCode == 200 {
-				updateBranch := functions.UpdateBranch(&c.Controller, r, verifyToken.User.UserId, idStr)
-
-				if updateBranch.StatusCode == 200 {
-					splitName := strings.Split(userDetailsResp.User.FullName, " | ")
-					firstname := ""
-					lastname := ""
-					if len(splitName) > 1 {
-						firstname = splitName[0]
-						lastname = splitName[1]
-					} else {
-						firstname = splitName[0]
-					}
-					role_name, _ := beego.AppConfig.String("branchManagerRoleName")
-					logs.Info("About to get data for role ", role_name)
-					role := functions.GetRoleWithRoleName(&c.Controller, role_name)
-					logs.Info("Get role response is ", role.Role.RoleId)
-					var roleId int64 = 0
-					if role.StatusCode == 200 {
-						roleId = role.Role.RoleId
-					}
-					logs.Info("Sending role ", roleId)
-					userDetails := requests.UpdateUserRequestDTO{RoleId: roleId, BranchId: updateBranch.Result.BranchId, FirstName: firstname, LastName: lastname, Username: userDetailsResp.User.Username, PhoneNumber: userDetailsResp.User.PhoneNumber, Gender: userDetailsResp.User.Gender, Dob: userDetailsResp.User.Dob.GoString(), Address: userDetailsResp.User.Address}
-					userId := strconv.FormatInt(userDetailsResp.User.UserId, 10)
-					updateUserResp := functions.UpdateUser(&c.Controller, userId, userDetails)
-					if updateUserResp.StatusCode == 200 {
-						logs.Info("Update user response is ", updateUserResp.StatusDesc)
-						branchIdStr := strconv.FormatInt(updateBranch.Result.BranchId, 10)
-						updateBranchResp := functions.UpdateBranchBranchManger(&c.Controller, userId, branchIdStr)
-						splitName := strings.Split(updateUserResp.User.FullName, " | ")
-						firstname := ""
-						lastname := ""
-						if len(splitName) > 1 {
-							firstname = splitName[0]
-							lastname = splitName[1]
-						} else {
-							firstname = splitName[0]
-						}
-
-						branchManager := responses.UserGateway{
-							UserId:      updateUserResp.User.UserId,
-							FirstName:   firstname,
-							LastName:    lastname,
-							Username:    updateUserResp.User.Username,
-							Email:       updateUserResp.User.Email,
-							PhoneNumber: updateUserResp.User.PhoneNumber,
-							ImagePath:   updateUserResp.User.ImagePath,
-							Customer:    updateUserResp.User.UserDetails,
-							// Gender:
-							// Dob:
-							// Address:
-							// IdType:
-							// IdNumber:
-							// Active:
-							IsVerified: updateUserResp.User.IsVerified,
-							Role:       updateUserResp.User.Role,
-						}
-
-						branchResp = &responses.BranchResp{
-							BranchId:    updateBranch.Result.BranchId,
-							Branch:      updateBranch.Result.BranchName,
-							Description: updateBranch.Result.Description,
-							// Country:       &country,
-							Location:      updateBranch.Result.Location,
-							PhoneNumber:   updateBranch.Result.PhoneNumber,
-							DateCreated:   updateBranch.Result.DateCreated,
-							BranchManager: &branchManager,
-						}
-
-						if updateBranchResp.StatusCode != 200 {
-							message = "Branch updated. Failed to update branch's branch manager"
-						}
-					} else {
-						message = "Branch updated. Failed to update branch manager"
-						logs.Error("Failed to update user", updateBranch.StatusDesc)
-						resp := responses.BranchResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "Branch update failed. " + updateUserResp.StatusDesc}
-						c.Data["json"] = resp
-					}
-
-					isSuccess = true
+		if updateBranch.StatusCode == 200 {
+			splitName := strings.Split(userDetailsResp.User.FullName, " | ")
+			firstname := ""
+			lastname := ""
+			if len(splitName) > 1 {
+				firstname = splitName[0]
+				lastname = splitName[1]
+			} else {
+				firstname = splitName[0]
+			}
+			role_name, _ := beego.AppConfig.String("branchManagerRoleName")
+			logs.Info("About to get data for role ", role_name)
+			role := functions.GetRoleWithRoleName(&c.Controller, role_name)
+			logs.Info("Get role response is ", role.Role.RoleId)
+			var roleId int64 = 0
+			if role.StatusCode == 200 {
+				roleId = role.Role.RoleId
+			}
+			logs.Info("Sending role ", roleId)
+			userDetails := requests.UpdateUserRequestDTO{RoleId: roleId, BranchId: updateBranch.Result.BranchId, FirstName: firstname, LastName: lastname, Username: userDetailsResp.User.Username, PhoneNumber: userDetailsResp.User.PhoneNumber, Gender: userDetailsResp.User.Gender, Dob: userDetailsResp.User.Dob.GoString(), Address: userDetailsResp.User.Address}
+			userId := strconv.FormatInt(userDetailsResp.User.UserId, 10)
+			updateUserResp := functions.UpdateUser(&c.Controller, userId, userDetails)
+			if updateUserResp.StatusCode == 200 {
+				logs.Info("Update user response is ", updateUserResp.StatusDesc)
+				branchIdStr := strconv.FormatInt(updateBranch.Result.BranchId, 10)
+				updateBranchResp := functions.UpdateBranchBranchManger(&c.Controller, userId, branchIdStr)
+				splitName := strings.Split(updateUserResp.User.FullName, " | ")
+				firstname := ""
+				lastname := ""
+				if len(splitName) > 1 {
+					firstname = splitName[0]
+					lastname = splitName[1]
 				} else {
-					message = "Failed to update branch"
-					branchResp = nil
+					firstname = splitName[0]
+				}
+
+				branchManager := responses.UserGateway{
+					UserId:      updateUserResp.User.UserId,
+					FirstName:   firstname,
+					LastName:    lastname,
+					Username:    updateUserResp.User.Username,
+					Email:       updateUserResp.User.Email,
+					PhoneNumber: updateUserResp.User.PhoneNumber,
+					ImagePath:   updateUserResp.User.ImagePath,
+					Customer:    updateUserResp.User.UserDetails,
+					// Gender:
+					// Dob:
+					// Address:
+					// IdType:
+					// IdNumber:
+					// Active:
+					IsVerified: updateUserResp.User.IsVerified,
+					Role:       updateUserResp.User.Role,
+				}
+
+				branchResp = &responses.BranchResp{
+					BranchId:    updateBranch.Result.BranchId,
+					Branch:      updateBranch.Result.BranchName,
+					Description: updateBranch.Result.Description,
+					// Country:       &country,
+					Location:      updateBranch.Result.Location,
+					PhoneNumber:   updateBranch.Result.PhoneNumber,
+					DateCreated:   updateBranch.Result.DateCreated,
+					BranchManager: &branchManager,
+				}
+
+				if updateBranchResp.StatusCode != 200 {
+					message = "Branch updated. Failed to update branch's branch manager"
 				}
 			} else {
-				logs.Info("Failed to get branch manager")
-				message = "Failed to get specified branch manager"
+				message = "Branch updated. Failed to update branch manager"
+				logs.Error("Failed to update user", updateBranch.StatusDesc)
+				resp := responses.BranchResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "Branch update failed. " + updateUserResp.StatusDesc}
+				c.Data["json"] = resp
 			}
-			resp := responses.BranchResponseDTO{Success: isSuccess, Result: branchResp, StatusDesc: message}
-			c.Ctx.Output.SetStatus(200)
-			c.Data["json"] = resp
+
+			isSuccess = true
 		} else {
-			logs.Error("Failed to verify token")
-			resp := responses.BranchResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "Failed to verify token"}
-			c.Data["json"] = resp
+			message = "Failed to update branch"
+			branchResp = nil
 		}
 	} else {
-		c.Ctx.Output.SetStatus(200)
-		var resp responses.BranchResponseDTO = responses.BranchResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
-		c.Data["json"] = resp
+		logs.Info("Failed to get branch manager")
+		message = "Failed to get specified branch manager"
 	}
+	resp := responses.BranchResponseDTO{Success: isSuccess, Result: branchResp, StatusDesc: message}
+	c.Ctx.Output.SetStatus(200)
+	c.Data["json"] = resp
 
 	c.ServeJSON()
 }
@@ -1085,6 +1289,279 @@ func (c *SystemController) UploadSystemImage() {
 			c.Data["json"] = resp
 		}
 
+	}
+
+	c.ServeJSON()
+}
+
+// GetShops ...
+// @Title Get Shops
+// @Description Get all shops
+// @Success 200 {object} responses.ShopsResponse
+// @Failure 403 body is empty
+// @router /get-shops [get]
+func (c *SystemController) GetShops() {
+
+	var isSuccess bool = false
+
+	statusesResp := functions.GetShops(&c.Controller)
+
+	// var message string
+
+	if statusesResp.StatusCode == 200 {
+
+		isSuccess = true
+		// message = "Email sent"
+
+		var resp responses.ShopsResponse = responses.ShopsResponse{Success: isSuccess, Result: statusesResp.Result, StatusDesc: statusesResp.StatusDesc}
+		c.Data["json"] = resp
+	} else {
+		var resp responses.ShopsResponse = responses.ShopsResponse{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
+		c.Data["json"] = resp
+	}
+
+	c.ServeJSON()
+}
+
+// GetShop ...
+// @Title Get Shop
+// @Description Get a single shop by ID
+// @Success 200 {object} responses.ShopsResponse
+// @Failure 403 body is empty
+// @router /get-shop/:id [get]
+func (c *SystemController) GetShop() {
+	id := c.Ctx.Input.Param(":id")
+	var isSuccess bool = false
+
+	statusesResp := functions.GetShop(&c.Controller, id)
+
+	// var message string
+
+	if statusesResp.StatusCode == 200 {
+
+		isSuccess = true
+		// message = "Email sent"
+
+		var resp responses.ShopResponse = responses.ShopResponse{Success: isSuccess, Result: statusesResp.Result, StatusDesc: statusesResp.StatusDesc}
+		c.Data["json"] = resp
+	} else {
+		var resp responses.ShopResponse = responses.ShopResponse{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
+		c.Data["json"] = resp
+	}
+
+	c.ServeJSON()
+}
+
+// AddShop ...
+// @Title Add Shop
+// @Description add a new shop
+// @Param	Authorization		header 	string true		"header for User"
+// @Param	body		body 	requests.ShopRequestDTO	true		"body for Shop content"
+// @Success 200 {object} responses.StatusResponseDTO
+// @Failure 403 body is empty
+// @router /add-shop [post]
+func (c *SystemController) AddShop() {
+	u := c.Ctx.Input.GetData("user")
+	userData, err := u.(*responses.UsersOri)
+	// fmt.Printf("Type of v: %T\n", v)
+	// fmt.Printf("Value of v: %+v\n", v)
+	if err != false {
+		logs.Error("Error retrieving user data: ", err)
+	}
+	var v requests.ShopRequestDTO
+	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
+
+	var isSuccess bool = false
+
+	userIdStr := strconv.Itoa(int(userData.UserId))
+	addStatusResp := functions.AddShop(&c.Controller, v, userIdStr)
+
+	if addStatusResp.StatusCode == 200 {
+
+		if addStatusResp.StatusCode == 200 {
+			message := "Shop Added Successfully"
+			isSuccess = true
+			var resp responses.ShopResponse = responses.ShopResponse{Success: isSuccess, Result: addStatusResp.Result, StatusDesc: message}
+			c.Data["json"] = resp
+		} else {
+			var resp responses.ShopResponse = responses.ShopResponse{Success: isSuccess, Result: nil, StatusDesc: addStatusResp.StatusDesc}
+			c.Data["json"] = resp
+		}
+	} else {
+		var resp responses.ShopResponse = responses.ShopResponse{Success: isSuccess, Result: nil, StatusDesc: "Shop could not be added"}
+		c.Data["json"] = resp
+	}
+
+	c.ServeJSON()
+}
+
+// UpdateShop ...
+// @Title Update Shop
+// @Description update an existing shop
+// @Param	Authorization		header 	string true		"header for User"
+// @Param	body		body 	requests.ShopRequestDTO	true		"body for Shop content"
+// @Success 200 {object} responses.StatusResponseDTO
+// @Failure 403 body is empty
+// @router /update-shop [post]
+func (c *SystemController) UpdateShop() {
+	u := c.Ctx.Input.GetData("user")
+	userData, err := u.(*responses.UsersOri)
+	// fmt.Printf("Type of v: %T\n", v)
+	// fmt.Printf("Value of v: %+v\n", v)
+	if err != false {
+		logs.Error("Error retrieving user data: ", err)
+	}
+	var v requests.ShopRequestDTO
+	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
+
+	var isSuccess bool = false
+
+	userIdStr := strconv.Itoa(int(userData.UserId))
+	addStatusResp := functions.UpdateShop(&c.Controller, v, userIdStr)
+
+	if addStatusResp.StatusCode == 200 {
+
+		if addStatusResp.StatusCode == 200 {
+			message := "Shop Updated Successfully"
+			isSuccess = true
+			var resp responses.ShopResponse = responses.ShopResponse{Success: isSuccess, Result: addStatusResp.Result, StatusDesc: message}
+			c.Data["json"] = resp
+		} else {
+			var resp responses.ShopResponse = responses.ShopResponse{Success: isSuccess, Result: nil, StatusDesc: addStatusResp.StatusDesc}
+			c.Data["json"] = resp
+		}
+	} else {
+		var resp responses.ShopResponse = responses.ShopResponse{Success: isSuccess, Result: nil, StatusDesc: "Shop could not be updated"}
+		c.Data["json"] = resp
+	}
+
+	c.ServeJSON()
+}
+
+// DeleteShop ...
+// @Title Delete Shop
+// @Description delete an existing shop
+// @Param	Authorization		header 	string true		"header for User"
+// @Param	body		body 	requests.ShopRequestDTO	true		"body for Shop content"
+// @Success 200 {object} responses.ShopResponse
+// @Failure 403 body is empty
+// @router /delete-shop [post]
+func (c *SystemController) DeleteShop() {
+	u := c.Ctx.Input.GetData("user")
+	userData, err := u.(*responses.UsersOri)
+	// fmt.Printf("Type of v: %T\n", v)
+	// fmt.Printf("Value of v: %+v\n", v)
+	if err != false {
+		logs.Error("Error retrieving user data: ", err)
+	}
+	var v requests.ShopRequestDTO
+	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
+
+	var isSuccess bool = false
+
+	userIdStr := strconv.Itoa(int(userData.UserId))
+	addStatusResp := functions.DeleteShop(&c.Controller, userIdStr)
+
+	if addStatusResp.StatusCode == 200 {
+
+		if addStatusResp.StatusCode == 200 {
+			message := "Shop Deleted Successfully"
+			isSuccess = true
+			var resp responses.ShopResponse = responses.ShopResponse{Success: isSuccess, Result: addStatusResp.Result, StatusDesc: message}
+			c.Data["json"] = resp
+		} else {
+			var resp responses.ShopResponse = responses.ShopResponse{Success: isSuccess, Result: nil, StatusDesc: addStatusResp.StatusDesc}
+			c.Data["json"] = resp
+		}
+	} else {
+		var resp responses.ShopResponse = responses.ShopResponse{Success: isSuccess, Result: nil, StatusDesc: "Shop could not be deleted"}
+		c.Data["json"] = resp
+	}
+
+	c.ServeJSON()
+}
+
+// AddShopBranch ...
+// @Title Add Shop Branch
+// @Description add a new shop branch
+// @Param	Authorization		header 	string true		"header for User"
+// @Param	body		body 	requests.ShopBranchRequestDTO	true		"body for Shop content"
+// @Success 200 {object} responses.StatusResponseDTO
+// @Failure 403 body is empty
+// @router /shop/add-branch [post]
+func (c *SystemController) AddShopBranch() {
+	u := c.Ctx.Input.GetData("user")
+	userData, err := u.(*responses.UsersOri)
+	// fmt.Printf("Type of v: %T\n", v)
+	// fmt.Printf("Value of v: %+v\n", v)
+	if err != false {
+		logs.Error("Error retrieving user data: ", err)
+	}
+	var v requests.ShopBranchRequestDTO
+	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
+
+	var isSuccess bool = false
+
+	userIdStr := strconv.Itoa(int(userData.UserId))
+	addStatusResp := functions.AddShopBranch(&c.Controller, v, userIdStr)
+
+	if addStatusResp.StatusCode == 200 {
+
+		if addStatusResp.StatusCode == 200 {
+			message := "Shop Added Successfully"
+			isSuccess = true
+			var resp responses.ShopResponse = responses.ShopResponse{Success: isSuccess, Result: addStatusResp.Result, StatusDesc: message}
+			c.Data["json"] = resp
+		} else {
+			var resp responses.ShopResponse = responses.ShopResponse{Success: isSuccess, Result: nil, StatusDesc: addStatusResp.StatusDesc}
+			c.Data["json"] = resp
+		}
+	} else {
+		var resp responses.ShopResponse = responses.ShopResponse{Success: isSuccess, Result: nil, StatusDesc: "Shop could not be added"}
+		c.Data["json"] = resp
+	}
+
+	c.ServeJSON()
+}
+
+// RemoveShopBranch ...
+// @Title Remove Shop Branch
+// @Description remove an existing shop branch
+// @Param	Authorization		header 	string true		"header for User"
+// @Param	body		body 	requests.ShopBranchRequestDTO	true		"body for Shop content"
+// @Success 200 {object} responses.StatusResponseDTO
+// @Failure 403 body is empty
+// @router /shop/remove-branch [post]
+func (c *SystemController) RemoveShopBranch() {
+	u := c.Ctx.Input.GetData("user")
+	userData, err := u.(*responses.UsersOri)
+	// fmt.Printf("Type of v: %T\n", v)
+	// fmt.Printf("Value of v: %+v\n", v)
+	if err != false {
+		logs.Error("Error retrieving user data: ", err)
+	}
+	var v requests.ShopBranchRequestDTO
+	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
+
+	var isSuccess bool = false
+
+	userIdStr := strconv.Itoa(int(userData.UserId))
+	addStatusResp := functions.RemoveShopBranch(&c.Controller, v, userIdStr)
+
+	if addStatusResp.StatusCode == 200 {
+
+		if addStatusResp.StatusCode == 200 {
+			message := "Shop Branch Removed Successfully"
+			isSuccess = true
+			var resp responses.ShopResponse = responses.ShopResponse{Success: isSuccess, Result: addStatusResp.Result, StatusDesc: message}
+			c.Data["json"] = resp
+		} else {
+			var resp responses.ShopResponse = responses.ShopResponse{Success: isSuccess, Result: nil, StatusDesc: addStatusResp.StatusDesc}
+			c.Data["json"] = resp
+		}
+	} else {
+		var resp responses.ShopResponse = responses.ShopResponse{Success: isSuccess, Result: nil, StatusDesc: "Shop Branch could not be removed"}
+		c.Data["json"] = resp
 	}
 
 	c.ServeJSON()

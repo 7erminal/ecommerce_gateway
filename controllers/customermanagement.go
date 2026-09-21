@@ -143,8 +143,8 @@ func (c *CustomermanagementController) GetAll() {
 	v := c.Ctx.Input.GetData("user")
 	userData, err := v.(*responses.UsersOri)
 
-	fmt.Printf("Type of v: %T\n", v)
-	fmt.Printf("Value of v: %+v\n", v)
+	// fmt.Printf("Type of v: %T\n", v)
+	// fmt.Printf("Value of v: %+v\n", v)
 
 	logs.Info("Error is ", err)
 

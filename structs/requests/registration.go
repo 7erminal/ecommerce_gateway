@@ -18,4 +18,5 @@ type RegisterUser struct {
 	Password    string
 	Dob         string
 	RoleId      string
+	BranchId    string
 }

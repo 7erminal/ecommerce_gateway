@@ -16,7 +16,7 @@ import (
 )
 
 func AddBranch(c *beego.Controller, req requests.BranchRequestDTO, addedBy int64) (resp responses.BranchOriResponseDTO) {
-	host, _ := beego.AppConfig.String("systemBaseUrl")
+	host, _ := beego.AppConfig.String("customerBaseUrl")
 
 	logs.Info("Sending user name ", strconv.FormatInt(addedBy, 10))
 
@@ -67,7 +67,7 @@ func AddBranch(c *beego.Controller, req requests.BranchRequestDTO, addedBy int64
 }
 
 func UpdateBranch(c *beego.Controller, req requests.BranchRequestDTO, addedBy int64, branchId string) (resp responses.BranchOriResponseDTO) {
-	host, _ := beego.AppConfig.String("systemBaseUrl")
+	host, _ := beego.AppConfig.String("customerBaseUrl")
 
 	logs.Info("Sending user name ", strconv.FormatInt(addedBy, 10))
 
@@ -164,7 +164,7 @@ func GetBranch(c *beego.Controller, branchid string) (resp responses.BranchOriRe
 }
 
 func DeleteBranch(c *beego.Controller, branchid string) (resp responses.StringOriResponseDTO) {
-	host, _ := beego.AppConfig.String("systemBaseUrl")
+	host, _ := beego.AppConfig.String("customerBaseUrl")
 
 	logs.Info("Getting branch details for ", branchid)
 
@@ -1340,6 +1340,610 @@ func GetApplicationByCode(c *beego.Controller, code string) (resp responses.Appl
 
 	logs.Info("Resp is ", resp)
 	return resp
+}
+
+func GetStatuses(c *beego.Controller) (resp responses.StatusApiListResponse) {
+	host, _ := beego.AppConfig.String("customerBaseUrl")
+
+	logs.Info("Getting roles ")
+
+	request := api.NewRequest(
+		host,
+		"/v1/status",
+		api.GET)
+	// request.Params = {"UserId": strconv.Itoa(int(userid))}
+	client := api.Client{
+		Request: request,
+		Type_:   "body",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+	// data := map[string]interface{}{}
+	var data responses.StatusApiListResponse
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	logs.Info("Resp is ", data)
+
+	return data
+}
+
+func GetStatus(c *beego.Controller, statusid string) (resp responses.StatusApiResponse) {
+	host, _ := beego.AppConfig.String("systemBaseUrl")
+
+	logs.Info("Getting status for ID ", statusid)
+
+	request := api.NewRequest(
+		host,
+		"/v1/status/"+statusid,
+		api.GET)
+	// request.Params = {"UserId": strconv.Itoa(int(userid))}
+	client := api.Client{
+		Request: request,
+		Type_:   "body",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+	// data := map[string]interface{}{}
+	var data responses.StatusApiResponse
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	logs.Info("Resp is ", data)
+
+	return data
+}
+
+func AddStatus(c *beego.Controller, v requests.Status, userid string) (resp responses.StatusApiResponse) {
+	host, _ := beego.AppConfig.String("systemBaseUrl")
+
+	logs.Info("Adding status ")
+
+	request := api.NewRequest(
+		host,
+		"/v1/status",
+		api.POST)
+	// request.Params = {"UserId": strconv.Itoa(int(userid))}
+	request.InterfaceParams["Status"] = v.Status
+	request.InterfaceParams["StatusCode"] = v.StatusCode
+	client := api.Client{
+		Request: request,
+		Type_:   "body",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+	// data := map[string]interface{}{}
+	var data responses.StatusApiResponse
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	logs.Info("Resp is ", data)
+
+	return data
+}
+
+func DeleteStatus(c *beego.Controller, statusId string) (resp responses.StatusApiResponse) {
+	host, _ := beego.AppConfig.String("systemBaseUrl")
+
+	logs.Info("Deleting status ")
+
+	request := api.NewRequest(
+		host,
+		"/v1/status/"+statusId,
+		api.DELETE)
+	// request.Params = {"UserId": strconv.Itoa(int(userid))}
+	// request.InterfaceParams["StatusId"] = statusId
+	client := api.Client{
+		Request: request,
+		Type_:   "body",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+	// data := map[string]interface{}{}
+	var data responses.StatusApiResponse
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	logs.Info("Resp is ", data)
+
+	return data
+}
+
+func UpdateStatus(c *beego.Controller, v requests.Status, statusId string, userid string) (resp responses.StatusApiResponse) {
+	host, _ := beego.AppConfig.String("systemBaseUrl")
+
+	logs.Info("Updating status ")
+
+	request := api.NewRequest(
+		host,
+		"/v1/status/"+statusId,
+		api.PUT)
+	// request.Params = {"UserId": strconv.Itoa(int(userid))}
+	request.InterfaceParams["Status"] = v.Status
+	request.InterfaceParams["StatusCode"] = v.StatusCode
+	request.InterfaceParams["StatusId"] = statusId
+	client := api.Client{
+		Request: request,
+		Type_:   "body",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+	// data := map[string]interface{}{}
+	var data responses.StatusApiResponse
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	logs.Info("Resp is ", data)
+
+	return data
+}
+
+func GetShops(c *beego.Controller) (resp responses.ShopsApiResponse) {
+	host, _ := beego.AppConfig.String("customerBaseUrl")
+
+	logs.Info("Getting shops ")
+
+	request := api.NewRequest(
+		host,
+		"/v1/shops",
+		api.GET)
+	// request.Params = {"UserId": strconv.Itoa(int(userid))}
+	client := api.Client{
+		Request: request,
+		Type_:   "body",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+	// data := map[string]interface{}{}
+	var data responses.ShopsApiResponse
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	logs.Info("Resp is ", data)
+
+	return data
+}
+
+func GetShop(c *beego.Controller, shopId string) (resp responses.ShopApiResponse) {
+	host, _ := beego.AppConfig.String("customerBaseUrl")
+
+	logs.Info("Getting shop ")
+
+	request := api.NewRequest(
+		host,
+		"/v1/shops/"+shopId,
+		api.GET)
+	// request.Params = {"UserId": strconv.Itoa(int(userid))}
+	client := api.Client{
+		Request: request,
+		Type_:   "params",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+	// data := map[string]interface{}{}
+	var data responses.ShopApiResponse
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	logs.Info("Resp is ", data)
+
+	return data
+}
+
+func AddShop(c *beego.Controller, v requests.ShopRequestDTO, userid string) (resp responses.ShopApiResponse) {
+	host, _ := beego.AppConfig.String("customerBaseUrl")
+
+	logs.Info("Adding shops ")
+
+	request := api.NewRequest(
+		host,
+		"/v1/shops",
+		api.POST)
+	// request.Params = {"UserId": strconv.Itoa(int(userid))}
+	request.InterfaceParams["Name"] = v.ShopName
+	request.InterfaceParams["PhoneNumber"] = v.PhoneNumber
+	request.InterfaceParams["Email"] = v.Email
+	request.InterfaceParams["ImageUrl"] = v.Image
+	request.InterfaceParams["Description"] = v.ShopDescription
+	request.InterfaceParams["Location"] = v.ShopLocation
+	request.InterfaceParams["AssistantName"] = v.ShopAssistantName
+	request.InterfaceParams["AssistantPhoneNumber"] = v.ShopAssistantNumber
+	client := api.Client{
+		Request: request,
+		Type_:   "body",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+	// data := map[string]interface{}{}
+	var data responses.ShopApiResponse
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	logs.Info("Resp is ", data)
+
+	return data
+}
+
+func AddShopBranch(c *beego.Controller, v requests.ShopBranchRequestDTO, userid string) (resp responses.ShopApiResponse) {
+	host, _ := beego.AppConfig.String("customerBaseUrl")
+
+	logs.Info("Adding shops ")
+
+	request := api.NewRequest(
+		host,
+		"/v1/shops/branches",
+		api.POST)
+	// request.Params = {"UserId": strconv.Itoa(int(userid))}
+	request.InterfaceParams["ShopId"] = v.ShopId
+	request.InterfaceParams["BranchId"] = v.BranchId
+	client := api.Client{
+		Request: request,
+		Type_:   "body",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+	// data := map[string]interface{}{}
+	var data responses.ShopApiResponse
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	logs.Info("Resp is ", data)
+
+	return data
+}
+
+func RemoveShopBranch(c *beego.Controller, v requests.ShopBranchRequestDTO, userid string) (resp responses.ShopApiResponse) {
+	host, _ := beego.AppConfig.String("customerBaseUrl")
+
+	logs.Info("Removing shop branch ")
+
+	request := api.NewRequest(
+		host,
+		"/v1/shops/branches",
+		api.DELETE)
+	// request.Params = {"UserId": strconv.Itoa(int(userid))}
+	request.InterfaceParams["ShopId"] = v.ShopId
+	request.InterfaceParams["BranchId"] = v.BranchId
+	client := api.Client{
+		Request: request,
+		Type_:   "body",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+	// data := map[string]interface{}{}
+	var data responses.ShopApiResponse
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	logs.Info("Resp is ", data)
+
+	return data
+}
+
+func DeleteShop(c *beego.Controller, shopId string) (resp responses.ShopApiResponse) {
+	host, _ := beego.AppConfig.String("customerBaseUrl")
+
+	logs.Info("Deleting shops ")
+
+	request := api.NewRequest(
+		host,
+		"/v1/shops/"+shopId,
+		api.DELETE)
+	// request.Params = {"UserId": strconv.Itoa(int(userid))}
+	client := api.Client{
+		Request: request,
+		Type_:   "body",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+	// data := map[string]interface{}{}
+	var data responses.ShopApiResponse
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	logs.Info("Resp is ", data)
+
+	return data
+}
+
+func UpdateShop(c *beego.Controller, v requests.ShopRequestDTO, shopId string) (resp responses.ShopApiResponse) {
+	host, _ := beego.AppConfig.String("customerBaseUrl")
+
+	logs.Info("Updating shops ")
+
+	request := api.NewRequest(
+		host,
+		"/v1/shops/"+shopId,
+		api.PUT)
+	request.Params["Name"] = v.ShopName
+	request.Params["PhoneNumber"] = v.PhoneNumber
+	request.Params["Email"] = v.Email
+	request.Params["ImageUrl"] = v.Image
+	request.Params["Description"] = v.ShopDescription
+	request.Params["Location"] = v.ShopLocation
+	request.Params["AssistantName"] = v.ShopAssistantName
+	request.Params["AssistantPhoneNumber"] = v.ShopAssistantNumber
+	// request.Params = {"UserId": strconv.Itoa(int(userid))}
+	client := api.Client{
+		Request: request,
+		Type_:   "params",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+	// data := map[string]interface{}{}
+	var data responses.ShopApiResponse
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	logs.Info("Resp is ", data)
+
+	return data
+}
+
+func AddApplicationShop(c *beego.Controller, v requests.ShopBranchRequestDTO, userid string) (resp responses.ShopApiResponse) {
+	host, _ := beego.AppConfig.String("systemBaseUrl")
+
+	logs.Info("Adding shops ")
+
+	request := api.NewRequest(
+		host,
+		"/v1/shops/branches",
+		api.POST)
+	// request.Params = {"UserId": strconv.Itoa(int(userid))}
+	request.InterfaceParams["ShopId"] = v.ShopId
+	request.InterfaceParams["BranchId"] = v.BranchId
+	client := api.Client{
+		Request: request,
+		Type_:   "body",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+	// data := map[string]interface{}{}
+	var data responses.ShopApiResponse
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	logs.Info("Resp is ", data)
+
+	return data
+}
+
+func RemoveApplicationShop(c *beego.Controller, v requests.ShopBranchRequestDTO, userid string) (resp responses.ShopApiResponse) {
+	host, _ := beego.AppConfig.String("systemBaseUrl")
+
+	logs.Info("Removing shop branch ")
+
+	request := api.NewRequest(
+		host,
+		"/v1/shops/branches",
+		api.DELETE)
+	// request.Params = {"UserId": strconv.Itoa(int(userid))}
+	request.InterfaceParams["ShopId"] = v.ShopId
+	request.InterfaceParams["BranchId"] = v.BranchId
+	client := api.Client{
+		Request: request,
+		Type_:   "body",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+	// data := map[string]interface{}{}
+	var data responses.ShopApiResponse
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	logs.Info("Resp is ", data)
+
+	return data
 }
 
 func UploadSystemImage(c *beego.Controller, systemImage string, system string) (resp responses.SystemImageOriResponseDTO) {
