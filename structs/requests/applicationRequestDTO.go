@@ -36,3 +36,8 @@ type ThemeRequest struct {
 type ThemeConfigRequest struct {
 	Config string
 }
+
+type ApplicationShopRequest struct {
+	ApplicationId string
+	ShopId        string
+}

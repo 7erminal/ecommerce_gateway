@@ -1860,18 +1860,18 @@ func UpdateShop(c *beego.Controller, v requests.ShopRequestDTO, shopId string) (
 	return data
 }
 
-func AddApplicationShop(c *beego.Controller, v requests.ShopBranchRequestDTO, userid string) (resp responses.ShopApiResponse) {
+func AddApplicationShop(c *beego.Controller, v requests.ApplicationShopRequest, userid string) (resp responses.ApplicationResponse) {
 	host, _ := beego.AppConfig.String("systemBaseUrl")
 
 	logs.Info("Adding shops ")
 
 	request := api.NewRequest(
 		host,
-		"/v1/shops/branches",
+		"/v1/application/shop",
 		api.POST)
 	// request.Params = {"UserId": strconv.Itoa(int(userid))}
 	request.InterfaceParams["ShopId"] = v.ShopId
-	request.InterfaceParams["BranchId"] = v.BranchId
+	request.InterfaceParams["ApplicationId"] = v.ApplicationId
 	client := api.Client{
 		Request: request,
 		Type_:   "body",
@@ -1894,7 +1894,7 @@ func AddApplicationShop(c *beego.Controller, v requests.ShopBranchRequestDTO, us
 		logs.Info("Raw response received is \n", prettyJSON.String())
 	}
 	// data := map[string]interface{}{}
-	var data responses.ShopApiResponse
+	var data responses.ApplicationResponse
 	json.Unmarshal(read, &data)
 	c.Data["json"] = data
 
@@ -1903,18 +1903,18 @@ func AddApplicationShop(c *beego.Controller, v requests.ShopBranchRequestDTO, us
 	return data
 }
 
-func RemoveApplicationShop(c *beego.Controller, v requests.ShopBranchRequestDTO, userid string) (resp responses.ShopApiResponse) {
+func RemoveApplicationShop(c *beego.Controller, v requests.ApplicationShopRequest, userid string) (resp responses.ApplicationResponse) {
 	host, _ := beego.AppConfig.String("systemBaseUrl")
 
 	logs.Info("Removing shop branch ")
 
 	request := api.NewRequest(
 		host,
-		"/v1/shops/branches",
+		"/v1/application/shop",
 		api.DELETE)
 	// request.Params = {"UserId": strconv.Itoa(int(userid))}
 	request.InterfaceParams["ShopId"] = v.ShopId
-	request.InterfaceParams["BranchId"] = v.BranchId
+	request.InterfaceParams["ApplicationId"] = v.ApplicationId
 	client := api.Client{
 		Request: request,
 		Type_:   "body",
@@ -1937,7 +1937,7 @@ func RemoveApplicationShop(c *beego.Controller, v requests.ShopBranchRequestDTO,
 		logs.Info("Raw response received is \n", prettyJSON.String())
 	}
 	// data := map[string]interface{}{}
-	var data responses.ShopApiResponse
+	var data responses.ApplicationResponse
 	json.Unmarshal(read, &data)
 	c.Data["json"] = data
 

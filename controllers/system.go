@@ -1566,3 +1566,101 @@ func (c *SystemController) RemoveShopBranch() {
 
 	c.ServeJSON()
 }
+
+// AddShopBranch ...
+// @Title Add Application Shop Branch
+// @Description add a new application shop branch
+// @Param	Authorization		header 	string true		"header for User"
+// @Param	body		body 	requests.ShopBranchRequestDTO	true		"body for Application Shop content"
+// @Success 200 {object} responses.StatusResponseDTO
+// @Failure 403 body is empty
+// @router /application/add-shop [post]
+func (c *SystemController) AddApplicationShop() {
+	u := c.Ctx.Input.GetData("user")
+	userData, err := u.(*responses.UsersOri)
+	// fmt.Printf("Type of v: %T\n", v)
+	// fmt.Printf("Value of v: %+v\n", v)
+	if err != false {
+		logs.Error("Error retrieving user data: ", err)
+	}
+	var v requests.ApplicationShopRequest
+	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
+
+	var isSuccess bool = false
+
+	userIdStr := strconv.Itoa(int(userData.UserId))
+	addStatusResp := functions.AddApplicationShop(&c.Controller, v, userIdStr)
+
+	if addStatusResp.StatusCode == 200 {
+		message := "Shop Added Successfully"
+		isSuccess = true
+		appRespData := responses.ApplicationResp{
+			ApplicationId:    addStatusResp.Result.ApplicationId,
+			ApplicationCode:  addStatusResp.Result.ApplicationCode,
+			ApplicationName:  addStatusResp.Result.ApplicationName,
+			ApplicationLogo:  addStatusResp.Result.ApplicationLogo,
+			ThemeColors:      addStatusResp.Result.ThemeColors,
+			DefaultFontsize:  addStatusResp.Result.DefaultFontsize,
+			ApplicationImage: addStatusResp.Result.ApplicationImage,
+			DateCreated:      addStatusResp.Result.DateCreated,
+			DateModified:     addStatusResp.Result.DateModified,
+			Active:           addStatusResp.Result.Active,
+		}
+		var resp responses.ApplicationResponseDTO = responses.ApplicationResponseDTO{Success: isSuccess, Result: &appRespData, StatusDesc: message}
+		c.Data["json"] = resp
+	} else {
+		var resp responses.ApplicationResponseDTO = responses.ApplicationResponseDTO{Success: isSuccess, Result: nil, StatusDesc: addStatusResp.StatusMessage}
+		c.Data["json"] = resp
+	}
+
+	c.ServeJSON()
+}
+
+// RemoveShopBranch ...
+// @Title Remove Shop Branch
+// @Description remove an existing shop branch
+// @Param	Authorization		header 	string true		"header for User"
+// @Param	body		body 	requests.ApplicationShopRequest	true		"body for Shop content"
+// @Success 200 {object} responses.StatusResponseDTO
+// @Failure 403 body is empty
+// @router /application/remove-shop [post]
+func (c *SystemController) RemoveApplicationShop() {
+	u := c.Ctx.Input.GetData("user")
+	userData, err := u.(*responses.UsersOri)
+	// fmt.Printf("Type of v: %T\n", v)
+	// fmt.Printf("Value of v: %+v\n", v)
+	if err != false {
+		logs.Error("Error retrieving user data: ", err)
+	}
+	var v requests.ApplicationShopRequest
+	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
+
+	var isSuccess bool = false
+
+	userIdStr := strconv.Itoa(int(userData.UserId))
+	addStatusResp := functions.RemoveApplicationShop(&c.Controller, v, userIdStr)
+
+	if addStatusResp.StatusCode == 200 {
+		message := "Shop Branch Removed Successfully"
+		isSuccess = true
+		appRespData := responses.ApplicationResp{
+			ApplicationId:    addStatusResp.Result.ApplicationId,
+			ApplicationCode:  addStatusResp.Result.ApplicationCode,
+			ApplicationName:  addStatusResp.Result.ApplicationName,
+			ApplicationLogo:  addStatusResp.Result.ApplicationLogo,
+			ThemeColors:      addStatusResp.Result.ThemeColors,
+			DefaultFontsize:  addStatusResp.Result.DefaultFontsize,
+			ApplicationImage: addStatusResp.Result.ApplicationImage,
+			DateCreated:      addStatusResp.Result.DateCreated,
+			DateModified:     addStatusResp.Result.DateModified,
+			Active:           addStatusResp.Result.Active,
+		}
+		var resp responses.ApplicationResponseDTO = responses.ApplicationResponseDTO{Success: isSuccess, Result: &appRespData, StatusDesc: message}
+		c.Data["json"] = resp
+	} else {
+		var resp responses.ApplicationResponseDTO = responses.ApplicationResponseDTO{Success: isSuccess, Result: nil, StatusDesc: addStatusResp.StatusMessage}
+		c.Data["json"] = resp
+	}
+
+	c.ServeJSON()
+}
