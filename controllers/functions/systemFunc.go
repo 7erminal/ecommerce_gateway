@@ -19,6 +19,7 @@ func AddBranch(c *beego.Controller, req requests.BranchRequestDTO, addedBy int64
 	host, _ := beego.AppConfig.String("customerBaseUrl")
 
 	logs.Info("Sending user name ", strconv.FormatInt(addedBy, 10))
+	logs.Info("Getting branches")
 
 	request := api.NewRequest(
 		host,
@@ -52,9 +53,9 @@ func AddBranch(c *beego.Controller, req requests.BranchRequestDTO, addedBy int64
 
 	var prettyJSON bytes.Buffer
 	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
-		logs.Info("Raw response received is ", string(read))
+		logs.Info("Raw response for branches received is ", string(read))
 	} else {
-		logs.Info("Raw response received is \n", prettyJSON.String())
+		logs.Info("Raw response for branches received is \n", prettyJSON.String())
 	}
 	// data := map[string]interface{}{}
 	var data responses.BranchOriResponseDTO
