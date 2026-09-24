@@ -959,7 +959,7 @@ func (c *SystemController) GetApplicationShops() {
 	isSuccess := false
 
 	appResp := functions.GetApplicationShops(&c.Controller)
-	if appResp.Success {
+	if appResp.StatusCode == 200 {
 		isSuccess = true
 		message := "Application shops fetched successfully"
 		var resp responses.ApplicationShopsResponse = responses.ApplicationShopsResponse{Success: isSuccess, Result: appResp.Result, StatusDesc: message}

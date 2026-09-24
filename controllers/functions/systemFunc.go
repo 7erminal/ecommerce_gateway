@@ -1949,7 +1949,7 @@ func RemoveApplicationShop(c *beego.Controller, v requests.ApplicationShopReques
 	return data
 }
 
-func GetApplicationShops(c *beego.Controller) (resp responses.ApplicationShopsResponse) {
+func GetApplicationShops(c *beego.Controller) (resp responses.ApplicationShopsApiResponse) {
 	host, _ := beego.AppConfig.String("systemBaseUrl")
 
 	logs.Info("Getting application shops")
@@ -1983,7 +1983,7 @@ func GetApplicationShops(c *beego.Controller) (resp responses.ApplicationShopsRe
 		logs.Info("Raw response received is \n", prettyJSON.String())
 	}
 	// data := map[string]interface{}{}
-	var data responses.ApplicationShopsResponse
+	var data responses.ApplicationShopsApiResponse
 	json.Unmarshal(read, &data)
 	c.Data["json"] = data
 
