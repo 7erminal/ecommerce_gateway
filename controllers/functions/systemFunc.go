@@ -1913,7 +1913,7 @@ func RemoveApplicationShop(c *beego.Controller, v requests.ApplicationShopReques
 
 	request := api.NewRequest(
 		host,
-		"/v1/application/shop",
+		"/v1/application/remove-shop",
 		api.DELETE)
 	// request.Params = {"UserId": strconv.Itoa(int(userid))}
 	request.InterfaceParams["ShopId"] = v.ShopId
