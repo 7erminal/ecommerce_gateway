@@ -551,9 +551,9 @@ func (c *SystemController) GetAllBranches() {
 	if getBranchResp.StatusCode == 200 {
 		logs.Info("Response is 200")
 		var branches []responses.BranchResp
-		if getBranchResp.Branches != nil && len(*getBranchResp.Branches) > 0 {
+		if getBranchResp.Result != nil && len(*getBranchResp.Result) > 0 {
 			logs.Info("Processing branches ")
-			for _, branch := range *getBranchResp.Branches {
+			for _, branch := range *getBranchResp.Result {
 
 				var branchManager *responses.UserGateway
 
