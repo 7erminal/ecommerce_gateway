@@ -552,6 +552,7 @@ func (c *SystemController) GetAllBranches() {
 		logs.Info("Response is 200")
 		var branches []responses.BranchResp
 		if getBranchResp.Branches != nil && len(*getBranchResp.Branches) > 0 {
+			logs.Info("Processing branches ")
 			for _, branch := range *getBranchResp.Branches {
 
 				var branchManager *responses.UserGateway
@@ -597,6 +598,7 @@ func (c *SystemController) GetAllBranches() {
 		branchesData.Count = len(branches)
 
 		isSuccess = true
+		logs.Info("Branches fetched successfully, count: ", len(branches))
 		var resp responses.BranchesResponseDTO = responses.BranchesResponseDTO{Success: isSuccess, Result: &branchesData, StatusDesc: "Branches fetched Successfully"}
 		c.Data["json"] = resp
 	} else {
