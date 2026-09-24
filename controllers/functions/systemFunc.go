@@ -314,9 +314,9 @@ func GetBranches(c *beego.Controller) (resp responses.BranchesOriResponseDTO) {
 
 	var prettyJSON bytes.Buffer
 	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
-		logs.Info("Raw response received is ", string(read))
+		logs.Info("Raw response received for branches is ", string(read))
 	} else {
-		logs.Info("Raw response received is \n", prettyJSON.String())
+		logs.Info("Raw response received for branches is \n", prettyJSON.String())
 	}
 	// data := map[string]interface{}{}
 	var data responses.BranchesOriResponseDTO
