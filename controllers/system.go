@@ -541,81 +541,64 @@ func (c *SystemController) GetAllCountries() {
 // @Failure 403
 // @router /get-branches [get]
 func (c *SystemController) GetAllBranches() {
-	authorization := c.Ctx.Input.Header("Authorization")
-	token := strings.Split(authorization, " ")
-
+	logs.Info("Fetching all branches")
 	var isSuccess bool = false
 
-	if token[0] == "Bearer" {
-		logs.Info("Token is ", token[1])
-		verifyToken := functions.VerifyToken(&c.Controller, token[1])
+	getBranchResp := functions.GetBranches(&c.Controller)
 
-		if verifyToken.StatusCode == 200 {
-			getBranchResp := functions.GetBranches(&c.Controller)
+	// json.Unmarshal(getBranchResp.Branches, &v)
 
-			// json.Unmarshal(getBranchResp.Branches, &v)
+	if getBranchResp.StatusCode == 200 {
+		logs.Info("Response is 200")
+		var branches []responses.BranchResp
+		if getBranchResp.Branches != nil && len(*getBranchResp.Branches) > 0 {
+			for _, branch := range *getBranchResp.Branches {
 
-			if getBranchResp.StatusCode == 200 {
-				logs.Info("Response is 200")
-				var branches []responses.BranchResp
-				if getBranchResp.Branches != nil && len(*getBranchResp.Branches) > 0 {
-					for _, branch := range *getBranchResp.Branches {
+				var branchManager *responses.UserGateway
 
-						var branchManager *responses.UserGateway
-
-						logs.Info("Branch value is ", branch.BranchManager)
-						if branch.BranchManager != nil {
-							splitName := strings.Split(branch.BranchManager.FullName, " | ")
-							firstname := ""
-							lastname := ""
-							if len(splitName) > 1 {
-								firstname = splitName[0]
-								lastname = splitName[1]
-							} else {
-								firstname = splitName[0]
-							}
-
-							// var curr responses.CurrencyResp = responses.CurrencyResp{Symbol: branch.Country.DefaultCurrency.Symbol, Currency: branch.Country.DefaultCurrency.Currency}
-							// var country responses.CountryResp = responses.CountryResp{Country: branch.Country.Country, CountryCode: branch.Country.CountryCode, Currency: &curr}
-							branchManager = &responses.UserGateway{UserId: branch.BranchManager.UserId, FirstName: firstname, LastName: lastname, Username: branch.BranchManager.Username, Email: branch.BranchManager.Email, PhoneNumber: branch.BranchManager.PhoneNumber, ImagePath: branch.BranchManager.ImagePath}
-						} else {
-							branchManager = nil
-						}
-
-						var data responses.BranchResp = responses.BranchResp{
-							BranchId:    branch.BranchId,
-							Branch:      branch.BranchName,
-							Description: branch.Description,
-							// Country:     &country,
-							Location:      branch.Location,
-							PhoneNumber:   branch.PhoneNumber,
-							DateCreated:   branch.DateCreated,
-							BranchManager: branchManager,
-						}
-
-						branches = append(branches, data)
+				logs.Info("Branch value is ", branch.BranchManager)
+				if branch.BranchManager != nil {
+					splitName := strings.Split(branch.BranchManager.FullName, " | ")
+					firstname := ""
+					lastname := ""
+					if len(splitName) > 1 {
+						firstname = splitName[0]
+						lastname = splitName[1]
+					} else {
+						firstname = splitName[0]
 					}
+
+					// var curr responses.CurrencyResp = responses.CurrencyResp{Symbol: branch.Country.DefaultCurrency.Symbol, Currency: branch.Country.DefaultCurrency.Currency}
+					// var country responses.CountryResp = responses.CountryResp{Country: branch.Country.Country, CountryCode: branch.Country.CountryCode, Currency: &curr}
+					branchManager = &responses.UserGateway{UserId: branch.BranchManager.UserId, FirstName: firstname, LastName: lastname, Username: branch.BranchManager.Username, Email: branch.BranchManager.Email, PhoneNumber: branch.BranchManager.PhoneNumber, ImagePath: branch.BranchManager.ImagePath}
 				} else {
-					branches = []responses.BranchResp{}
+					branchManager = nil
 				}
 
-				branchesData := responses.BranchesData{}
-				branchesData.Data = &branches
-				branchesData.Count = len(branches)
+				var data responses.BranchResp = responses.BranchResp{
+					BranchId:    branch.BranchId,
+					Branch:      branch.BranchName,
+					Description: branch.Description,
+					// Country:     &country,
+					Location:      branch.Location,
+					PhoneNumber:   branch.PhoneNumber,
+					DateCreated:   branch.DateCreated,
+					BranchManager: branchManager,
+				}
 
-				isSuccess = true
-				var resp responses.BranchesResponseDTO = responses.BranchesResponseDTO{Success: isSuccess, Result: &branchesData, StatusDesc: "Branches fetched Successfully"}
-				c.Data["json"] = resp
-			} else {
-				var resp responses.BranchResponseDTO = responses.BranchResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
-				c.Data["json"] = resp
+				branches = append(branches, data)
 			}
 		} else {
-			logs.Error("Error verifying token")
-			var resp responses.BranchResponseDTO = responses.BranchResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
-			c.Data["json"] = resp
+			branches = []responses.BranchResp{}
 		}
 
+		branchesData := responses.BranchesData{}
+		branchesData.Data = &branches
+		branchesData.Count = len(branches)
+
+		isSuccess = true
+		var resp responses.BranchesResponseDTO = responses.BranchesResponseDTO{Success: isSuccess, Result: &branchesData, StatusDesc: "Branches fetched Successfully"}
+		c.Data["json"] = resp
 	} else {
 		var resp responses.BranchResponseDTO = responses.BranchResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
 		c.Data["json"] = resp
