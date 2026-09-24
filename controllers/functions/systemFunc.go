@@ -284,7 +284,7 @@ func GetSystemDetails(c *beego.Controller, branchid string) (resp responses.Syst
 }
 
 func GetBranches(c *beego.Controller) (resp responses.BranchesOriResponseDTO) {
-	host, _ := beego.AppConfig.String("systemBaseUrl")
+	host, _ := beego.AppConfig.String("customerBaseUrl")
 
 	request := api.NewRequest(
 		host,
@@ -328,7 +328,7 @@ func GetBranches(c *beego.Controller) (resp responses.BranchesOriResponseDTO) {
 }
 
 func UpdateBranchBranchManger(c *beego.Controller, userid string, branchid string) (resp responses.BranchesOriResponseDTO) {
-	host, _ := beego.AppConfig.String("systemBaseUrl")
+	host, _ := beego.AppConfig.String("customerBaseUrl")
 
 	request := api.NewRequest(
 		host,
