@@ -1956,14 +1956,14 @@ func GetApplicationShops(c *beego.Controller) (resp responses.ApplicationShopsRe
 
 	request := api.NewRequest(
 		host,
-		"/v1/application/get-application-shops",
+		"/v1/applications/get-application-shops",
 		api.GET)
 	// request.Params = {"UserId": strconv.Itoa(int(userid))}
 	// request.InterfaceParams["ShopId"] = v.ShopId
 	// request.InterfaceParams["ApplicationId"] = v.ApplicationId
 	client := api.Client{
 		Request: request,
-		Type_:   "body",
+		Type_:   "params",
 	}
 	res, err := client.SendRequest()
 	if err != nil {
