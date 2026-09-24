@@ -1949,6 +1949,49 @@ func RemoveApplicationShop(c *beego.Controller, v requests.ApplicationShopReques
 	return data
 }
 
+func GetApplicationShops(c *beego.Controller) (resp responses.ApplicationShopsResponse) {
+	host, _ := beego.AppConfig.String("systemBaseUrl")
+
+	logs.Info("Getting application shops")
+
+	request := api.NewRequest(
+		host,
+		"/v1/application/get-application-shops",
+		api.GET)
+	// request.Params = {"UserId": strconv.Itoa(int(userid))}
+	// request.InterfaceParams["ShopId"] = v.ShopId
+	// request.InterfaceParams["ApplicationId"] = v.ApplicationId
+	client := api.Client{
+		Request: request,
+		Type_:   "body",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+	// data := map[string]interface{}{}
+	var data responses.ApplicationShopsResponse
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	logs.Info("Resp is ", data)
+
+	return data
+}
+
 func UploadSystemImage(c *beego.Controller, systemImage string, system string) (resp responses.SystemImageOriResponseDTO) {
 	host, _ := beego.AppConfig.String("systemBaseUrl")
 

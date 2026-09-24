@@ -47,6 +47,7 @@ func (c *SystemController) URLMapping() {
 	c.Mapping("DeleteShop", c.DeleteShop)
 	c.Mapping("GetShops", c.GetShops)
 	c.Mapping("GetShop", c.GetShop)
+	c.Mapping("GetApplicationShops", c.GetApplicationShops)
 }
 
 // GetRoles ...
@@ -942,6 +943,29 @@ func (c *SystemController) GetApplications() {
 		c.Data["json"] = resp
 	} else {
 		var resp responses.ApplicationsResponseDTO = responses.ApplicationsResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An error occurred while fetching the applications"}
+		c.Data["json"] = resp
+	}
+
+	c.ServeJSON()
+}
+
+// GetApplicationShops ...
+// @Title Get Application Shops
+// @Description get all application shops
+// @Success 200 {object} responses.ApplicationShopsResponse
+// @Failure 403 an error occurred
+// @router /get-application-shops [get]
+func (c *SystemController) GetApplicationShops() {
+	isSuccess := false
+
+	appResp := functions.GetApplicationShops(&c.Controller)
+	if appResp.Success {
+		isSuccess = true
+		message := "Application shops fetched successfully"
+		var resp responses.ApplicationShopsResponse = responses.ApplicationShopsResponse{Success: isSuccess, Result: appResp.Result, StatusDesc: message}
+		c.Data["json"] = resp
+	} else {
+		var resp responses.ApplicationShopsResponse = responses.ApplicationShopsResponse{Success: isSuccess, Result: nil, StatusDesc: "An error occurred while fetching the application shops"}
 		c.Data["json"] = resp
 	}
 
