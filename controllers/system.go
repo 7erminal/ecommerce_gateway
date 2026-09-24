@@ -352,7 +352,16 @@ func (c *SystemController) AddBranch() {
 
 	var isSuccess bool = false
 
-	userDetailsResp := functions.GetUserDetails(&c.Controller, v.BranchManager)
+	branchManager := v.BranchManager
+	if branchManager == 0 {
+		logs.Error("Branch manager is not specified")
+		if userData != nil && userData.Role.Role == "SUPER_ADMIN" {
+			logs.Info("User is however a super admin")
+			branchManager = userData.UserId
+		}
+	}
+
+	userDetailsResp := functions.GetUserDetails(&c.Controller, branchManager)
 
 	activeState := "false"
 	if userData != nil && userData.Role.Role == "SUPER_ADMIN" {
