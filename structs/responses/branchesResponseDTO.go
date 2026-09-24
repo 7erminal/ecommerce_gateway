@@ -135,7 +135,7 @@ type BranchResp2 struct {
 
 type BranchesOriResponseDTO struct {
 	StatusCode int
-	Branches   *[]Branches
+	Result     *[]Branches
 	StatusDesc string
 }
 
