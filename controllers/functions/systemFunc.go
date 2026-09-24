@@ -1870,7 +1870,7 @@ func AddApplicationShop(c *beego.Controller, v requests.ApplicationShopRequest, 
 
 	request := api.NewRequest(
 		host,
-		"/v1/application/add-shop",
+		"/v1/applications/add-shop",
 		api.POST)
 	// request.Params = {"UserId": strconv.Itoa(int(userid))}
 	request.InterfaceParams["ShopId"] = v.ShopId
