@@ -1371,8 +1371,24 @@ func (c *SystemController) AddShop() {
 
 	var isSuccess bool = false
 
+	activeState := "false"
+	if userData != nil && userData.Role.Role == "SUPER_ADMIN" {
+		activeState = "true"
+	}
+
 	userIdStr := strconv.Itoa(int(userData.UserId))
-	addStatusResp := functions.AddShop(&c.Controller, v, userIdStr)
+	shopRequest := requests.ShopApiRequestDTO{
+		ShopName:            v.ShopName,
+		PhoneNumber:         v.PhoneNumber,
+		Email:               v.Email,
+		Image:               v.Image,
+		ShopDescription:     v.ShopDescription,
+		ShopLocation:        v.ShopLocation,
+		ShopAssistantName:   v.ShopAssistantName,
+		ShopAssistantNumber: v.ShopAssistantNumber,
+		Active:              activeState,
+	}
+	addStatusResp := functions.AddShop(&c.Controller, shopRequest, userIdStr)
 
 	if addStatusResp.StatusCode == 200 {
 
@@ -1397,7 +1413,7 @@ func (c *SystemController) AddShop() {
 // @Title Update Shop
 // @Description update an existing shop
 // @Param	Authorization		header 	string true		"header for User"
-// @Param	body		body 	requests.ShopRequestDTO	true		"body for Shop content"
+// @Param	body		body 	requests.ShopApiRequestDTO	true		"body for Shop content"
 // @Success 200 {object} responses.StatusResponseDTO
 // @Failure 403 body is empty
 // @router /update-shop [post]
@@ -1413,9 +1429,25 @@ func (c *SystemController) UpdateShop() {
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
 
 	var isSuccess bool = false
+	activeState := "false"
+	if userData != nil && userData.Role.Role == "SUPER_ADMIN" {
+		activeState = "true"
+	}
+	shopRequest := requests.ShopApiRequestDTO{
+		ShopId:              v.ShopId,
+		ShopName:            v.ShopName,
+		PhoneNumber:         v.PhoneNumber,
+		Email:               v.Email,
+		Image:               v.Image,
+		ShopDescription:     v.ShopDescription,
+		ShopLocation:        v.ShopLocation,
+		ShopAssistantName:   v.ShopAssistantName,
+		ShopAssistantNumber: v.ShopAssistantNumber,
+		Active:              activeState,
+	}
 
 	userIdStr := strconv.Itoa(int(userData.UserId))
-	addStatusResp := functions.UpdateShop(&c.Controller, v, userIdStr)
+	addStatusResp := functions.UpdateShop(&c.Controller, shopRequest, userIdStr)
 
 	if addStatusResp.StatusCode == 200 {
 

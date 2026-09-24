@@ -1638,7 +1638,7 @@ func GetShop(c *beego.Controller, shopId string) (resp responses.ShopApiResponse
 	return data
 }
 
-func AddShop(c *beego.Controller, v requests.ShopRequestDTO, userid string) (resp responses.ShopApiResponse) {
+func AddShop(c *beego.Controller, v requests.ShopApiRequestDTO, userid string) (resp responses.ShopApiResponse) {
 	host, _ := beego.AppConfig.String("customerBaseUrl")
 
 	logs.Info("Adding shops ")
@@ -1814,7 +1814,7 @@ func DeleteShop(c *beego.Controller, shopId string) (resp responses.ShopApiRespo
 	return data
 }
 
-func UpdateShop(c *beego.Controller, v requests.ShopRequestDTO, shopId string) (resp responses.ShopApiResponse) {
+func UpdateShop(c *beego.Controller, v requests.ShopApiRequestDTO, shopId string) (resp responses.ShopApiResponse) {
 	host, _ := beego.AppConfig.String("customerBaseUrl")
 
 	logs.Info("Updating shops ")
