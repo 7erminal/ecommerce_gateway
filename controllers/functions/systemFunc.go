@@ -15,7 +15,7 @@ import (
 	beego "github.com/beego/beego/v2/server/web"
 )
 
-func AddBranch(c *beego.Controller, req requests.BranchRequestDTO, addedBy int64) (resp responses.BranchOriResponseDTO) {
+func AddBranch(c *beego.Controller, req requests.BranchAPIRequestDTO, addedBy int64) (resp responses.BranchOriResponseDTO) {
 	host, _ := beego.AppConfig.String("customerBaseUrl")
 
 	logs.Info("Sending user name ", strconv.FormatInt(addedBy, 10))
@@ -29,6 +29,8 @@ func AddBranch(c *beego.Controller, req requests.BranchRequestDTO, addedBy int64
 	request.InterfaceParams["CountryCode"] = req.CountryCode
 	request.InterfaceParams["PhoneNumber"] = req.PhoneNumber
 	request.InterfaceParams["Location"] = req.Location
+	// request.InterfaceParams["BranchManager"] = strconv.FormatInt(req.BranchManager, 10)
+	request.InterfaceParams["Active"] = req.Active
 	request.InterfaceParams["AddedBy"] = strconv.FormatInt(addedBy, 10)
 	// request.Params["Dob"] = req.Dob
 	// request.Params["Gender"] = req.Gender

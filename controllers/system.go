@@ -352,8 +352,21 @@ func (c *SystemController) AddBranch() {
 	var isSuccess bool = false
 
 	userDetailsResp := functions.GetUserDetails(&c.Controller, v.BranchManager)
+
+	activeState := "false"
+	if userData != nil && userData.Role.Role == "SUPER_ADMIN" {
+		activeState = "true"
+	}
 	if userDetailsResp.StatusCode == 200 {
-		addBranchResp := functions.AddBranch(&c.Controller, v, userData.UserId)
+		branchRequest := requests.BranchAPIRequestDTO{
+			Branch:        v.Branch,
+			CountryCode:   v.CountryCode,
+			PhoneNumber:   v.PhoneNumber,
+			Location:      v.Location,
+			BranchManager: v.BranchManager,
+			Active:        activeState,
+		}
+		addBranchResp := functions.AddBranch(&c.Controller, branchRequest, userData.UserId)
 
 		if addBranchResp.StatusCode == 200 {
 			// Assign branch manager to added branch
