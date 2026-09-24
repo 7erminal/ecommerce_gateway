@@ -168,7 +168,7 @@ func VerifyTokenNew(token string) (resp responses.UserOriResponseDTO) {
 		// c.Data["json"] = err.Error()
 	}
 
-	logs.Info("Raw response received is ", string(read))
+	// logs.Info("Raw response received is ", string(read))
 	// data := map[string]interface{}{}
 	var data responses.UserOriResponseDTO
 	json.Unmarshal(read, &data)
