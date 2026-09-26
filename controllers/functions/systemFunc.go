@@ -1737,7 +1737,7 @@ func RemoveShopBranch(c *beego.Controller, v requests.ShopBranchRequestDTO, user
 
 	request := api.NewRequest(
 		host,
-		"/v1/shops/remove-branches",
+		"/v1/shops/delete-branches",
 		api.POST)
 	// request.Params = {"UserId": strconv.Itoa(int(userid))}
 	request.InterfaceParams["ShopId"] = v.ShopId
