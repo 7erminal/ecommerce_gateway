@@ -3,7 +3,7 @@ package responses
 import "time"
 
 type ShopBranchResp struct {
-	ShopBranch BranchResp
+	ShopBranch Branches
 	ShopId     string
 	BranchId   string
 }
