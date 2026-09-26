@@ -649,6 +649,8 @@ func (c *SystemController) UpdateBranch() {
 		logs.Error("Error asserting user data")
 	}
 
+	logs.Info("User data in json: ", userData)
+
 	var isSuccess bool = false
 
 	idStr := c.Ctx.Input.Param(":id")
