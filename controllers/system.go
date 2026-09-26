@@ -649,7 +649,7 @@ func (c *SystemController) UpdateBranch() {
 		logs.Error("Error asserting user data")
 	}
 
-	logs.Info("User data in json: ", userData)
+	// logs.Info("User data in json: ",  userData)
 
 	var isSuccess bool = false
 
@@ -657,7 +657,7 @@ func (c *SystemController) UpdateBranch() {
 	var r requests.BranchRequestDTO
 	json.Unmarshal(c.Ctx.Input.RequestBody, &r)
 	message := "Branch updated successfully"
-	userDetailsResp := functions.GetUserDetails(&c.Controller, r.BranchManager)
+	userDetailsResp := functions.GetUserDetails(&c.Controller, userData.UserId)
 	branchResp := &responses.BranchResp{}
 
 	if userDetailsResp.StatusCode == 200 {
