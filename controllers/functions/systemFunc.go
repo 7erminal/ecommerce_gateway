@@ -735,16 +735,7 @@ func UpdateApplication(c *beego.Controller, req requests.UpdateApplicationReques
 				DateCreated:      backendResp.Result.DateCreated,
 				DateModified:     backendResp.Result.DateModified,
 				Active:           backendResp.Result.Active,
-				Theme: &responses.ThemePersonalResp{
-					ThemeId:      backendResp.Result.Theme.ThemeId,
-					ThemeCode:    backendResp.Result.Theme.ThemeCode,
-					ThemeName:    backendResp.Result.Theme.ThemeName,
-					ThemeConfig:  backendResp.Result.Theme.ThemeConfig,
-					DateCreated:  backendResp.Result.Theme.DateCreated,
-					DateModified: backendResp.Result.Theme.DateModified,
-					CreatedBy:    backendResp.Result.Theme.CreatedBy,
-					ModifiedBy:   backendResp.Result.Theme.ModifiedBy,
-				},
+				Theme:            &responses.ThemePersonalResp{},
 			},
 			StatusDesc: backendResp.StatusMessage,
 		}
