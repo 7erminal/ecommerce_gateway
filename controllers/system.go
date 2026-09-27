@@ -657,97 +657,65 @@ func (c *SystemController) UpdateBranch() {
 	var r requests.BranchRequestDTO
 	json.Unmarshal(c.Ctx.Input.RequestBody, &r)
 	message := "Branch updated successfully"
-	userDetailsResp := functions.GetUserDetails(&c.Controller, userData.UserId)
 	branchResp := &responses.BranchResp{}
 
-	if userDetailsResp.StatusCode == 200 {
-		updateBranch := functions.UpdateBranch(&c.Controller, r, userData.UserId, idStr)
+	updateBranch := functions.UpdateBranch(&c.Controller, r, userData.UserId, idStr)
 
-		if updateBranch.StatusCode == 200 {
-			splitName := strings.Split(userDetailsResp.User.FullName, " | ")
-			firstname := ""
-			lastname := ""
-			if len(splitName) > 1 {
-				firstname = splitName[0]
-				lastname = splitName[1]
-			} else {
-				firstname = splitName[0]
-			}
-			// role_name, _ := beego.AppConfig.String("branchManagerRoleName")
-			role_name := userData.Role.Role
-			logs.Info("About to get data for role ", role_name)
-			role := functions.GetRoleWithRoleName(&c.Controller, role_name)
-			logs.Info("Get role response is ", role.Role.RoleId)
-			var roleId int64 = 0
-			if role.StatusCode == 200 {
-				roleId = role.Role.RoleId
-			}
-			logs.Info("Sending role ", roleId)
-			userDetails := requests.UpdateUserRequestDTO{RoleId: roleId, BranchId: updateBranch.Result.BranchId, FirstName: firstname, LastName: lastname, Username: userDetailsResp.User.Username, PhoneNumber: userDetailsResp.User.PhoneNumber, Gender: userDetailsResp.User.Gender, Dob: userDetailsResp.User.Dob.GoString(), Address: userDetailsResp.User.Address}
-			userId := strconv.FormatInt(userDetailsResp.User.UserId, 10)
-			updateUserResp := functions.UpdateUser(&c.Controller, userId, userDetails)
-			if updateUserResp.StatusCode == 200 {
-				logs.Info("Update user response is ", updateUserResp.StatusDesc)
-				branchIdStr := strconv.FormatInt(updateBranch.Result.BranchId, 10)
-				updateBranchResp := functions.UpdateBranchBranchManger(&c.Controller, userId, branchIdStr)
-				splitName := strings.Split(updateUserResp.User.FullName, " | ")
-				firstname := ""
-				lastname := ""
-				if len(splitName) > 1 {
-					firstname = splitName[0]
-					lastname = splitName[1]
-				} else {
-					firstname = splitName[0]
-				}
-
-				branchManager := responses.UserGateway{
-					UserId:      updateUserResp.User.UserId,
-					FirstName:   firstname,
-					LastName:    lastname,
-					Username:    updateUserResp.User.Username,
-					Email:       updateUserResp.User.Email,
-					PhoneNumber: updateUserResp.User.PhoneNumber,
-					ImagePath:   updateUserResp.User.ImagePath,
-					Customer:    updateUserResp.User.UserDetails,
-					// Gender:
-					// Dob:
-					// Address:
-					// IdType:
-					// IdNumber:
-					// Active:
-					IsVerified: updateUserResp.User.IsVerified,
-					Role:       updateUserResp.User.Role,
-				}
-
-				branchResp = &responses.BranchResp{
-					BranchId:    updateBranch.Result.BranchId,
-					Branch:      updateBranch.Result.BranchName,
-					Description: updateBranch.Result.Description,
-					// Country:       &country,
-					Location:      updateBranch.Result.Location,
-					PhoneNumber:   updateBranch.Result.PhoneNumber,
-					DateCreated:   updateBranch.Result.DateCreated,
-					BranchManager: &branchManager,
-				}
-
-				if updateBranchResp.StatusCode != 200 {
-					message = "Branch updated. Failed to update branch's branch manager"
-				}
-			} else {
-				message = "Branch updated. Failed to update branch manager"
-				logs.Error("Failed to update user", updateBranch.StatusDesc)
-				resp := responses.BranchResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "Branch update failed. " + updateUserResp.StatusDesc}
-				c.Data["json"] = resp
-			}
-
-			isSuccess = true
+	if updateBranch.StatusCode == 200 {
+		splitName := strings.Split(userData.FullName, " | ")
+		firstname := ""
+		lastname := ""
+		if len(splitName) > 1 {
+			firstname = splitName[0]
+			lastname = splitName[1]
 		} else {
-			message = "Failed to update branch"
-			branchResp = nil
+			firstname = splitName[0]
 		}
+		// role_name, _ := beego.AppConfig.String("branchManagerRoleName")
+		// role := functions.GetRoleWithRoleName(&c.Controller, role_name)
+
+		logs.Info("Update user response is ", updateBranch.StatusDesc)
+		// branchIdStr := strconv.FormatInt(updateBranch.Result.BranchId, 10)
+		// updateBranchResp := functions.UpdateBranchBranchManger(&c.Controller, userId, branchIdStr)
+
+		branchManager := responses.UserGateway{
+			UserId:      userData.UserId,
+			FirstName:   firstname,
+			LastName:    lastname,
+			Username:    userData.Username,
+			Email:       userData.Email,
+			PhoneNumber: userData.PhoneNumber,
+			ImagePath:   userData.ImagePath,
+			Customer:    userData.UserDetails,
+			// Gender:
+			// Dob:
+			// Address:
+			// IdType:
+			// IdNumber:
+			// Active:
+			IsVerified: userData.IsVerified,
+			Role:       userData.Role,
+		}
+
+		branchResp = &responses.BranchResp{
+			BranchId:    updateBranch.Result.BranchId,
+			Branch:      updateBranch.Result.BranchName,
+			Description: updateBranch.Result.Description,
+			// Country:       &country,
+			Location:      updateBranch.Result.Location,
+			PhoneNumber:   updateBranch.Result.PhoneNumber,
+			DateCreated:   updateBranch.Result.DateCreated,
+			BranchManager: &branchManager,
+		}
+
+		// if updateBranchResp.StatusCode != 200 {
+		// 	message = "Branch updated. Failed to update branch's branch manager"
+		// }
+
+		isSuccess = true
 	} else {
-		logs.Info("Failed to get branch manager")
-		message = "Failed to get specified branch manager"
+		message = "Failed to update branch"
+		branchResp = nil
 	}
 	resp := responses.BranchResponseDTO{Success: isSuccess, Result: branchResp, StatusDesc: message}
 	c.Ctx.Output.SetStatus(200)
