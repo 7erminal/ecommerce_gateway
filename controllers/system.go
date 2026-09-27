@@ -673,7 +673,8 @@ func (c *SystemController) UpdateBranch() {
 			} else {
 				firstname = splitName[0]
 			}
-			role_name, _ := beego.AppConfig.String("branchManagerRoleName")
+			// role_name, _ := beego.AppConfig.String("branchManagerRoleName")
+			role_name := userData.Role.Role
 			logs.Info("About to get data for role ", role_name)
 			role := functions.GetRoleWithRoleName(&c.Controller, role_name)
 			logs.Info("Get role response is ", role.Role.RoleId)
