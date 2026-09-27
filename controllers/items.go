@@ -848,13 +848,17 @@ func (c *ItemsController) GetItems() {
 			logs.Info("User data received ", verifyToken.User.UserDetails.Branch)
 
 			// if verifyToken.User.UserDetails.Branch != nil {
-			branchId := strconv.FormatInt(verifyToken.User.UserDetails.Branch.BranchId, 10)
+			// 	branchId := strconv.FormatInt(verifyToken.User.UserDetails.Branch.BranchId, 10)
 
 			// Depending on the role, fetch items
 			var getItemsResp responses.ItemsOriResponseDTO
 			if verifyToken.User.Role.Role == "SUPER_ADMIN" {
 				getItemsResp = functions.GetItems(&c.Controller, query, fields, sortby, order, offset, limit)
 			} else {
+				branchId := ""
+				if verifyToken.User.UserDetails.Branch != nil {
+					branchId = strconv.FormatInt(verifyToken.User.UserDetails.Branch.BranchId, 10)
+				}
 				getItemsResp = functions.GetItemsByBranch(&c.Controller, branchId, query, fields, sortby, order, offset, limit)
 			}
 
@@ -902,16 +906,16 @@ func (c *ItemsController) GetItems() {
 				var resp responses.ItemsResponseDTO = responses.ItemsResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
 				c.Data["json"] = resp
 			}
-			// } else {
-			// 	logs.Error("User is not linked to a branch")
-			// 	var resp responses.ItemsResponseDTO = responses.ItemsResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred. User is not linked to a branch"}
-			// 	c.Data["json"] = resp
-			// }
-
 		} else {
-			var resp responses.ItemsResponseDTO = responses.ItemsResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
+			logs.Error("User is not linked to a branch")
+			var resp responses.ItemsResponseDTO = responses.ItemsResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred. User is not linked to a branch"}
 			c.Data["json"] = resp
 		}
+
+		// } else {
+		// 	var resp responses.ItemsResponseDTO = responses.ItemsResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
+		// 	c.Data["json"] = resp
+		// }
 	} else {
 		var resp responses.ItemsResponseDTO = responses.ItemsResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
 		c.Data["json"] = resp
