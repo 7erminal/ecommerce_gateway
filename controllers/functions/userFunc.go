@@ -375,7 +375,7 @@ func GetRole(c *beego.Controller, role string) (resp responses.RoleResponseDTO) 
 func GetRoleWithRoleName(c *beego.Controller, role string) (resp responses.RoleResponseDTO) {
 	host, _ := beego.AppConfig.String("customerBaseUrl")
 
-	logs.Info("Getting roles ")
+	logs.Info("Getting role with ", role)
 
 	request := api.NewRequest(
 		host,
