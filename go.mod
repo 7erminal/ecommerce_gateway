@@ -6,7 +6,15 @@ require github.com/beego/beego/v2 v2.3.4
 
 require github.com/smartystreets/goconvey v1.8.1
 
-require gopkg.in/yaml.v2 v2.4.0 // indirect
+require (
+	github.com/bmatcuk/doublestar/v4 v4.6.1 // indirect
+	github.com/casbin/beego-orm-adapter/v3 v3.3.0 // indirect
+	github.com/casbin/casbin/v2 v2.135.0 // indirect
+	github.com/casbin/govaluate v1.3.0 // indirect
+	github.com/google/uuid v1.6.0 // indirect
+	github.com/valyala/bytebufferpool v1.0.0 // indirect
+	gopkg.in/yaml.v2 v2.4.0 // indirect
+)
 
 require (
 	github.com/astaxie/beego v1.12.3

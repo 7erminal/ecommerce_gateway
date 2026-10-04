@@ -82,7 +82,7 @@ func (c *ItemsController) AddSalesItem() {
 			ReorderLevel:    0,
 			CostPrice:       v.CostPrice,
 			SellingPrice:    v.SellingPrice,
-			BranchId:        userData.UserDetails.Branch.BranchId,
+			BranchId:        branchId,
 			ImagePath:       v.ImagePath,
 			AvailableSizes:  v.AvailableSizes,
 			AvailableColors: v.AvailableColors,
@@ -244,7 +244,7 @@ func (c *ItemsController) AddRentalsItem() {
 	}
 
 	if proceed {
-		req := requests.AddItemRequestDTO{ProductName: v.ProductName, Quantity: v.Quantity, ReorderLevel: v.ReorderLevel, CostPrice: 0, SellingPrice: v.RentalPrice, BranchId: userData.UserDetails.Branch.BranchId, ImagePath: v.ImagePath}
+		req := requests.AddItemRequestDTO{ProductName: v.ProductName, Quantity: v.Quantity, ReorderLevel: v.ReorderLevel, CostPrice: 0, SellingPrice: v.RentalPrice, BranchId: branchId, ImagePath: v.ImagePath}
 		addItemResp := functions.AddItem(&c.Controller, req, getProductTypes.Category.CategoryId, getBranchResp.Result.Branch.Country.CountryCode, userData.UserDetails.Branch.BranchId, int(userData.UserId))
 
 		itemResp := responses.Item{}

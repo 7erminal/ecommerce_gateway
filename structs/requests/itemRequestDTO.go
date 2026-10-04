@@ -7,7 +7,7 @@ type AddItemRequestDTO struct {
 	Quantity        int
 	CostPrice       float64
 	SellingPrice    float64
-	BranchId        int64
+	BranchId        string
 	ImagePath       string
 	ReorderLevel    int
 	CategoryId      int64
@@ -32,6 +32,7 @@ type AddSalesItemRequestDTO struct {
 	ImagePath       string
 	QuantityAlert   int
 	Weight          string
+	BranchId        string
 }
 
 type AddProductFeatureRequestDTO struct {
@@ -50,6 +51,7 @@ type AddRentalItemRequestDTO struct {
 	ReorderLevel int
 	RentalPrice  float64
 	ImagePath    string
+	BranchId     string
 }
 
 type UpdateItemRequestDTO struct {
