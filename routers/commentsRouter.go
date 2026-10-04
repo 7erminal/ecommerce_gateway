@@ -675,6 +675,24 @@ func init() {
 
     beego.GlobalControllerRouter["AMC_gateway/controllers:UserManagementController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:UserManagementController"],
         beego.ControllerComments{
+            Method: "AddRole",
+            Router: `/add-role`,
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["AMC_gateway/controllers:UserManagementController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:UserManagementController"],
+        beego.ControllerComments{
+            Method: "DeleteRole",
+            Router: `/delete-role/:role`,
+            AllowHTTPMethods: []string{"delete"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["AMC_gateway/controllers:UserManagementController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:UserManagementController"],
+        beego.ControllerComments{
             Method: "GetBranchManagers",
             Router: `/get-branch-managers`,
             AllowHTTPMethods: []string{"get"},
@@ -768,6 +786,15 @@ func init() {
             Method: "UpdateInviteToken",
             Router: `/revoke-invite/:id`,
             AllowHTTPMethods: []string{"put"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["AMC_gateway/controllers:UserManagementController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:UserManagementController"],
+        beego.ControllerComments{
+            Method: "UpdateRole",
+            Router: `/update-role`,
+            AllowHTTPMethods: []string{"post"},
             MethodParams: param.Make(),
             Filters: nil,
             Params: nil})

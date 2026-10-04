@@ -858,7 +858,7 @@ func (c *UserManagementController) DeleteRole() {
 // @Param	body		body 	requests.UpdateRoleRequest true		"body for Update Role"
 // @Success 200 {object} responses.RoleResponseDTO
 // @Failure 403 body is empty
-// @router /update-role/:role [put]
+// @router /update-role [post]
 func (c *UserManagementController) UpdateRole() {
 	role := c.Ctx.Input.Param(":role")
 
