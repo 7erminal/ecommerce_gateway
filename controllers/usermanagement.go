@@ -32,6 +32,9 @@ func (c *UserManagementController) URLMapping() {
 	c.Mapping("UpdateUser", c.UpdateUser)
 	c.Mapping("UpdateUserRole", c.UpdateUserRole)
 	c.Mapping("UpdateUserBranch", c.UpdateUserBranch)
+	c.Mapping("UpdateRole", c.UpdateRole)
+	c.Mapping("AddRole", c.AddRole)
+	c.Mapping("DeleteRole", c.DeleteRole)
 }
 
 // GetUserSession ...
@@ -785,6 +788,61 @@ func (c *UserManagementController) GetRoles() {
 		c.Data["json"] = resp
 	}
 
+	c.ServeJSON()
+}
+
+// GetPermissions ...
+// @Title Get Permissions
+// @Description Get all permissions
+// @Param	Authorization		header 	string true		"header for User"
+// @Success 200 {object} responses.PermissionsAllGatewayResponseDTO
+// @Failure 403 body is empty
+// @router /get-permissions [get]
+func (c *UserManagementController) GetPermissions() {
+
+	var isSuccess bool = false
+	statusDesc := ""
+	permissionsResp := functions.GetPermissions(&c.Controller)
+
+	if permissionsResp.StatusCode == 200 {
+		logs.Info("Permissions returned: ", permissionsResp)
+
+		isSuccess = true
+		statusDesc = permissionsResp.StatusDesc
+
+	} else {
+		logs.Error("Failed to get permissions ", permissionsResp.StatusDesc)
+		statusDesc = "An Error occurred: " + permissionsResp.StatusDesc
+	}
+	var resp responses.PermissionsResponse = responses.PermissionsResponse{Success: isSuccess, Result: permissionsResp.Result, StatusDesc: statusDesc}
+	c.Data["json"] = resp
+	c.ServeJSON()
+}
+
+// GetActions ...
+// @Title Get Actions
+// @Description Get all actions
+// @Param	Authorization		header 	string true		"header for User"
+// @Success 200 {object} responses.ActionsAllGatewayResponseDTO
+// @Failure 403 body is empty
+// @router /get-actions [get]
+func (c *UserManagementController) GetActions() {
+
+	var isSuccess bool = false
+	statusDesc := ""
+	actionsResp := functions.GetActions(&c.Controller)
+
+	if actionsResp.StatusCode == 200 {
+		logs.Info("Actions returned: ", actionsResp.Result)
+
+		isSuccess = true
+		statusDesc = actionsResp.StatusDesc
+	} else {
+		logs.Error("Failed to get actions ", actionsResp.StatusDesc)
+		statusDesc = "An Error occurred: " + actionsResp.StatusDesc
+	}
+	var resp responses.ActionsResponse = responses.ActionsResponse{Success: isSuccess, Result: actionsResp.Result, StatusDesc: statusDesc}
+	c.Data["json"] = resp
 	c.ServeJSON()
 }
 

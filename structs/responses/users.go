@@ -159,7 +159,13 @@ type PermissionData struct {
 
 type PermissionsResponseDTO struct {
 	StatusCode int
-	Result     *[]PermissionData
+	Result     []*PermissionData
+	StatusDesc string
+}
+
+type PermissionsResponse struct {
+	Success    bool
+	Result     []*PermissionData
 	StatusDesc string
 }
 
@@ -176,6 +182,12 @@ type ActionData struct {
 
 type ActionsResponseDTO struct {
 	StatusCode int
-	Result     *[]ActionData
+	Result     []*ActionData
+	StatusDesc string
+}
+
+type ActionsResponse struct {
+	Success    bool
+	Result     []*ActionData
 	StatusDesc string
 }

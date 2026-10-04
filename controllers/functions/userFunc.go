@@ -497,10 +497,8 @@ func DeleteRole(c *beego.Controller, role string) (resp responses.RoleResponseDT
 	return data
 }
 
-func GetPermissions(c *beego.Controller, role string) (resp []responses.PermissionsResponseDTO) {
+func GetPermissions(c *beego.Controller) (resp responses.PermissionsResponseDTO) {
 	host, _ := beego.AppConfig.String("customerBaseUrl")
-
-	logs.Info("Getting permissions for role ", role)
 
 	request := api.NewRequest(
 		host,
@@ -529,7 +527,7 @@ func GetPermissions(c *beego.Controller, role string) (resp []responses.Permissi
 		logs.Info("Raw response received is \n", prettyJSON.String())
 	}
 	// data := map[string]interface{}{}
-	var data []responses.PermissionsResponseDTO
+	var data responses.PermissionsResponseDTO
 	json.Unmarshal(read, &data)
 	c.Data["json"] = data
 
@@ -538,7 +536,7 @@ func GetPermissions(c *beego.Controller, role string) (resp []responses.Permissi
 	return data
 }
 
-func GetActions(c *beego.Controller) (resp []responses.ActionsResponseDTO) {
+func GetActions(c *beego.Controller) (resp responses.ActionsResponseDTO) {
 	host, _ := beego.AppConfig.String("customerBaseUrl")
 
 	logs.Info("Getting actions")
@@ -570,7 +568,7 @@ func GetActions(c *beego.Controller) (resp []responses.ActionsResponseDTO) {
 		logs.Info("Raw response received is \n", prettyJSON.String())
 	}
 	// data := map[string]interface{}{}
-	var data []responses.ActionsResponseDTO
+	var data responses.ActionsResponseDTO
 	json.Unmarshal(read, &data)
 	c.Data["json"] = data
 
