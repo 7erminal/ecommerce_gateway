@@ -39,8 +39,8 @@ func AuthMiddleware(ctx *context.Context) {
 	if token[0] == "Bearer" {
 		verifyToken := functions.VerifyTokenNew(token[1])
 		if verifyToken.StatusCode == 200 {
-			logs.Info("User details are ", verifyToken.User)
-			ctx.Input.SetData("user", verifyToken.User)
+			logs.Info("User details are ", verifyToken.Result)
+			ctx.Input.SetData("user", verifyToken.Result)
 
 			return
 		} else {
@@ -98,11 +98,11 @@ func AuthWithRoleBasedAppMiddleware(ctx *context.Context) {
 		return
 	}
 
-	logs.Info("User details are ", verifyToken.User)
-	ctx.Input.SetData("user", verifyToken.User)
+	logs.Info("User details are ", verifyToken.Result)
+	ctx.Input.SetData("user", verifyToken.Result)
 
 	// Check if user role is SUPER_ADMIN - if so, skip application verification
-	if verifyToken.User != nil && verifyToken.User.Role.Role == "SUPER_ADMIN" {
+	if verifyToken.Result != nil && verifyToken.Result.Role.Role == "SUPER_ADMIN" {
 		// logs.Info("SUPER_ADMIN role detected, skipping application verification")
 		return
 	}

@@ -845,19 +845,19 @@ func (c *ItemsController) GetItems() {
 			logs.Info("Success response received")
 			isSuccess = false
 
-			logs.Info("User data received ", verifyToken.User.UserDetails.Branch)
+			logs.Info("User data received ", verifyToken.Result.UserDetails.Branch)
 
 			// if verifyToken.User.UserDetails.Branch != nil {
 			// 	branchId := strconv.FormatInt(verifyToken.User.UserDetails.Branch.BranchId, 10)
 
 			// Depending on the role, fetch items
 			var getItemsResp responses.ItemsOriResponseDTO
-			if verifyToken.User.Role.Role == "SUPER_ADMIN" {
+			if verifyToken.Result.Role.Role == "SUPER_ADMIN" {
 				getItemsResp = functions.GetItems(&c.Controller, query, fields, sortby, order, offset, limit)
 			} else {
 				branchId := ""
-				if verifyToken.User.UserDetails.Branch != nil {
-					branchId = strconv.FormatInt(verifyToken.User.UserDetails.Branch.BranchId, 10)
+				if verifyToken.Result.UserDetails.Branch != nil {
+					branchId = strconv.FormatInt(verifyToken.Result.UserDetails.Branch.BranchId, 10)
 				}
 				getItemsResp = functions.GetItemsByBranch(&c.Controller, branchId, query, fields, sortby, order, offset, limit)
 			}

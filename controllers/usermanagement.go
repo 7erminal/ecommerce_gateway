@@ -52,13 +52,13 @@ func (c *UserManagementController) GetUser() {
 		verifyToken := functions.VerifyToken(&c.Controller, token[1])
 
 		if verifyToken.StatusCode == 200 {
-			userResp := functions.GetUserDetails(&c.Controller, verifyToken.User.UserId)
+			userResp := functions.GetUserDetails(&c.Controller, verifyToken.Result.UserId)
 
 			var data responses.UserGateway
 
 			if userResp.StatusCode == 200 {
-				logs.Info("Name returned: ", userResp.User.FullName)
-				splitName := strings.Split(userResp.User.FullName, " | ")
+				logs.Info("Name returned: ", userResp.Result.FullName)
+				splitName := strings.Split(userResp.Result.FullName, " | ")
 
 				// logs.Debug("Name is ", splitName[0])
 				firstname := ""
@@ -72,13 +72,13 @@ func (c *UserManagementController) GetUser() {
 
 				status := "ACTIVE"
 
-				if userResp.User.Active == 6 {
+				if userResp.Result.Active == 6 {
 					status = "DELETED"
 				}
-				if userResp.User.Active == 2 {
+				if userResp.Result.Active == 2 {
 					status = "PENDING"
 				}
-				if userResp.User.Active == 4 {
+				if userResp.Result.Active == 4 {
 					status = "INACTIVE"
 				}
 				// branch := &responses.BranchResp{}
@@ -92,16 +92,16 @@ func (c *UserManagementController) GetUser() {
 				// 	branch = nil
 				// }
 				data = responses.UserGateway{
-					UserId: userResp.User.UserId,
+					UserId: userResp.Result.UserId,
 					// UserType:    userResp.User.UserType,
 					FirstName:   firstname,
 					LastName:    lastname,
-					Username:    userResp.User.Username,
-					Email:       userResp.User.Email,
-					PhoneNumber: userResp.User.PhoneNumber,
-					Role:        userResp.User.Role,
-					Customer:    userResp.User.UserDetails,
-					ImagePath:   userResp.User.ImagePath,
+					Username:    userResp.Result.Username,
+					Email:       userResp.Result.Email,
+					PhoneNumber: userResp.Result.PhoneNumber,
+					Role:        userResp.Result.Role,
+					Customer:    userResp.Result.UserDetails,
+					ImagePath:   userResp.Result.ImagePath,
 					Status:      status,
 					// Gender:         userResp.User.Gender,
 					// Dob:            userResp.User.Dob,
@@ -159,8 +159,8 @@ func (c *UserManagementController) GetUserWithId() {
 			var data responses.UserGateway
 
 			if userResp.StatusCode == 200 {
-				logs.Info("Name returned: ", userResp.User.FullName)
-				splitName := strings.Split(userResp.User.FullName, " | ")
+				logs.Info("Name returned: ", userResp.Result.FullName)
+				splitName := strings.Split(userResp.Result.FullName, " | ")
 
 				// logs.Debug("Name is ", splitName[0])
 				firstname := ""
@@ -173,46 +173,46 @@ func (c *UserManagementController) GetUserWithId() {
 				}
 				// branch := &responses.BranchResp{}
 
-				// if userResp.User.Branch != nil {
-				// 	currency := responses.CurrencyResp{Symbol: userResp.User.Branch.Country.DefaultCurrency.Symbol, Currency: userResp.User.Branch.Country.DefaultCurrency.Currency}
-				// 	country := responses.CountryResp{Country: userResp.User.Branch.Country.Country, CountryCode: userResp.User.Branch.Country.CountryCode, Currency: &currency}
-				// 	branch = &responses.BranchResp{BranchId: userResp.User.Branch.BranchId, Branch: userResp.User.Branch.Branch, Country: &country, Location: userResp.User.Branch.Location, PhoneNumber: userResp.User.Branch.PhoneNumber}
-				// 	// userResp.User.Customer.Branch.Country = country
+				// if userResp.Result.Branch != nil {
+				// 	currency := responses.CurrencyResp{Symbol: userResp.Result.Branch.Country.DefaultCurrency.Symbol, Currency: userResp.Result.Branch.Country.DefaultCurrency.Currency}
+				// 	country := responses.CountryResp{Country: userResp.Result.Branch.Country.Country, CountryCode: userResp.Result.Branch.Country.CountryCode, Currency: &currency}
+				// 	branch = &responses.BranchResp{BranchId: userResp.Result.Branch.BranchId, Branch: userResp.Result.Branch.Branch, Country: &country, Location: userResp.Result.Branch.Location, PhoneNumber: userResp.Result.Branch.PhoneNumber}
+				// 	// userResp.Result.Customer.Branch.Country = country
 				// 	} else {
 				// 	branch = nil
 				// }
 				status := "ACTIVE"
 
-				if userResp.User.Active == 6 {
+				if userResp.Result.Active == 6 {
 					status = "DELETED"
 				}
-				if userResp.User.Active == 2 {
+				if userResp.Result.Active == 2 {
 					status = "PENDING"
 				}
-				if userResp.User.Active == 4 {
+				if userResp.Result.Active == 4 {
 					status = "INACTIVE"
 				}
 
 				data = responses.UserGateway{
-					UserId: userResp.User.UserId,
-					// UserType:    userResp.User.UserType,
+					UserId: userResp.Result.UserId,
+					// UserType:    userResp.Result.UserType,
 					FirstName:   firstname,
 					LastName:    lastname,
-					Username:    userResp.User.Username,
-					Email:       userResp.User.Email,
-					PhoneNumber: userResp.User.PhoneNumber,
-					Role:        userResp.User.Role,
-					Customer:    userResp.User.UserDetails,
-					ImagePath:   userResp.User.ImagePath,
+					Username:    userResp.Result.Username,
+					Email:       userResp.Result.Email,
+					PhoneNumber: userResp.Result.PhoneNumber,
+					Role:        userResp.Result.Role,
+					Customer:    userResp.Result.UserDetails,
+					ImagePath:   userResp.Result.ImagePath,
 					Status:      status,
-					// Gender:         userResp.User.Gender,
-					// Dob:            userResp.User.Dob,
-					// Address:        userResp.User.Address,
-					// IdType:         userResp.User.IdType,
-					// IdNumber:       userResp.User.IdNumber,
-					// Active:         userResp.User.Active,
-					// IsVerified:     userResp.User.IsVerified,
-					// DateRegistered: userResp.User.DateCreated,
+					// Gender:         userResp.Result.Gender,
+					// Dob:            userResp.Result.Dob,
+					// Address:        userResp.Result.Address,
+					// IdType:         userResp.Result.IdType,
+					// IdNumber:       userResp.Result.IdNumber,
+					// Active:         userResp.Result.Active,
+					// IsVerified:     userResp.Result.IsVerified,
+					// DateRegistered: userResp.Result.DateCreated,
 				}
 
 				isSuccess = true
@@ -696,7 +696,7 @@ func (c *UserManagementController) InviteUserReg() {
 
 		if verifyToken.StatusCode == 200 {
 			link := "https://amc-flowpos.com/auth/user/invite/"
-			inviteResp := functions.InviteUser(&c.Controller, v.Email, v.Role, link, verifyToken.User.UserId)
+			inviteResp := functions.InviteUser(&c.Controller, v.Email, v.Role, link, verifyToken.Result.UserId)
 
 			var message string
 
@@ -780,7 +780,7 @@ func (c *UserManagementController) GetRoles() {
 			// var message string
 
 			if rolesResp.StatusCode == 200 {
-				logs.Info("Name returned: ", verifyToken.User.FullName)
+				logs.Info("Name returned: ", verifyToken.Result.FullName)
 
 				isSuccess = true
 				// message = "Email sent"
@@ -827,7 +827,7 @@ func (c *UserManagementController) GetUserInvites() {
 			if invitesResp.StatusCode == 200 {
 				userInvites := []responses.UserInvites{}
 
-				logs.Info("Name returned: ", verifyToken.User.FullName)
+				logs.Info("Name returned: ", verifyToken.Result.FullName)
 
 				if invitesResp.UserInvites != nil {
 					for _, userInvite := range *invitesResp.UserInvites {
@@ -939,11 +939,11 @@ func (c *UserManagementController) UpdateUserImage() {
 				if respCode == 200 {
 					var data responses.UserGateway
 
-					userResp := functions.UpdateUserImage(&c.Controller, filePath, verifyToken.User.UserId)
+					userResp := functions.UpdateUserImage(&c.Controller, filePath, verifyToken.Result.UserId)
 
 					if userResp.StatusCode == 200 {
-						logs.Info("Name returned: ", userResp.User.FullName)
-						splitName := strings.Split(userResp.User.FullName, " | ")
+						logs.Info("Name returned: ", userResp.Result.FullName)
+						splitName := strings.Split(userResp.Result.FullName, " | ")
 
 						// logs.Debug("Name is ", splitName[0])
 						firstname := ""
@@ -965,27 +965,27 @@ func (c *UserManagementController) UpdateUserImage() {
 						// }
 						status := "ACTIVE"
 
-						if userResp.User.Active == 6 {
+						if userResp.Result.Active == 6 {
 							status = "INACTIVE"
 						}
-						if userResp.User.Active == 2 {
+						if userResp.Result.Active == 2 {
 							status = "PENDING"
 						}
-						if userResp.User.Active == 4 {
+						if userResp.Result.Active == 4 {
 							status = "INACTIVE"
 						}
 
 						data = responses.UserGateway{
-							UserId: userResp.User.UserId,
+							UserId: userResp.Result.UserId,
 							// UserType:    userResp.User.UserType,
 							FirstName:   firstname,
 							LastName:    lastname,
-							Username:    userResp.User.Username,
-							Email:       userResp.User.Email,
-							PhoneNumber: userResp.User.PhoneNumber,
-							Role:        userResp.User.Role,
-							ImagePath:   userResp.User.ImagePath,
-							Customer:    userResp.User.UserDetails,
+							Username:    userResp.Result.Username,
+							Email:       userResp.Result.Email,
+							PhoneNumber: userResp.Result.PhoneNumber,
+							Role:        userResp.Result.Role,
+							ImagePath:   userResp.Result.ImagePath,
+							Customer:    userResp.Result.UserDetails,
 							Status:      status,
 							// Gender:         userResp.User.Gender,
 							// Dob:            userResp.User.Dob,
@@ -1056,7 +1056,7 @@ func (c *UserManagementController) UpdateUser() {
 			if updateUserResp.StatusCode == 200 {
 				var data responses.UserGateway
 
-				splitName := strings.Split(updateUserResp.User.FullName, " | ")
+				splitName := strings.Split(updateUserResp.Result.FullName, " | ")
 
 				firstname := ""
 				lastname := ""
@@ -1077,27 +1077,27 @@ func (c *UserManagementController) UpdateUser() {
 				// }
 				status := "ACTIVE"
 
-				if updateUserResp.User.Active == 6 {
+				if updateUserResp.Result.Active == 6 {
 					status = "DELETED"
 				}
-				if updateUserResp.User.Active == 2 {
+				if updateUserResp.Result.Active == 2 {
 					status = "PENDING"
 				}
-				if updateUserResp.User.Active == 4 {
+				if updateUserResp.Result.Active == 4 {
 					status = "INACTIVE"
 				}
 
 				data = responses.UserGateway{
-					UserId: updateUserResp.User.UserId,
+					UserId: updateUserResp.Result.UserId,
 					// UserType:    regResp.User.UserType,
 					FirstName:   firstname,
 					LastName:    lastname,
-					Username:    updateUserResp.User.Username,
-					Email:       updateUserResp.User.Email,
-					PhoneNumber: updateUserResp.User.PhoneNumber,
-					Role:        updateUserResp.User.Role,
-					Customer:    updateUserResp.User.UserDetails,
-					ImagePath:   updateUserResp.User.ImagePath,
+					Username:    updateUserResp.Result.Username,
+					Email:       updateUserResp.Result.Email,
+					PhoneNumber: updateUserResp.Result.PhoneNumber,
+					Role:        updateUserResp.Result.Role,
+					Customer:    updateUserResp.Result.UserDetails,
+					ImagePath:   updateUserResp.Result.ImagePath,
 					Status:      status,
 					// Gender:         regResp.User.Gender,
 					// Dob:            regResp.User.Dob,
@@ -1163,7 +1163,7 @@ func (c *UserManagementController) UpdateUserRole() {
 			if updateUserResp.StatusCode == 200 {
 				var data responses.UserGateway
 
-				splitName := strings.Split(updateUserResp.User.FullName, " | ")
+				splitName := strings.Split(updateUserResp.Result.FullName, " | ")
 
 				firstname := ""
 				lastname := ""
@@ -1184,27 +1184,27 @@ func (c *UserManagementController) UpdateUserRole() {
 				// }
 				status := "ACTIVE"
 
-				if updateUserResp.User.Active == 6 {
+				if updateUserResp.Result.Active == 6 {
 					status = "DELETED"
 				}
-				if updateUserResp.User.Active == 2 {
+				if updateUserResp.Result.Active == 2 {
 					status = "PENDING"
 				}
-				if updateUserResp.User.Active == 4 {
+				if updateUserResp.Result.Active == 4 {
 					status = "INACTIVE"
 				}
 
 				data = responses.UserGateway{
-					UserId: updateUserResp.User.UserId,
+					UserId: updateUserResp.Result.UserId,
 					// UserType:    regResp.User.UserType,
 					FirstName:   firstname,
 					LastName:    lastname,
-					Username:    updateUserResp.User.Username,
-					Email:       updateUserResp.User.Email,
-					PhoneNumber: updateUserResp.User.PhoneNumber,
-					Role:        updateUserResp.User.Role,
-					Customer:    updateUserResp.User.UserDetails,
-					ImagePath:   updateUserResp.User.ImagePath,
+					Username:    updateUserResp.Result.Username,
+					Email:       updateUserResp.Result.Email,
+					PhoneNumber: updateUserResp.Result.PhoneNumber,
+					Role:        updateUserResp.Result.Role,
+					Customer:    updateUserResp.Result.UserDetails,
+					ImagePath:   updateUserResp.Result.ImagePath,
 					Status:      status,
 					// Gender:         regResp.User.Gender,
 					// Dob:            regResp.User.Dob,
@@ -1270,7 +1270,7 @@ func (c *UserManagementController) UpdateUserBranch() {
 			if updateUserResp.StatusCode == 200 {
 				var data responses.UserGateway
 
-				splitName := strings.Split(updateUserResp.User.FullName, " | ")
+				splitName := strings.Split(updateUserResp.Result.FullName, " | ")
 
 				firstname := ""
 				lastname := ""
@@ -1291,27 +1291,27 @@ func (c *UserManagementController) UpdateUserBranch() {
 				// }
 				status := "ACTIVE"
 
-				if updateUserResp.User.Active == 6 {
+				if updateUserResp.Result.Active == 6 {
 					status = "INACTIVE"
 				}
-				if updateUserResp.User.Active == 2 {
+				if updateUserResp.Result.Active == 2 {
 					status = "PENDING"
 				}
-				if updateUserResp.User.Active == 4 {
+				if updateUserResp.Result.Active == 4 {
 					status = "INACTIVE"
 				}
 
 				data = responses.UserGateway{
-					UserId: updateUserResp.User.UserId,
+					UserId: updateUserResp.Result.UserId,
 					// UserType:    regResp.User.UserType,
 					FirstName:   firstname,
 					LastName:    lastname,
-					Username:    updateUserResp.User.Username,
-					Email:       updateUserResp.User.Email,
-					PhoneNumber: updateUserResp.User.PhoneNumber,
-					Role:        updateUserResp.User.Role,
-					Customer:    updateUserResp.User.UserDetails,
-					ImagePath:   updateUserResp.User.ImagePath,
+					Username:    updateUserResp.Result.Username,
+					Email:       updateUserResp.Result.Email,
+					PhoneNumber: updateUserResp.Result.PhoneNumber,
+					Role:        updateUserResp.Result.Role,
+					Customer:    updateUserResp.Result.UserDetails,
+					ImagePath:   updateUserResp.Result.ImagePath,
 					Status:      status,
 					// Gender:         regResp.User.Gender,
 					// Dob:            regResp.User.Dob,
@@ -1463,7 +1463,7 @@ func (c *UserManagementController) GetUserInvite() {
 			// var message string
 
 			if inviteResp.StatusCode == 200 {
-				logs.Info("Name returned: ", verifyToken.User.FullName)
+				logs.Info("Name returned: ", verifyToken.Result.FullName)
 
 				// splitName := strings.Split(inviteResp.UserInvite.InvitedBy.FullName, " | ")
 

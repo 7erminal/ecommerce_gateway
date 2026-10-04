@@ -380,7 +380,7 @@ func (c *SystemController) AddBranch() {
 
 		if addBranchResp.StatusCode == 200 {
 			// Assign branch manager to added branch
-			splitName := strings.Split(userDetailsResp.User.FullName, " | ")
+			splitName := strings.Split(userDetailsResp.Result.FullName, " | ")
 			firstname := ""
 			lastname := ""
 			if len(splitName) > 1 {
@@ -389,8 +389,8 @@ func (c *SystemController) AddBranch() {
 			} else {
 				firstname = splitName[0]
 			}
-			userDetails := requests.UpdateUserRequestDTO{BranchId: addBranchResp.Result.BranchId, FirstName: firstname, LastName: lastname, Username: userDetailsResp.User.Username, PhoneNumber: userDetailsResp.User.PhoneNumber, Gender: userDetailsResp.User.Gender, Dob: userDetailsResp.User.Dob.GoString(), Address: userDetailsResp.User.Address}
-			userId := strconv.FormatInt(userDetailsResp.User.UserId, 10)
+			userDetails := requests.UpdateUserRequestDTO{BranchId: addBranchResp.Result.BranchId, FirstName: firstname, LastName: lastname, Username: userDetailsResp.Result.Username, PhoneNumber: userDetailsResp.Result.PhoneNumber, Gender: userDetailsResp.Result.Gender, Dob: userDetailsResp.Result.Dob.GoString(), Address: userDetailsResp.Result.Address}
+			userId := strconv.FormatInt(userDetailsResp.Result.UserId, 10)
 			updateUserResp := functions.UpdateUser(&c.Controller, userId, userDetails)
 			branchIdStr := strconv.FormatInt(addBranchResp.Result.BranchId, 10)
 			updateBranchResp := functions.UpdateBranchBranchManger(&c.Controller, userId, branchIdStr)

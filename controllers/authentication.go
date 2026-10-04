@@ -202,7 +202,7 @@ func (c *AuthenticationController) ChangePassword() {
 
 			logs.Info("Received ", v.OldPassword, v.NewPassword)
 
-			idStr := strconv.FormatInt(verifyToken.User.UserId, 10)
+			idStr := strconv.FormatInt(verifyToken.Result.UserId, 10)
 
 			loginResp := functions.ChangePassword(&c.Controller, idStr, v)
 
@@ -222,12 +222,12 @@ func (c *AuthenticationController) ChangePassword() {
 			c.Data["json"] = resp
 		} else {
 			logs.Error("Unable to verify user")
-			var resp responses.UserInviteResponse = responses.UserInviteResponse{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
+			var resp responses.StringResponseDTO = responses.StringResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
 			c.Data["json"] = resp
 		}
 	} else {
 		logs.Error("Unable to verify user")
-		var resp responses.UserInviteResponse = responses.UserInviteResponse{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
+		var resp responses.StringResponseDTO = responses.StringResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
 		c.Data["json"] = resp
 	}
 

@@ -42,7 +42,7 @@ func (c *StatsController) GetGeneralStats() {
 
 		if verifyToken.StatusCode == 200 {
 			logs.Info("Success response received")
-			branchidStr := strconv.FormatInt(verifyToken.User.UserDetails.Branch.BranchId, 10)
+			branchidStr := strconv.FormatInt(verifyToken.Result.UserDetails.Branch.BranchId, 10)
 
 			getItemStatsResp := functions.GetItemStats(&c.Controller, branchidStr)
 

@@ -2,7 +2,7 @@ package responses
 
 type UserOriResponseDTO struct {
 	StatusCode int
-	User       *UsersOri
+	Result     *UsersOri
 	StatusDesc string
 }
 
