@@ -413,6 +413,255 @@ func GetRoleWithRoleName(c *beego.Controller, role string) (resp responses.RoleR
 	return data
 }
 
+func AddRole(c *beego.Controller, req requests.AddRoleRequestDTO) (resp responses.RoleResponseDTO) {
+	host, _ := beego.AppConfig.String("customerBaseUrl")
+
+	logs.Info("Adding role with name ", req.Name)
+
+	request := api.NewRequest(
+		host,
+		"/v1/roles",
+		api.POST)
+	request.InterfaceParams["Role"] = req.Name
+	request.InterfaceParams["Description"] = req.Description
+	// request.Params = {"UserId": strconv.Itoa(int(userid))}
+	client := api.Client{
+		Request: request,
+		Type_:   "body",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+	// data := map[string]interface{}{}
+	var data responses.RoleResponseDTO
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	logs.Info("Resp is ", data)
+
+	return data
+}
+
+func DeleteRole(c *beego.Controller, role string) (resp responses.RoleResponseDTO) {
+	host, _ := beego.AppConfig.String("customerBaseUrl")
+
+	logs.Info("Deleting role with name ", role)
+
+	request := api.NewRequest(
+		host,
+		"/v1/roles/"+role,
+		api.DELETE)
+	// request.Params = {"UserId": strconv.Itoa(int(userid))}
+	client := api.Client{
+		Request: request,
+		Type_:   "params",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+	// data := map[string]interface{}{}
+	var data responses.RoleResponseDTO
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	logs.Info("Resp is ", data)
+
+	return data
+}
+
+func GetPermissions(c *beego.Controller, role string) (resp []responses.PermissionsResponseDTO) {
+	host, _ := beego.AppConfig.String("customerBaseUrl")
+
+	logs.Info("Getting permissions for role ", role)
+
+	request := api.NewRequest(
+		host,
+		"/v1//permissions",
+		api.GET)
+	// request.Params = {"UserId": strconv.Itoa(int(userid))}
+	client := api.Client{
+		Request: request,
+		Type_:   "params",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+	// data := map[string]interface{}{}
+	var data []responses.PermissionsResponseDTO
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	logs.Info("Resp is ", data)
+
+	return data
+}
+
+func GetActions(c *beego.Controller) (resp []responses.ActionsResponseDTO) {
+	host, _ := beego.AppConfig.String("customerBaseUrl")
+
+	logs.Info("Getting actions")
+
+	request := api.NewRequest(
+		host,
+		"/v1/actions",
+		api.GET)
+	// request.Params = {"UserId": strconv.Itoa(int(userid))}
+	client := api.Client{
+		Request: request,
+		Type_:   "params",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+	// data := map[string]interface{}{}
+	var data []responses.ActionsResponseDTO
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	logs.Info("Resp is ", data)
+
+	return data
+}
+
+func AddRolePermission(c *beego.Controller, role string, req requests.UpdateRolePermissionRequestDTO) (resp responses.RoleResponseDTO) {
+	host, _ := beego.AppConfig.String("customerBaseUrl")
+
+	logs.Info("Updating role permissions for role ", role)
+
+	request := api.NewRequest(
+		host,
+		"/v1/role-permissions",
+		api.POST)
+	request.InterfaceParams["Role"] = req.Role
+	request.InterfaceParams["PermissionCode"] = req.PermissionCode
+	request.InterfaceParams["Action"] = req.Action
+
+	client := api.Client{
+		Request: request,
+		Type_:   "body",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+	var data responses.RoleResponseDTO
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	logs.Info("Resp is ", data)
+
+	return data
+}
+
+func RemoveRolePermission(c *beego.Controller, role string) (resp responses.RoleResponseDTO) {
+	host, _ := beego.AppConfig.String("customerBaseUrl")
+
+	logs.Info("Removing role permissions for role ", role)
+
+	request := api.NewRequest(
+		host,
+		"/v1/role-permissions/"+role,
+		api.DELETE)
+
+	client := api.Client{
+		Request: request,
+		Type_:   "body",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+	var data responses.RoleResponseDTO
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	logs.Info("Resp is ", data)
+
+	return data
+}
+
 func GetInvite(c *beego.Controller, token string) (resp responses.UserInviteResponseDTO) {
 	host, _ := beego.AppConfig.String("customerBaseUrl")
 

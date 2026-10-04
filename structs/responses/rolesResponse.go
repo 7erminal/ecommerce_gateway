@@ -6,11 +6,32 @@ package responses
 // 	StatusDesc string
 // }
 
+type Actions struct {
+	ActionId    int64
+	Action      string
+	Description string
+}
+
+type Permissions struct {
+	PermissionId          int64
+	Permission            string
+	PermissionCode        string
+	PermissionDescription string
+}
+
+type Role_permissions struct {
+	RolePermissionId int64
+	Role             *Roles
+	Permission       *Permissions
+	Action           *Actions
+}
+
 type Roles struct {
-	RoleId      int64  `orm:"auto"`
-	Role        string `orm:"size(100)"`
-	Description string `orm:"size(500)"`
-	// Active      int
+	RoleId          int64  `orm:"auto"`
+	Role            string `orm:"size(100)"`
+	Description     string `orm:"size(500)"`
+	Active          int
+	RolePermissions []*Role_permissions
 }
 
 type RoleResponseDTO struct {
@@ -28,5 +49,11 @@ type RolesAllResponseDTO struct {
 type RolesAllGatewayResponseDTO struct {
 	Success    bool
 	Result     *[]Roles
+	StatusDesc string
+}
+
+type RoleGatewayResponseDTO struct {
+	Success    bool
+	Result     *Roles
 	StatusDesc string
 }

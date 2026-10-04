@@ -19,3 +19,26 @@ type UpdateUserRoleRequestDTO struct {
 type UpdateUserBranchRequestDTO struct {
 	BranchId int64
 }
+
+type AddRoleRequestDTO struct {
+	Name        string
+	Description string
+}
+
+type AddRoleRequest struct {
+	Role        string
+	Description string
+}
+
+type UpdateRolePermissionRequestDTO struct {
+	Role           string
+	Action         string
+	PermissionCode string
+}
+
+type UpdateRolePermissionRequest struct {
+	Role           string
+	Action         string
+	PermissionCode string
+	ActionCode     string
+}

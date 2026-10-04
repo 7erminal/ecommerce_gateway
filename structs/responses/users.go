@@ -145,3 +145,37 @@ type UserInviteResponse struct {
 	Result     *UserInvites
 	StatusDesc string
 }
+
+type PermissionData struct {
+	PermissionId          int64
+	Permission            string
+	PermissionCode        string
+	PermissionDescription string
+	DateCreated           time.Time `orm:"type(datetime)"`
+	DateModified          time.Time `orm:"type(datetime)"`
+	CreatedBy             int
+	ModifiedBy            int
+}
+
+type PermissionsResponseDTO struct {
+	StatusCode int
+	Result     *[]PermissionData
+	StatusDesc string
+}
+
+type ActionData struct {
+	ActionId          int64
+	Action            string
+	ActionCode        string
+	ActionDescription string
+	DateCreated       time.Time `orm:"type(datetime)"`
+	DateModified      time.Time `orm:"type(datetime)"`
+	CreatedBy         int
+	ModifiedBy        int
+}
+
+type ActionsResponseDTO struct {
+	StatusCode int
+	Result     *[]ActionData
+	StatusDesc string
+}

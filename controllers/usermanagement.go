@@ -766,41 +766,138 @@ func (c *UserManagementController) VerifyInvite() {
 // @Failure 403 body is empty
 // @router /get-roles [get]
 func (c *UserManagementController) GetRoles() {
-	authorization := c.Ctx.Input.Header("Authorization")
 
-	token := strings.Split(authorization, " ")
 	var isSuccess bool = false
-	if token[0] == "Bearer" {
-		logs.Info("Token is ", token[1])
-		verifyToken := functions.VerifyToken(&c.Controller, token[1])
+	rolesResp := functions.GetRoles(&c.Controller)
 
-		if verifyToken.StatusCode == 200 {
-			rolesResp := functions.GetRoles(&c.Controller)
+	// var message string
 
-			// var message string
+	if rolesResp.StatusCode == 200 {
+		logs.Info("Name returned: ", rolesResp.Roles)
 
-			if rolesResp.StatusCode == 200 {
-				logs.Info("Name returned: ", verifyToken.Result.FullName)
+		isSuccess = true
+		// message = "Email sent"
 
-				isSuccess = true
-				// message = "Email sent"
-
-				var resp responses.RolesAllGatewayResponseDTO = responses.RolesAllGatewayResponseDTO{Success: isSuccess, Result: rolesResp.Roles, StatusDesc: rolesResp.StatusDesc}
-				c.Data["json"] = resp
-			} else {
-				var resp responses.RolesAllGatewayResponseDTO = responses.RolesAllGatewayResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
-				c.Data["json"] = resp
-			}
-		} else {
-			var resp responses.RolesAllGatewayResponseDTO = responses.RolesAllGatewayResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
-			c.Data["json"] = resp
-		}
+		var resp responses.RolesAllGatewayResponseDTO = responses.RolesAllGatewayResponseDTO{Success: isSuccess, Result: rolesResp.Roles, StatusDesc: rolesResp.StatusDesc}
+		c.Data["json"] = resp
 	} else {
 		var resp responses.RolesAllGatewayResponseDTO = responses.RolesAllGatewayResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
 		c.Data["json"] = resp
 	}
 
 	c.ServeJSON()
+}
+
+// AddRole ...
+// @Title Add Role
+// @Description Add a new role
+// @Param	Authorization		header 	string true		"header for User"
+// @Param	body		body 	requests.AddRoleRequest true		"body for Add Role"
+// @Success 200 {object} responses.RoleResponseDTO
+// @Failure 403 body is empty
+// @router /add-role [post]
+func (c *UserManagementController) AddRole() {
+
+	var isSuccess bool = false
+
+	addRoleReq := requests.AddRoleRequest{}
+	if err := c.ParseForm(&addRoleReq); err != nil {
+		logs.Error("Error parsing form: ", err)
+		c.Data["json"] = responses.RoleGatewayResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "Invalid request"}
+		c.ServeJSON()
+		return
+	}
+
+	roleReq := requests.AddRoleRequestDTO{
+		Name:        addRoleReq.Role,
+		Description: addRoleReq.Description,
+	}
+	roleResp := functions.AddRole(&c.Controller, roleReq)
+
+	if roleResp.StatusCode == 200 {
+		isSuccess = true
+	} else {
+		logs.Error("Error adding role: ", roleResp.StatusDesc)
+	}
+
+	c.Data["json"] = responses.RoleGatewayResponseDTO{Success: isSuccess, Result: roleResp.Role, StatusDesc: roleResp.StatusDesc}
+
+	c.ServeJSON()
+}
+
+// DeleteRole ...
+// @Title Delete Role
+// @Description Delete an existing role
+// @Param	Authorization		header 	string true		"header for User"
+// @Param	role		path 	string true		"Role to delete"
+// @Success 200 {object} responses.RoleResponseDTO
+// @Failure 403 body is empty
+// @router /delete-role/:role [delete]
+func (c *UserManagementController) DeleteRole() {
+	role := c.Ctx.Input.Param(":role")
+
+	var isSuccess bool = false
+
+	deleteRoleResp := functions.DeleteRole(&c.Controller, role)
+
+	if deleteRoleResp.StatusCode == 200 {
+		isSuccess = true
+	} else {
+		logs.Error("Error deleting role: ", deleteRoleResp.StatusDesc)
+	}
+
+	c.Data["json"] = responses.RoleGatewayResponseDTO{Success: isSuccess, Result: nil, StatusDesc: deleteRoleResp.StatusDesc}
+	c.ServeJSON()
+}
+
+// UpdateRole ...
+// @Title Update Role
+// @Description Update an existing role
+// @Param	Authorization		header 	string true		"header for User"
+// @Param	role		path 	string true		"Role to update"
+// @Param	body		body 	requests.UpdateRoleRequest true		"body for Update Role"
+// @Success 200 {object} responses.RoleResponseDTO
+// @Failure 403 body is empty
+// @router /update-role/:role [put]
+func (c *UserManagementController) UpdateRole() {
+	role := c.Ctx.Input.Param(":role")
+
+	var isSuccess bool = false
+
+	updateRoleReq := requests.UpdateRolePermissionRequest{}
+	if err := c.ParseForm(&updateRoleReq); err != nil {
+		logs.Error("Error parsing form: ", err)
+		c.Data["json"] = responses.RoleGatewayResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "Invalid request"}
+		c.ServeJSON()
+		return
+	}
+
+	switch updateRoleReq.Action {
+	case "REMOVE":
+		roleResp := functions.DeleteRole(&c.Controller, role)
+		if roleResp.StatusCode == 200 {
+			isSuccess = true
+		} else {
+			logs.Error("Error updating role: ", roleResp.StatusDesc)
+		}
+	case "ADD":
+		roleReq := requests.UpdateRolePermissionRequestDTO{
+			Role:           updateRoleReq.Role,
+			Action:         updateRoleReq.ActionCode,
+			PermissionCode: updateRoleReq.PermissionCode,
+		}
+		roleResp := functions.AddRolePermission(&c.Controller, updateRoleReq.Role, roleReq)
+
+		if roleResp.StatusCode == 200 {
+			isSuccess = true
+		} else {
+			logs.Error("Error updating role: ", roleResp.StatusDesc)
+		}
+
+		c.Data["json"] = responses.RoleGatewayResponseDTO{Success: isSuccess, Result: roleResp.Role, StatusDesc: roleResp.StatusDesc}
+		c.ServeJSON()
+		return
+	}
 }
 
 // GetInvites ...
