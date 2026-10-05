@@ -182,7 +182,7 @@ type ActionData struct {
 
 type ActionsResponseDTO struct {
 	StatusCode int
-	Result     []*ActionData
+	Actions    []*ActionData
 	StatusDesc string
 }
 

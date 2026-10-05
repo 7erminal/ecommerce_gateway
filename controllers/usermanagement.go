@@ -835,7 +835,7 @@ func (c *UserManagementController) GetActions() {
 	actionsResp := functions.GetActions(&c.Controller)
 
 	if actionsResp.StatusCode == 200 {
-		logs.Info("Actions returned: ", actionsResp.Result)
+		logs.Info("Actions returned: ", actionsResp.Actions)
 
 		isSuccess = true
 		statusDesc = actionsResp.StatusDesc
@@ -843,7 +843,7 @@ func (c *UserManagementController) GetActions() {
 		logs.Error("Failed to get actions ", actionsResp.StatusDesc)
 		statusDesc = "An Error occurred: " + actionsResp.StatusDesc
 	}
-	var resp responses.ActionsResponse = responses.ActionsResponse{Success: isSuccess, Result: actionsResp.Result, StatusDesc: statusDesc}
+	var resp responses.ActionsResponse = responses.ActionsResponse{Success: isSuccess, Result: actionsResp.Actions, StatusDesc: statusDesc}
 	c.Data["json"] = resp
 	c.ServeJSON()
 }
