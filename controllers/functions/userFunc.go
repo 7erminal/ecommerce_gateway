@@ -620,7 +620,7 @@ func AddRolePermission(c *beego.Controller, role string, req requests.UpdateRole
 	return data
 }
 
-func RemoveRolePermission(c *beego.Controller, role string) (resp responses.RoleResponseDTO) {
+func RemoveRolePermission(c *beego.Controller, role string, permission string, action string) (resp responses.RoleResponseDTO) {
 	host, _ := beego.AppConfig.String("customerBaseUrl")
 
 	logs.Info("Removing role permissions for role ", role)
@@ -629,10 +629,13 @@ func RemoveRolePermission(c *beego.Controller, role string) (resp responses.Role
 		host,
 		"/v1/role-permissions/"+role,
 		api.DELETE)
+	request.Params["Role"] = role
+	request.Params["PermissionCode"] = permission
+	request.Params["Action"] = action
 
 	client := api.Client{
 		Request: request,
-		Type_:   "body",
+		Type_:   "params",
 	}
 	res, err := client.SendRequest()
 	if err != nil {
