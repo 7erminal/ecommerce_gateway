@@ -37,6 +37,7 @@ func (c *UserManagementController) URLMapping() {
 	c.Mapping("DeleteRole", c.DeleteRole)
 	c.Mapping("GetActions", c.GetActions)
 	c.Mapping("GetPermissions", c.GetPermissions)
+	c.Mapping("UpdateUserImage", c.UpdateUserImage)
 }
 
 // GetUserSession ...
@@ -1164,6 +1165,55 @@ func (c *UserManagementController) UpdateUserImage() {
 	} else {
 		var resp responses.RolesAllGatewayResponseDTO = responses.RolesAllGatewayResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
 		c.Data["json"] = resp
+	}
+
+	c.ServeJSON()
+}
+
+// UpdateImage ...
+// @Title UpdateImage
+// @Description Update User's Image
+// @Param	Authorization		header 	string true		"header for User"
+// @Param	Image		formData 	file	true		"System Image"
+// @Success 200 {object} responses.StringResponseDTO
+// @Failure 403 body is empty
+// @router /upload-image [post]
+func (c *UserManagementController) UploadSystemImage() {
+
+	var isSuccess bool = false
+
+	image, header, err := c.GetFile("Image")
+
+	if err != nil {
+		var resp responses.StringResponseDTO = responses.StringResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "No file uploaded"}
+		c.Data["json"] = resp
+	} else {
+		system := c.Ctx.Input.Query("System")
+		logs.Info("System to be saved to is ", system)
+		isSuccess = false
+		respCode, filePath := functions.SaveImage(&c.Controller, "Image", image, *header)
+		logs.Info("Response code from SaveImage is ", respCode)
+		logs.Info("File path from SaveImage is ", filePath)
+
+		if respCode == 200 {
+			itemImage := functions.UploadUserImage(&c.Controller, filePath, system)
+
+			if itemImage.StatusCode == 200 {
+				logs.Info("Item image returned: ", itemImage.Result)
+
+				isSuccess = true
+
+				var resp responses.StringResponseDTO = responses.StringResponseDTO{Success: isSuccess, Result: itemImage.Result, StatusDesc: itemImage.StatusDesc}
+				c.Data["json"] = resp
+			} else {
+				var resp responses.StringResponseDTO = responses.StringResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
+				c.Data["json"] = resp
+			}
+		} else {
+			var resp responses.StringResponseDTO = responses.StringResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "Failed to upload file. Tmp"}
+			c.Data["json"] = resp
+		}
+
 	}
 
 	c.ServeJSON()

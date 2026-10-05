@@ -2030,3 +2030,51 @@ func UploadSystemImage(c *beego.Controller, systemImage string, system string) (
 
 	return data
 }
+
+func UploadUserImage(c *beego.Controller, systemImage string, system string) (resp responses.SystemImageOriResponseDTO) {
+	host, _ := beego.AppConfig.String("customerBaseUrl")
+
+	logs.Info("System image to be uploaded is ", systemImage)
+	logs.Info("System to which the image belongs is ", system)
+
+	request := api.NewRequest(
+		host,
+		"/v1/images/upload-image",
+		api.POST)
+
+	request.FileField["Image"] = systemImage
+	request.Params["System"] = system
+	// request.HeaderField["content-type"] = "multipart/form-data"
+	// request.Params = {"UserId": strconv.Itoa(int(userid))}
+	client := api.Client{
+		Request: request,
+		Type_:   "params",
+	}
+
+	// client.Request.HeaderField["content-type"] = "multipart/form-data"
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		c.Data["json"] = err.Error()
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.Data["json"] = err.Error()
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+	// data := map[string]interface{}{}
+	var data responses.SystemImageOriResponseDTO
+	json.Unmarshal(read, &data)
+	c.Data["json"] = data
+
+	logs.Info("Resp is ", data)
+
+	return data
+}
