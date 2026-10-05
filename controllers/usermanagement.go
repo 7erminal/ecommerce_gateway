@@ -35,6 +35,8 @@ func (c *UserManagementController) URLMapping() {
 	c.Mapping("UpdateRole", c.UpdateRole)
 	c.Mapping("AddRole", c.AddRole)
 	c.Mapping("DeleteRole", c.DeleteRole)
+	c.Mapping("GetActions", c.GetActions)
+	c.Mapping("GetPermissions", c.GetPermissions)
 }
 
 // GetUserSession ...

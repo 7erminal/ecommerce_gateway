@@ -693,6 +693,15 @@ func init() {
 
     beego.GlobalControllerRouter["AMC_gateway/controllers:UserManagementController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:UserManagementController"],
         beego.ControllerComments{
+            Method: "GetActions",
+            Router: `/get-actions`,
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["AMC_gateway/controllers:UserManagementController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:UserManagementController"],
+        beego.ControllerComments{
             Method: "GetBranchManagers",
             Router: `/get-branch-managers`,
             AllowHTTPMethods: []string{"get"},
@@ -704,6 +713,15 @@ func init() {
         beego.ControllerComments{
             Method: "GetUserInvites",
             Router: `/get-invites`,
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["AMC_gateway/controllers:UserManagementController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:UserManagementController"],
+        beego.ControllerComments{
+            Method: "GetPermissions",
+            Router: `/get-permissions`,
             AllowHTTPMethods: []string{"get"},
             MethodParams: param.Make(),
             Filters: nil,
