@@ -924,8 +924,6 @@ func (c *UserManagementController) DeleteRole() {
 // @Failure 403 body is empty
 // @router /update-role [post]
 func (c *UserManagementController) UpdateRole() {
-	role := c.Ctx.Input.Param(":role")
-
 	var isSuccess bool = false
 
 	updateRoleReq := requests.UpdateRolePermissionRequest{}
@@ -940,7 +938,7 @@ func (c *UserManagementController) UpdateRole() {
 
 	switch updateRoleReq.Action {
 	case "REMOVE":
-		roleResp := functions.DeleteRole(&c.Controller, role)
+		roleResp := functions.RemoveRolePermission(&c.Controller, updateRoleReq.Role)
 		if roleResp.StatusCode == 200 {
 			isSuccess = true
 		} else {
