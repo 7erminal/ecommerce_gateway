@@ -170,14 +170,14 @@ type PermissionsResponse struct {
 }
 
 type ActionData struct {
-	ActionId          int64
-	Action            string
-	ActionCode        string
-	ActionDescription string
-	DateCreated       time.Time `orm:"type(datetime)"`
-	DateModified      time.Time `orm:"type(datetime)"`
-	CreatedBy         int
-	ModifiedBy        int
+	ActionId     int64
+	Action       string
+	Description  string
+	DateCreated  time.Time `orm:"type(datetime)"`
+	DateModified time.Time `orm:"type(datetime)"`
+	CreatedBy    int
+	ModifiedBy   int
+	Active       bool
 }
 
 type ActionsResponseDTO struct {
