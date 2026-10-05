@@ -938,7 +938,7 @@ func (c *UserManagementController) UpdateRole() {
 
 	switch updateRoleReq.Action {
 	case "REMOVE":
-		roleResp := functions.RemoveRolePermission(&c.Controller, updateRoleReq.Role, updateRoleReq.PermissionCode, updateRoleReq.Action)
+		roleResp := functions.RemoveRolePermission(&c.Controller, updateRoleReq.Role, updateRoleReq.PermissionCode, updateRoleReq.ActionCode)
 		if roleResp.StatusCode == 200 {
 			isSuccess = true
 		} else {
