@@ -855,6 +855,15 @@ func init() {
 
     beego.GlobalControllerRouter["AMC_gateway/controllers:UserManagementController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:UserManagementController"],
         beego.ControllerComments{
+            Method: "UploadSystemImage",
+            Router: `/upload-image`,
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["AMC_gateway/controllers:UserManagementController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:UserManagementController"],
+        beego.ControllerComments{
             Method: "VerifyInvite",
             Router: `/verify-invite`,
             AllowHTTPMethods: []string{"post"},
