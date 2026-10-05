@@ -868,6 +868,8 @@ func (c *UserManagementController) AddRole() {
 		return
 	}
 
+	json.Unmarshal(c.Ctx.Input.RequestBody, &addRoleReq)
+
 	logs.Info("AddRole request: ", addRoleReq)
 
 	roleReq := requests.AddRoleRequestDTO{
@@ -934,6 +936,8 @@ func (c *UserManagementController) UpdateRole() {
 		return
 	}
 
+	json.Unmarshal(c.Ctx.Input.RequestBody, &updateRoleReq)
+
 	switch updateRoleReq.Action {
 	case "REMOVE":
 		roleResp := functions.DeleteRole(&c.Controller, role)
@@ -970,95 +974,80 @@ func (c *UserManagementController) UpdateRole() {
 // @Failure 403 body is empty
 // @router /get-invites [get]
 func (c *UserManagementController) GetUserInvites() {
-	authorization := c.Ctx.Input.Header("Authorization")
 
-	token := strings.Split(authorization, " ")
 	var isSuccess bool = false
-	if token[0] == "Bearer" {
-		logs.Info("Token is ", token[1])
-		verifyToken := functions.VerifyToken(&c.Controller, token[1])
 
-		if verifyToken.StatusCode == 200 {
-			invitesResp := functions.GetInvites(&c.Controller)
+	invitesResp := functions.GetInvites(&c.Controller)
 
-			// var message string
+	// var message string
 
-			if invitesResp.StatusCode == 200 {
-				userInvites := []responses.UserInvites{}
+	if invitesResp.StatusCode == 200 {
+		userInvites := []responses.UserInvites{}
 
-				logs.Info("Name returned: ", verifyToken.Result.FullName)
+		logs.Info("Invites response: ", invitesResp)
 
-				if invitesResp.UserInvites != nil {
-					for _, userInvite := range *invitesResp.UserInvites {
-						// splitName := strings.Split(userInvite.InvitedBy.FullName, " | ")
+		if invitesResp.UserInvites != nil {
+			for _, userInvite := range *invitesResp.UserInvites {
+				// splitName := strings.Split(userInvite.InvitedBy.FullName, " | ")
 
-						// firstname := ""
-						// lastname := ""
-						// if len(splitName) > 1 {
-						// 	firstname = splitName[0]
-						// 	lastname = splitName[1]
-						// } else {
-						// 	firstname = splitName[0]
-						// }
+				// firstname := ""
+				// lastname := ""
+				// if len(splitName) > 1 {
+				// 	firstname = splitName[0]
+				// 	lastname = splitName[1]
+				// } else {
+				// 	firstname = splitName[0]
+				// }
 
-						// logs.Debug("Name is ", splitName[0])
-						logs.Debug("Email is ", userInvite.Email)
-						// branch := &responses.BranchResp{}
+				// logs.Debug("Name is ", splitName[0])
+				logs.Debug("Email is ", userInvite.Email)
+				// branch := &responses.BranchResp{}
 
-						// if userInvite.InvitedBy.Branch != nil {
-						// 	currency := responses.CurrencyResp{Symbol: userInvite.InvitedBy.Branch.Country.DefaultCurrency.Symbol, Currency: userInvite.InvitedBy.Branch.Country.DefaultCurrency.Currency}
-						// 	country := responses.CountryResp{Country: userInvite.InvitedBy.Branch.Country.Country, CountryCode: userInvite.InvitedBy.Branch.Country.CountryCode, Currency: &currency}
-						// 	branch = &responses.BranchResp{BranchId: userInvite.InvitedBy.Branch.BranchId, Branch: userInvite.InvitedBy.Branch.Branch, Country: &country, Location: userInvite.InvitedBy.Branch.Location, PhoneNumber: userInvite.InvitedBy.Branch.PhoneNumber}
-						// } else {
-						// 	branch = nil
-						// }
-						// user := responses.UserGateway{
-						// 	UserId: userInvite.InvitedBy.UserId,
-						// 	// UserType:    userResp.User.UserType,
-						// 	FirstName:   firstname,
-						// 	LastName:    lastname,
-						// 	Username:    userInvite.InvitedBy.Username,
-						// 	Email:       userInvite.InvitedBy.Email,
-						// 	PhoneNumber: userInvite.InvitedBy.PhoneNumber,
-						// 	Role:        userInvite.InvitedBy.Role,
-						// 	Customer:    userInvite.InvitedBy.Customer,
-						// 	ImagePath:   verifyToken.User.ImagePath,
-						// 	// Gender:         userResp.User.Gender,
-						// 	// Dob:            userResp.User.Dob,
-						// 	// Address:        userResp.User.Address,
-						// 	// IdType:         userResp.User.IdType,
-						// 	// IdNumber:       userResp.User.IdNumber,
-						// 	// Active:         userResp.User.Active,
-						// 	// IsVerified:     userResp.User.IsVerified,
-						// 	// DateRegistered: userResp.User.DateCreated,
-						// }
+				// if userInvite.InvitedBy.Branch != nil {
+				// 	currency := responses.CurrencyResp{Symbol: userInvite.InvitedBy.Branch.Country.DefaultCurrency.Symbol, Currency: userInvite.InvitedBy.Branch.Country.DefaultCurrency.Currency}
+				// 	country := responses.CountryResp{Country: userInvite.InvitedBy.Branch.Country.Country, CountryCode: userInvite.InvitedBy.Branch.Country.CountryCode, Currency: &currency}
+				// 	branch = &responses.BranchResp{BranchId: userInvite.InvitedBy.Branch.BranchId, Branch: userInvite.InvitedBy.Branch.Branch, Country: &country, Location: userInvite.InvitedBy.Branch.Location, PhoneNumber: userInvite.InvitedBy.Branch.PhoneNumber}
+				// } else {
+				// 	branch = nil
+				// }
+				// user := responses.UserGateway{
+				// 	UserId: userInvite.InvitedBy.UserId,
+				// 	// UserType:    userResp.User.UserType,
+				// 	FirstName:   firstname,
+				// 	LastName:    lastname,
+				// 	Username:    userInvite.InvitedBy.Username,
+				// 	Email:       userInvite.InvitedBy.Email,
+				// 	PhoneNumber: userInvite.InvitedBy.PhoneNumber,
+				// 	Role:        userInvite.InvitedBy.Role,
+				// 	Customer:    userInvite.InvitedBy.Customer,
+				// 	ImagePath:   verifyToken.User.ImagePath,
+				// 	// Gender:         userResp.User.Gender,
+				// 	// Dob:            userResp.User.Dob,
+				// 	// Address:        userResp.User.Address,
+				// 	// IdType:         userResp.User.IdType,
+				// 	// IdNumber:       userResp.User.IdNumber,
+				// 	// Active:         userResp.User.Active,
+				// 	// IsVerified:     userResp.User.IsVerified,
+				// 	// DateRegistered: userResp.User.DateCreated,
+				// }
 
-						// userInvite := responses.UserInvites{UserInviteId: userInvite.UserInviteId, InvitedBy: &user, InvitationToken: userInvite.InvitationToken, Status: userInvite.Status}
-						userInvite := responses.UserInvites{UserInviteId: userInvite.UserInviteId, Status: userInvite.Status, Email: userInvite.Email, Role: userInvite.Role.Role}
+				// userInvite := responses.UserInvites{UserInviteId: userInvite.UserInviteId, InvitedBy: &user, InvitationToken: userInvite.InvitationToken, Status: userInvite.Status}
+				userInvite := responses.UserInvites{UserInviteId: userInvite.UserInviteId, Status: userInvite.Status, Email: userInvite.Email, Role: userInvite.Role.Role}
 
-						userInvites = append(userInvites, userInvite)
-					}
-				} else {
-					userInvites = []responses.UserInvites{}
-				}
-
-				isSuccess = true
-
-				var resp responses.UserInvitesResponse = responses.UserInvitesResponse{Success: isSuccess, Result: &userInvites, StatusDesc: invitesResp.StatusDesc}
-				c.Data["json"] = resp
-			} else {
-				var resp responses.UserInvitesResponse = responses.UserInvitesResponse{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
-				c.Data["json"] = resp
+				userInvites = append(userInvites, userInvite)
 			}
 		} else {
-			var resp responses.UserInvitesResponse = responses.UserInvitesResponse{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
-			c.Data["json"] = resp
+			userInvites = []responses.UserInvites{}
 		}
+
+		isSuccess = true
+
+		var resp responses.UserInvitesResponse = responses.UserInvitesResponse{Success: isSuccess, Result: &userInvites, StatusDesc: invitesResp.StatusDesc}
+		c.Data["json"] = resp
 	} else {
 		var resp responses.UserInvitesResponse = responses.UserInvitesResponse{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
 		c.Data["json"] = resp
 	}
-
 	c.ServeJSON()
 }
 
