@@ -177,7 +177,7 @@ type ActionData struct {
 	DateModified time.Time `orm:"type(datetime)"`
 	CreatedBy    int
 	ModifiedBy   int
-	Active       bool
+	Active       int
 }
 
 type ActionsResponseDTO struct {
