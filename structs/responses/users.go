@@ -158,9 +158,9 @@ type PermissionData struct {
 }
 
 type PermissionsResponseDTO struct {
-	StatusCode int
-	Result     []*PermissionData
-	StatusDesc string
+	StatusCode  int
+	Permissions []*PermissionData
+	StatusDesc  string
 }
 
 type PermissionsResponse struct {

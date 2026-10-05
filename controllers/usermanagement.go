@@ -816,7 +816,7 @@ func (c *UserManagementController) GetPermissions() {
 		logs.Error("Failed to get permissions ", permissionsResp.StatusDesc)
 		statusDesc = "An Error occurred: " + permissionsResp.StatusDesc
 	}
-	var resp responses.PermissionsResponse = responses.PermissionsResponse{Success: isSuccess, Result: permissionsResp.Result, StatusDesc: statusDesc}
+	var resp responses.PermissionsResponse = responses.PermissionsResponse{Success: isSuccess, Result: permissionsResp.Permissions, StatusDesc: statusDesc}
 	c.Data["json"] = resp
 	c.ServeJSON()
 }
