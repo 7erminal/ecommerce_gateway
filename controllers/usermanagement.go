@@ -868,6 +868,8 @@ func (c *UserManagementController) AddRole() {
 		return
 	}
 
+	logs.Info("AddRole request: ", addRoleReq)
+
 	roleReq := requests.AddRoleRequestDTO{
 		Name:        addRoleReq.Role,
 		Description: addRoleReq.Description,
