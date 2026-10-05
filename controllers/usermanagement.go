@@ -936,6 +936,8 @@ func (c *UserManagementController) UpdateRole() {
 
 	json.Unmarshal(c.Ctx.Input.RequestBody, &updateRoleReq)
 
+	role := responses.Roles{}
+
 	switch updateRoleReq.Action {
 	case "REMOVE":
 		roleResp := functions.RemoveRolePermission(&c.Controller, updateRoleReq.Role, updateRoleReq.PermissionCode, updateRoleReq.ActionCode)
@@ -954,14 +956,13 @@ func (c *UserManagementController) UpdateRole() {
 
 		if roleResp.StatusCode == 200 {
 			isSuccess = true
+			role = *roleResp.Role
 		} else {
 			logs.Error("Error updating role: ", roleResp.StatusDesc)
 		}
-
-		c.Data["json"] = responses.RoleGatewayResponseDTO{Success: isSuccess, Result: roleResp.Role, StatusDesc: roleResp.StatusDesc}
-		c.ServeJSON()
-		return
 	}
+	c.Data["json"] = responses.RoleGatewayResponseDTO{Success: isSuccess, Result: &role, StatusDesc: ""}
+	c.ServeJSON()
 }
 
 // GetInvites ...
