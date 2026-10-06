@@ -9,12 +9,11 @@ import (
 	"strconv"
 
 	"github.com/beego/beego/v2/core/logs"
-	beego "github.com/beego/beego/v2/server/web"
 )
 
 // TransactionsController operations for Transactions
 type TransactionsController struct {
-	beego.Controller
+	BaseController
 }
 
 // URLMapping ...
@@ -36,6 +35,11 @@ func (c *TransactionsController) URLMapping() {
 // @Failure 403 body is empty
 // @router /place-rental-request [post]
 func (c *TransactionsController) PlaceRentalRequest() {
+	if !c.RequirePermission("TRANSACTION", "CREATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	u := c.Ctx.Input.GetData("user")
 	userData, err := u.(*responses.UsersOri)
 
@@ -108,6 +112,11 @@ func (c *TransactionsController) PlaceRentalRequest() {
 // @Failure 403 body is empty
 // @router /place-sales-request [post]
 func (c *TransactionsController) PlaceSalesRequest() {
+	if !c.RequirePermission("TRANSACTION", "CREATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	u := c.Ctx.Input.GetData("user")
 	userData, err := u.(*responses.UsersOri)
 
@@ -172,6 +181,11 @@ func (c *TransactionsController) PlaceSalesRequest() {
 // @Failure 403 body is empty
 // @router /place-order-request [post]
 func (c *TransactionsController) PlaceOrderRequest() {
+	if !c.RequirePermission("TRANSACTION", "CREATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	u := c.Ctx.Input.GetData("user")
 	userData, err := u.(*responses.UsersOri)
 
@@ -254,6 +268,11 @@ func (c *TransactionsController) PlaceOrderRequest() {
 // @Failure 403 body is empty
 // @router /get-all-transactions [get]
 func (c *TransactionsController) GetAllTransactions() {
+	if !c.RequirePermission("TRANSACTION", "READ") && !c.RequirePermission("TRANSACTION", "LIST") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	u := c.Ctx.Input.GetData("user")
 	userData, err := u.(*responses.UsersOri)
 
@@ -304,6 +323,11 @@ func (c *TransactionsController) GetAllTransactions() {
 // @Failure 403 body is empty
 // @router /get-orders [get]
 func (c *TransactionsController) GetAllOrders() {
+	if !c.RequirePermission("TRANSACTION", "LIST") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	u := c.Ctx.Input.GetData("user")
 	userData, err := u.(*responses.UsersOri)
 
@@ -368,6 +392,11 @@ func (c *TransactionsController) GetAllOrders() {
 // @Failure 403 id is empty
 // @router /get-order/:id [get]
 func (c *TransactionsController) GetOneOrder() {
+	if !c.RequirePermission("TRANSACTION", "READ") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	idStr := c.Ctx.Input.Param(":id")
 
 	success := false

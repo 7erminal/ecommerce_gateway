@@ -53,3 +53,26 @@ type LoginResponseDTO struct {
 	Result     *LoginDataResponseDTO
 	StatusDesc string
 }
+
+type VerifyTokenOriResponseDTO struct {
+	StatusCode int
+	Result     *AuthenticatedUser
+	StatusDesc string
+}
+
+type AuthenticatedUser struct {
+	UserID      string
+	Username    string
+	RoleID      string
+	RoleName    string
+	ExpiryTime  int64
+	Permissions []UserPermission
+}
+
+type AuthenticatedCustomer struct {
+	CustomerId       string
+	Username         string
+	Number           string
+	CustomerCategory string
+	ExpiryTime       int64
+}

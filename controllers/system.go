@@ -9,12 +9,11 @@ import (
 	"strings"
 
 	"github.com/beego/beego/v2/core/logs"
-	beego "github.com/beego/beego/v2/server/web"
 )
 
 // SystemController operations for System
 type SystemController struct {
-	beego.Controller
+	BaseController
 }
 
 // URLMapping ...
@@ -57,6 +56,11 @@ func (c *SystemController) URLMapping() {
 // @Failure 403 body is empty
 // @router /get-roles [get]
 func (c *SystemController) GetRoles() {
+	if !c.RequirePermission("ROLE", "READ") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 
 	var isSuccess bool = false
 
@@ -86,6 +90,11 @@ func (c *SystemController) GetRoles() {
 // @Failure 403 body is empty
 // @router /get-statuses [get]
 func (c *SystemController) GetStatuses() {
+	if !c.RequirePermission("SETTINGS", "READ") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 
 	var isSuccess bool = false
 	message := ""
@@ -127,6 +136,11 @@ func (c *SystemController) GetStatuses() {
 // @Failure 403 body is empty
 // @router /get-status/:id [get]
 func (c *SystemController) GetStatus() {
+	if !c.RequirePermission("SETTINGS", "READ") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	id := c.Ctx.Input.Param(":id")
 	var isSuccess bool = false
 	message := ""
@@ -166,6 +180,11 @@ func (c *SystemController) GetStatus() {
 // @Failure 403 body is empty
 // @router /add-status [post]
 func (c *SystemController) AddStatus() {
+	if !c.RequirePermission("SETTINGS", "CREATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	u := c.Ctx.Input.GetData("user")
 	userData, err := u.(*responses.UsersOri)
 	// fmt.Printf("Type of v: %T\n", v)
@@ -214,6 +233,11 @@ func (c *SystemController) AddStatus() {
 // @Failure 403 body is empty
 // @router /update-status [post]
 func (c *SystemController) UpdateStatus() {
+	if !c.RequirePermission("SETTINGS", "UPDATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	u := c.Ctx.Input.GetData("user")
 	userData, err := u.(*responses.UsersOri)
 	// fmt.Printf("Type of v: %T\n", v)
@@ -262,6 +286,11 @@ func (c *SystemController) UpdateStatus() {
 // @Failure 403 body is empty
 // @router /delete-status [post]
 func (c *SystemController) DeleteStatus() {
+	if !c.RequirePermission("SETTINGS", "DELETE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	u := c.Ctx.Input.GetData("user")
 	userData, err := u.(*responses.UsersOri)
 	// fmt.Printf("Type of v: %T\n", v)
@@ -303,6 +332,11 @@ func (c *SystemController) DeleteStatus() {
 // @Failure 403 body is empty
 // @router /get-system-details/:branchid [get]
 func (c *SystemController) GetSystemDetails() {
+	if !c.RequirePermission("SETTINGS", "READ") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 
 	var isSuccess bool = false
 	message := "An Error occurred"
@@ -340,6 +374,11 @@ func (c *SystemController) GetSystemDetails() {
 // @Failure 403 body is empty
 // @router /add-branch [post]
 func (c *SystemController) AddBranch() {
+	if !c.RequirePermission("SETTINGS", "CREATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	u := c.Ctx.Input.GetData("user")
 	userData, err := u.(*responses.UsersOri)
 	// fmt.Printf("Type of v: %T\n", v)
@@ -375,6 +414,7 @@ func (c *SystemController) AddBranch() {
 			Location:      v.Location,
 			BranchManager: v.BranchManager,
 			Active:        activeState,
+			AddedBy:       strconv.FormatInt(userData.UserId, 10),
 		}
 		addBranchResp := functions.AddBranch(&c.Controller, branchRequest, userData.UserId)
 
@@ -436,6 +476,11 @@ func (c *SystemController) AddBranch() {
 // @Failure 403 :id is empty
 // @router /get-branch/:id [get]
 func (c *SystemController) GetOneBranch() {
+	if !c.RequirePermission("SETTINGS", "READ") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	idStr := c.Ctx.Input.Param(":id")
 
 	var isSuccess bool = false
@@ -499,6 +544,11 @@ func (c *SystemController) GetOneBranch() {
 // @Failure 403
 // @router /get-countries [get]
 func (c *SystemController) GetAllCountries() {
+	if !c.RequirePermission("SETTINGS", "READ") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	authorization := c.Ctx.Input.Header("Authorization")
 	token := strings.Split(authorization, " ")
 
@@ -564,6 +614,11 @@ func (c *SystemController) GetAllCountries() {
 // @Failure 403
 // @router /get-branches [get]
 func (c *SystemController) GetAllBranches() {
+	if !c.RequirePermission("SETTINGS", "READ") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	logs.Info("Fetching all branches")
 	var isSuccess bool = false
 
@@ -642,6 +697,11 @@ func (c *SystemController) GetAllBranches() {
 // @Failure 403 :id is not int
 // @router /update-branch/:id [put]
 func (c *SystemController) UpdateBranch() {
+	if !c.RequirePermission("SETTINGS", "UPDATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	u := c.Ctx.Input.GetData("user")
 	userData, err := u.(*responses.UsersOri)
 
@@ -733,6 +793,11 @@ func (c *SystemController) UpdateBranch() {
 // @Failure 403 id is empty
 // @router /delete-branch/:id [delete]
 func (c *SystemController) Delete() {
+	if !c.RequirePermission("SETTINGS", "DELETE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	idStr := c.Ctx.Input.Param(":id")
 
 	authorization := c.Ctx.Input.Header("Authorization")
@@ -779,6 +844,11 @@ func (c *SystemController) Delete() {
 // @Failure 403
 // @router /get-id-types [get]
 func (c *SystemController) GetIdTypes() {
+	if !c.RequirePermission("ROLE", "READ") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	// v := c.Ctx.Input.GetData("user")
 	// userData, err := v.(*responses.UsersOri)
 
@@ -846,6 +916,11 @@ func (c *SystemController) GetIdTypes() {
 // @Failure 403 body is empty
 // @router /add-application [post]
 func (c *SystemController) AddApplication() {
+	if !c.RequirePermission("SETTINGS", "CREATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	userData, _ := c.Ctx.Input.GetData("user").(*responses.UsersOri)
 	var v requests.ApplicationRequest
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
@@ -886,6 +961,11 @@ func (c *SystemController) AddApplication() {
 // @Failure 403 code is empty
 // @router /get-application/:code [get]
 func (c *SystemController) GetApplication() {
+	if !c.RequirePermission("SETTINGS", "READ") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	code := c.Ctx.Input.Param(":code")
 
 	logs.Info("Getting application with code: ", code)
@@ -913,6 +993,11 @@ func (c *SystemController) GetApplication() {
 // @Failure 403 an error occurred
 // @router /get-applications [get]
 func (c *SystemController) GetApplications() {
+	if !c.RequirePermission("SETTINGS", "READ") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	isSuccess := false
 
 	appResp := functions.GetAllApplications(&c.Controller)
@@ -936,6 +1021,11 @@ func (c *SystemController) GetApplications() {
 // @Failure 403 an error occurred
 // @router /get-application-shops [get]
 func (c *SystemController) GetApplicationShops() {
+	if !c.RequirePermission("SETTINGS", "READ") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	isSuccess := false
 
 	appResp := functions.GetApplicationShops(&c.Controller)
@@ -962,6 +1052,11 @@ func (c *SystemController) GetApplicationShops() {
 // @Failure 403 :id is not int
 // @router /update-application/:id [put]
 func (c *SystemController) UpdateApplication() {
+	if !c.RequirePermission("SETTINGS", "UPDATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	userData, _ := c.Ctx.Input.GetData("user").(*responses.UsersOri)
 	idStr := c.Ctx.Input.Param(":id")
 	var v requests.ApplicationRequest
@@ -1005,6 +1100,11 @@ func (c *SystemController) UpdateApplication() {
 // @Failure 403 :id is not int
 // @router /update-application-theme/:id [put]
 func (c *SystemController) UpdateApplicationTheme() {
+	if !c.RequirePermission("SETTINGS", "UPDATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	idStr := c.Ctx.Input.Param(":id")
 	var v requests.ThemeRequest
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
@@ -1040,6 +1140,11 @@ func (c *SystemController) UpdateApplicationTheme() {
 // @Failure 403 body is empty
 // @router /add-theme [post]
 func (c *SystemController) AddTheme() {
+	if !c.RequirePermission("SETTINGS", "CREATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	var v requests.ThemeRequest
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
 
@@ -1079,6 +1184,11 @@ func (c *SystemController) AddTheme() {
 // @Failure 403 body is empty
 // @router /remove-theme/:id [delete]
 func (c *SystemController) RemoveTheme() {
+	if !c.RequirePermission("SETTINGS", "DELETE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	idStr := c.Ctx.Input.Param(":id")
 
 	var isSuccess bool = false
@@ -1118,6 +1228,11 @@ func (c *SystemController) RemoveTheme() {
 // @Failure 403 :id is not int
 // @router /update-theme/:id [put]
 func (c *SystemController) UpdateTheme() {
+	if !c.RequirePermission("SETTINGS", "UPDATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	idStr := c.Ctx.Input.Param(":id")
 	var v requests.ThemeRequest
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
@@ -1157,6 +1272,11 @@ func (c *SystemController) UpdateTheme() {
 // @Failure 403 :id is not int
 // @router /fetch-themes [get]
 func (c *SystemController) FetchThemes() {
+	if !c.RequirePermission("SETTINGS", "READ") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 
 	var isSuccess bool = false
 	message := "You are not authorized to perform this request"
@@ -1190,6 +1310,11 @@ func (c *SystemController) FetchThemes() {
 // @Failure 403 body is empty
 // @router /add-theme-config/:id [post]
 func (c *SystemController) AddThemeConfig() {
+	if !c.RequirePermission("SETTINGS", "CREATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	idStr := c.Ctx.Input.Param(":id")
 	var v requests.ThemeConfigRequest
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
@@ -1219,6 +1344,11 @@ func (c *SystemController) AddThemeConfig() {
 // @Failure 403 body is empty
 // @router /remove-theme-config/:id [delete]
 func (c *SystemController) RemoveThemeConfig() {
+	if !c.RequirePermission("SETTINGS", "DELETE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	idStr := c.Ctx.Input.Param(":id")
 
 	authorization := c.Ctx.Input.Header("Authorization")
@@ -1256,6 +1386,11 @@ func (c *SystemController) RemoveThemeConfig() {
 // @Failure 403 body is empty
 // @router /upload-system-image [post]
 func (c *SystemController) UploadSystemImage() {
+	if !c.RequirePermission("SETTINGS", "UPDATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 
 	var isSuccess bool = false
 
@@ -1303,6 +1438,11 @@ func (c *SystemController) UploadSystemImage() {
 // @Failure 403 body is empty
 // @router /get-shops [get]
 func (c *SystemController) GetShops() {
+	if !c.RequirePermission("SETTINGS", "LIST") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 
 	var isSuccess bool = false
 
@@ -1332,6 +1472,11 @@ func (c *SystemController) GetShops() {
 // @Failure 403 body is empty
 // @router /get-shop/:id [get]
 func (c *SystemController) GetShop() {
+	if !c.RequirePermission("SETTINGS", "READ") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	id := c.Ctx.Input.Param(":id")
 	var isSuccess bool = false
 
@@ -1363,6 +1508,11 @@ func (c *SystemController) GetShop() {
 // @Failure 403 body is empty
 // @router /add-shop [post]
 func (c *SystemController) AddShop() {
+	if !c.RequirePermission("SETTINGS", "CREATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	u := c.Ctx.Input.GetData("user")
 	userData, err := u.(*responses.UsersOri)
 	// fmt.Printf("Type of v: %T\n", v)
@@ -1391,6 +1541,7 @@ func (c *SystemController) AddShop() {
 		ShopAssistantName:   v.ShopAssistantName,
 		ShopAssistantNumber: v.ShopAssistantNumber,
 		Active:              activeState,
+		AddedBy:             userIdStr,
 	}
 	addStatusResp := functions.AddShop(&c.Controller, shopRequest, userIdStr)
 
@@ -1422,6 +1573,11 @@ func (c *SystemController) AddShop() {
 // @Failure 403 body is empty
 // @router /update-shop [post]
 func (c *SystemController) UpdateShop() {
+	if !c.RequirePermission("SETTINGS", "UPDATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	u := c.Ctx.Input.GetData("user")
 	userData, err := u.(*responses.UsersOri)
 	// fmt.Printf("Type of v: %T\n", v)
@@ -1437,6 +1593,7 @@ func (c *SystemController) UpdateShop() {
 	if userData != nil && userData.Role.Role == "SUPER_ADMIN" {
 		activeState = "true"
 	}
+	userIdStr := strconv.Itoa(int(userData.UserId))
 	shopRequest := requests.ShopApiRequestDTO{
 		ShopId:              v.ShopId,
 		ShopName:            v.ShopName,
@@ -1448,9 +1605,9 @@ func (c *SystemController) UpdateShop() {
 		ShopAssistantName:   v.ShopAssistantName,
 		ShopAssistantNumber: v.ShopAssistantNumber,
 		Active:              activeState,
+		AddedBy:             userIdStr,
 	}
 
-	userIdStr := strconv.Itoa(int(userData.UserId))
 	addStatusResp := functions.UpdateShop(&c.Controller, shopRequest, userIdStr)
 
 	if addStatusResp.StatusCode == 200 {
@@ -1481,6 +1638,11 @@ func (c *SystemController) UpdateShop() {
 // @Failure 403 body is empty
 // @router /delete-shop [post]
 func (c *SystemController) DeleteShop() {
+	if !c.RequirePermission("SETTINGS", "DELETE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	u := c.Ctx.Input.GetData("user")
 	userData, err := u.(*responses.UsersOri)
 	// fmt.Printf("Type of v: %T\n", v)
@@ -1524,6 +1686,11 @@ func (c *SystemController) DeleteShop() {
 // @Failure 403 body is empty
 // @router /shop/add-branch [post]
 func (c *SystemController) AddShopBranch() {
+	if !c.RequirePermission("SETTINGS", "UPDATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	u := c.Ctx.Input.GetData("user")
 	userData, err := u.(*responses.UsersOri)
 	// fmt.Printf("Type of v: %T\n", v)
@@ -1537,7 +1704,12 @@ func (c *SystemController) AddShopBranch() {
 	var isSuccess bool = false
 
 	userIdStr := strconv.Itoa(int(userData.UserId))
-	addStatusResp := functions.AddShopBranch(&c.Controller, v, userIdStr)
+	shopBranchRequest := requests.ShopBranchApiRequestDTO{
+		BranchId: v.BranchId,
+		ShopId:   v.ShopId,
+		AddedBy:  userIdStr,
+	}
+	addStatusResp := functions.AddShopBranch(&c.Controller, shopBranchRequest, userIdStr)
 
 	if addStatusResp.StatusCode == 200 {
 
@@ -1567,6 +1739,11 @@ func (c *SystemController) AddShopBranch() {
 // @Failure 403 body is empty
 // @router /shop/remove-branch [post]
 func (c *SystemController) RemoveShopBranch() {
+	if !c.RequirePermission("SETTINGS", "UPDATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	u := c.Ctx.Input.GetData("user")
 	userData, err := u.(*responses.UsersOri)
 	// fmt.Printf("Type of v: %T\n", v)
@@ -1610,6 +1787,11 @@ func (c *SystemController) RemoveShopBranch() {
 // @Failure 403 body is empty
 // @router /application/add-shop [post]
 func (c *SystemController) AddApplicationShop() {
+	if !c.RequirePermission("SETTINGS", "UPDATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	u := c.Ctx.Input.GetData("user")
 	userData, err := u.(*responses.UsersOri)
 	// fmt.Printf("Type of v: %T\n", v)
@@ -1659,6 +1841,11 @@ func (c *SystemController) AddApplicationShop() {
 // @Failure 403 body is empty
 // @router /application/remove-shop [post]
 func (c *SystemController) RemoveApplicationShop() {
+	if !c.RequirePermission("SETTINGS", "UPDATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	u := c.Ctx.Input.GetData("user")
 	userData, err := u.(*responses.UsersOri)
 	// fmt.Printf("Type of v: %T\n", v)

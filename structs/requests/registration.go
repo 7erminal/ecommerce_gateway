@@ -8,6 +8,7 @@ type Registration struct {
 	Password    string
 	Dob         string
 	RoleId      string
+	Branch      string
 }
 
 type RegisterUser struct {
@@ -18,5 +19,6 @@ type RegisterUser struct {
 	Password    string
 	Dob         string
 	RoleId      string
-	BranchId    string
+	Branch      string
+	AddedBy     string
 }

@@ -15,11 +15,12 @@ import (
 
 // UserManagementController operations for UserManagement
 type UserManagementController struct {
-	beego.Controller
+	BaseController
 }
 
 // URLMapping ...
 func (c *UserManagementController) URLMapping() {
+	c.Mapping("AddUser", c.AddUser)
 	c.Mapping("GetUser", c.GetUser)
 	c.Mapping("GetUserWithId", c.GetUserWithId)
 	c.Mapping("InviteUserReg", c.InviteUserReg)
@@ -40,6 +41,87 @@ func (c *UserManagementController) URLMapping() {
 	c.Mapping("UpdateUserImage", c.UpdateUserImage)
 }
 
+// Post ...
+// @Title Create
+// @Description Register a User
+// @Param	body		body 	requests.Registration	true		"body for Registration content. Role should be the role ID"
+// @Success 200 {object} responses.UserGatewayResponseDTO
+// @Failure 403 body is empty
+// @router /add-user [post]
+func (c *UserManagementController) AddUser() {
+	if !c.RequirePermission("USER", "CREATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
+	u := c.Ctx.Input.GetData("user")
+	userData, err := u.(*responses.UsersOri)
+	if !err {
+		logs.Error("Error retrieving user data: ", err)
+	}
+
+	var v requests.Registration
+	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
+
+	if v.RoleId == "" {
+		var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: false, Result: nil, StatusDesc: "User role not specified"}
+
+		c.Data["json"] = resp
+	} else {
+		userRole := functions.GetRole(&c.Controller, v.RoleId)
+
+		if userRole.StatusCode == 200 {
+
+			var req requests.RegisterUser = requests.RegisterUser{Email: v.Email, Name: v.FirstName + " | " + v.LastName, Gender: "", PhoneNumber: v.PhoneNumber, Password: v.Password, RoleId: v.RoleId, AddedBy: strconv.FormatInt(userData.UserId, 10)}
+
+			regResp := functions.RegistrationRequest(&c.Controller, req)
+
+			var isSuccess bool = false
+
+			var data responses.UserGateway
+
+			if regResp.StatusCode == 200 {
+				splitName := strings.Split(regResp.User.FullName, " | ")
+
+				logs.Debug("Name is ", splitName[0])
+
+				role := responses.Role{Role: userRole.Role.Role}
+
+				data = responses.UserGateway{
+					// UserId:         regResp.User.UserId,
+					// UserType:    regResp.User.UserType,
+					FirstName:   splitName[0],
+					LastName:    splitName[1],
+					Username:    regResp.User.Username,
+					Email:       regResp.User.Email,
+					PhoneNumber: regResp.User.PhoneNumber,
+					Role:        &role,
+					// Gender:         regResp.User.Gender,
+					// Dob:            regResp.User.Dob,
+					// Address:        regResp.User.Address,
+					// IdType:         regResp.User.IdType,
+					// IdNumber:       regResp.User.IdNumber,
+					// Active:         regResp.User.Active,
+					// IsVerified:     regResp.User.IsVerified,
+					// DateRegistered: regResp.User.DateCreated,
+				}
+
+				isSuccess = true
+			}
+
+			var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: isSuccess, Result: &data, StatusDesc: regResp.StatusDesc}
+
+			c.Data["json"] = resp
+		} else {
+			var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: false, Result: nil, StatusDesc: "User role not specified"}
+
+			c.Data["json"] = resp
+		}
+	}
+
+	c.ServeJSON()
+}
+
 // GetUserSession ...
 // @Title Get User Session
 // @Description Get user
@@ -48,89 +130,84 @@ func (c *UserManagementController) URLMapping() {
 // @Failure 403 body is empty
 // @router /get-user-session [post]
 func (c *UserManagementController) GetUser() {
-	authorization := c.Ctx.Input.Header("Authorization")
+	if !c.RequirePermission("USER", "READ") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
+	v := c.Ctx.Input.GetData("user")
+	userData, err := v.(*responses.UsersOri)
+	if err != false {
+		logs.Error("Error retrieving user data: ", err)
+	}
 
-	token := strings.Split(authorization, " ")
 	var isSuccess bool = false
-	logs.Info("Token name is ", token[0])
-	if token[0] == "Bearer" {
-		logs.Info("Token is ", token[1])
-		verifyToken := functions.VerifyToken(&c.Controller, token[1])
 
-		if verifyToken.StatusCode == 200 {
-			userResp := functions.GetUserDetails(&c.Controller, verifyToken.Result.UserId)
+	userResp := functions.GetUserDetails(&c.Controller, userData.UserId)
 
-			var data responses.UserGateway
+	var data responses.UserGateway
 
-			if userResp.StatusCode == 200 {
-				logs.Info("Name returned: ", userResp.Result.FullName)
-				splitName := strings.Split(userResp.Result.FullName, " | ")
+	if userResp.StatusCode == 200 {
+		logs.Info("Name returned: ", userResp.Result.FullName)
+		splitName := strings.Split(userResp.Result.FullName, " | ")
 
-				// logs.Debug("Name is ", splitName[0])
-				firstname := ""
-				lastname := ""
-				if len(splitName) > 1 {
-					firstname = splitName[0]
-					lastname = splitName[1]
-				} else {
-					firstname = splitName[0]
-				}
-
-				status := "ACTIVE"
-
-				if userResp.Result.Active == 6 {
-					status = "DELETED"
-				}
-				if userResp.Result.Active == 2 {
-					status = "PENDING"
-				}
-				if userResp.Result.Active == 4 {
-					status = "INACTIVE"
-				}
-				// branch := &responses.BranchResp{}
-
-				// if userResp.User.Branch != nil {
-				// 	currency := responses.CurrencyResp{Symbol: userResp.User.Branch.Country.DefaultCurrency.Symbol, Currency: userResp.User.Branch.Country.DefaultCurrency.Currency}
-				// 	country := responses.CountryResp{Country: userResp.User.Branch.Country.Country, CountryCode: userResp.User.Branch.Country.CountryCode, Currency: &currency}
-				// 	branch = &responses.BranchResp{BranchId: userResp.User.Branch.BranchId, Branch: userResp.User.Branch.Branch, Country: &country, Location: userResp.User.Branch.Location, PhoneNumber: userResp.User.Branch.PhoneNumber}
-				// 	// userResp.User.Customer.Branch.Country = country
-				// 	} else {
-				// 	branch = nil
-				// }
-				data = responses.UserGateway{
-					UserId: userResp.Result.UserId,
-					// UserType:    userResp.User.UserType,
-					FirstName:   firstname,
-					LastName:    lastname,
-					Username:    userResp.Result.Username,
-					Email:       userResp.Result.Email,
-					PhoneNumber: userResp.Result.PhoneNumber,
-					Role:        userResp.Result.Role,
-					Customer:    userResp.Result.UserDetails,
-					ImagePath:   userResp.Result.ImagePath,
-					Status:      status,
-					// Gender:         userResp.User.Gender,
-					// Dob:            userResp.User.Dob,
-					// Address:        userResp.User.Address,
-					// IdType:         userResp.User.IdType,
-					// IdNumber:       userResp.User.IdNumber,
-					// Active:         userResp.User.Active,
-					// IsVerified:     userResp.User.IsVerified,
-					// DateRegistered: userResp.User.DateCreated,
-				}
-
-				isSuccess = true
-
-				var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: isSuccess, Result: &data, StatusDesc: userResp.StatusDesc}
-				c.Data["json"] = resp
-			} else {
-				var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
-				c.Data["json"] = resp
-			}
+		// logs.Debug("Name is ", splitName[0])
+		firstname := ""
+		lastname := ""
+		if len(splitName) > 1 {
+			firstname = splitName[0]
+			lastname = splitName[1]
 		} else {
-			var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
-			c.Data["json"] = resp
+			firstname = splitName[0]
 		}
+
+		status := "ACTIVE"
+
+		if userResp.Result.Active == 6 {
+			status = "DELETED"
+		}
+		if userResp.Result.Active == 2 {
+			status = "PENDING"
+		}
+		if userResp.Result.Active == 4 {
+			status = "INACTIVE"
+		}
+		// branch := &responses.BranchResp{}
+
+		// if userResp.User.Branch != nil {
+		// 	currency := responses.CurrencyResp{Symbol: userResp.User.Branch.Country.DefaultCurrency.Symbol, Currency: userResp.User.Branch.Country.DefaultCurrency.Currency}
+		// 	country := responses.CountryResp{Country: userResp.User.Branch.Country.Country, CountryCode: userResp.User.Branch.Country.CountryCode, Currency: &currency}
+		// 	branch = &responses.BranchResp{BranchId: userResp.User.Branch.BranchId, Branch: userResp.User.Branch.Branch, Country: &country, Location: userResp.User.Branch.Location, PhoneNumber: userResp.User.Branch.PhoneNumber}
+		// 	// userResp.User.Customer.Branch.Country = country
+		// 	} else {
+		// 	branch = nil
+		// }
+		data = responses.UserGateway{
+			UserId: userResp.Result.UserId,
+			// UserType:    userResp.User.UserType,
+			FirstName:   firstname,
+			LastName:    lastname,
+			Username:    userResp.Result.Username,
+			Email:       userResp.Result.Email,
+			PhoneNumber: userResp.Result.PhoneNumber,
+			Role:        userResp.Result.Role,
+			Customer:    userResp.Result.UserDetails,
+			ImagePath:   userResp.Result.ImagePath,
+			Status:      status,
+			// Gender:         userResp.User.Gender,
+			// Dob:            userResp.User.Dob,
+			// Address:        userResp.User.Address,
+			// IdType:         userResp.User.IdType,
+			// IdNumber:       userResp.User.IdNumber,
+			// Active:         userResp.User.Active,
+			// IsVerified:     userResp.User.IsVerified,
+			// DateRegistered: userResp.User.DateCreated,
+		}
+
+		isSuccess = true
+
+		var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: isSuccess, Result: &data, StatusDesc: userResp.StatusDesc}
+		c.Data["json"] = resp
 	} else {
 		var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
 		c.Data["json"] = resp
@@ -148,93 +225,82 @@ func (c *UserManagementController) GetUser() {
 // @Failure 403 body is empty
 // @router /get-user-with-id/:id [get]
 func (c *UserManagementController) GetUserWithId() {
-	authorization := c.Ctx.Input.Header("Authorization")
+	if !c.RequirePermission("USER", "READ") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	idStr := c.Ctx.Input.Param(":id")
 	id, _ := strconv.ParseInt(idStr, 0, 64)
 
-	token := strings.Split(authorization, " ")
 	var isSuccess bool = false
-	logs.Info("Token name is ", token[0])
-	if token[0] == "Bearer" {
-		logs.Info("Token is ", token[1])
-		verifyToken := functions.VerifyToken(&c.Controller, token[1])
+	userResp := functions.GetUserDetails(&c.Controller, id)
 
-		if verifyToken.StatusCode == 200 {
-			userResp := functions.GetUserDetails(&c.Controller, id)
+	var data responses.UserGateway
 
-			var data responses.UserGateway
+	if userResp.StatusCode == 200 {
+		logs.Info("Name returned: ", userResp.Result.FullName)
+		splitName := strings.Split(userResp.Result.FullName, " | ")
 
-			if userResp.StatusCode == 200 {
-				logs.Info("Name returned: ", userResp.Result.FullName)
-				splitName := strings.Split(userResp.Result.FullName, " | ")
-
-				// logs.Debug("Name is ", splitName[0])
-				firstname := ""
-				lastname := ""
-				if len(splitName) > 1 {
-					firstname = splitName[0]
-					lastname = splitName[1]
-				} else {
-					firstname = splitName[0]
-				}
-				// branch := &responses.BranchResp{}
-
-				// if userResp.Result.Branch != nil {
-				// 	currency := responses.CurrencyResp{Symbol: userResp.Result.Branch.Country.DefaultCurrency.Symbol, Currency: userResp.Result.Branch.Country.DefaultCurrency.Currency}
-				// 	country := responses.CountryResp{Country: userResp.Result.Branch.Country.Country, CountryCode: userResp.Result.Branch.Country.CountryCode, Currency: &currency}
-				// 	branch = &responses.BranchResp{BranchId: userResp.Result.Branch.BranchId, Branch: userResp.Result.Branch.Branch, Country: &country, Location: userResp.Result.Branch.Location, PhoneNumber: userResp.Result.Branch.PhoneNumber}
-				// 	// userResp.Result.Customer.Branch.Country = country
-				// 	} else {
-				// 	branch = nil
-				// }
-				status := "ACTIVE"
-
-				if userResp.Result.Active == 6 {
-					status = "DELETED"
-				}
-				if userResp.Result.Active == 2 {
-					status = "PENDING"
-				}
-				if userResp.Result.Active == 4 {
-					status = "INACTIVE"
-				}
-
-				data = responses.UserGateway{
-					UserId: userResp.Result.UserId,
-					// UserType:    userResp.Result.UserType,
-					FirstName:   firstname,
-					LastName:    lastname,
-					Username:    userResp.Result.Username,
-					Email:       userResp.Result.Email,
-					PhoneNumber: userResp.Result.PhoneNumber,
-					Role:        userResp.Result.Role,
-					Customer:    userResp.Result.UserDetails,
-					ImagePath:   userResp.Result.ImagePath,
-					Status:      status,
-					// Gender:         userResp.Result.Gender,
-					// Dob:            userResp.Result.Dob,
-					// Address:        userResp.Result.Address,
-					// IdType:         userResp.Result.IdType,
-					// IdNumber:       userResp.Result.IdNumber,
-					// Active:         userResp.Result.Active,
-					// IsVerified:     userResp.Result.IsVerified,
-					// DateRegistered: userResp.Result.DateCreated,
-				}
-
-				isSuccess = true
-
-				var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: isSuccess, Result: &data, StatusDesc: userResp.StatusDesc}
-				c.Data["json"] = resp
-			} else {
-				var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "Error getting user details"}
-				c.Data["json"] = resp
-			}
+		// logs.Debug("Name is ", splitName[0])
+		firstname := ""
+		lastname := ""
+		if len(splitName) > 1 {
+			firstname = splitName[0]
+			lastname = splitName[1]
 		} else {
-			var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "You are not authorized to access this resource"}
-			c.Data["json"] = resp
+			firstname = splitName[0]
 		}
+		// branch := &responses.BranchResp{}
+
+		// if userResp.Result.Branch != nil {
+		// 	currency := responses.CurrencyResp{Symbol: userResp.Result.Branch.Country.DefaultCurrency.Symbol, Currency: userResp.Result.Branch.Country.DefaultCurrency.Currency}
+		// 	country := responses.CountryResp{Country: userResp.Result.Branch.Country.Country, CountryCode: userResp.Result.Branch.Country.CountryCode, Currency: &currency}
+		// 	branch = &responses.BranchResp{BranchId: userResp.Result.Branch.BranchId, Branch: userResp.Result.Branch.Branch, Country: &country, Location: userResp.Result.Branch.Location, PhoneNumber: userResp.Result.Branch.PhoneNumber}
+		// 	// userResp.Result.Customer.Branch.Country = country
+		// 	} else {
+		// 	branch = nil
+		// }
+		status := "ACTIVE"
+
+		if userResp.Result.Active == 6 {
+			status = "DELETED"
+		}
+		if userResp.Result.Active == 2 {
+			status = "PENDING"
+		}
+		if userResp.Result.Active == 4 {
+			status = "INACTIVE"
+		}
+
+		data = responses.UserGateway{
+			UserId: userResp.Result.UserId,
+			// UserType:    userResp.Result.UserType,
+			FirstName:   firstname,
+			LastName:    lastname,
+			Username:    userResp.Result.Username,
+			Email:       userResp.Result.Email,
+			PhoneNumber: userResp.Result.PhoneNumber,
+			Role:        userResp.Result.Role,
+			Customer:    userResp.Result.UserDetails,
+			ImagePath:   userResp.Result.ImagePath,
+			Status:      status,
+			// Gender:         userResp.Result.Gender,
+			// Dob:            userResp.Result.Dob,
+			// Address:        userResp.Result.Address,
+			// IdType:         userResp.Result.IdType,
+			// IdNumber:       userResp.Result.IdNumber,
+			// Active:         userResp.Result.Active,
+			// IsVerified:     userResp.Result.IsVerified,
+			// DateRegistered: userResp.Result.DateCreated,
+		}
+
+		isSuccess = true
+
+		var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: isSuccess, Result: &data, StatusDesc: userResp.StatusDesc}
+		c.Data["json"] = resp
 	} else {
-		var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred. Invalid authorization token"}
+		var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "Error getting user details"}
 		c.Data["json"] = resp
 	}
 
@@ -255,6 +321,11 @@ func (c *UserManagementController) GetUserWithId() {
 // @Failure 403 body is empty
 // @router /get-users [get]
 func (c *UserManagementController) GetUsers() {
+	if !c.RequirePermission("USER", "LIST") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	v := c.Ctx.Input.GetData("user")
 	userData, err := v.(*responses.UsersOri)
 
@@ -410,6 +481,11 @@ func (c *UserManagementController) GetUsers() {
 // @Failure 403 body is empty
 // @router /get-branch-managers [get]
 func (c *UserManagementController) GetBranchManagers() {
+	if !c.RequirePermission("USER", "READ") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 
 	// Retrieve the user data from the context
 	userData := c.Ctx.Input.GetData("user")
@@ -550,6 +626,11 @@ func (c *UserManagementController) GetBranchManagers() {
 // @Failure 403 body is empty
 // @router /get-users-under-branch/:branch_id [get]
 func (c *UserManagementController) GetUsersUnderBranch() {
+	if !c.RequirePermission("USER", "READ") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	authorization := c.Ctx.Input.Header("Authorization")
 
 	token := strings.Split(authorization, " ")
@@ -690,6 +771,11 @@ func (c *UserManagementController) GetUsersUnderBranch() {
 // @Failure 403 body is empty
 // @router /invite-user [post]
 func (c *UserManagementController) InviteUserReg() {
+	if !c.RequirePermission("USER", "CREATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	var v requests.InviteRequestDTO
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
 	authorization := c.Ctx.Input.Header("Authorization")
@@ -702,7 +788,7 @@ func (c *UserManagementController) InviteUserReg() {
 
 		if verifyToken.StatusCode == 200 {
 			link := "https://amc-flowpos.com/auth/user/invite/"
-			inviteResp := functions.InviteUser(&c.Controller, v.Email, v.Role, link, verifyToken.Result.UserId)
+			inviteResp := functions.InviteUser(&c.Controller, v.Email, v.Role, link, verifyToken.Result.UserID)
 
 			var message string
 
@@ -738,6 +824,11 @@ func (c *UserManagementController) InviteUserReg() {
 // @Failure 403 body is empty
 // @router /verify-invite [post]
 func (c *UserManagementController) VerifyInvite() {
+	if !c.RequirePermission("USER", "READ") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	var v requests.StringRequestDTO
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
 
@@ -772,6 +863,11 @@ func (c *UserManagementController) VerifyInvite() {
 // @Failure 403 body is empty
 // @router /get-roles [get]
 func (c *UserManagementController) GetRoles() {
+	if !c.RequirePermission("ROLE", "READ") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 
 	var isSuccess bool = false
 	rolesResp := functions.GetRoles(&c.Controller)
@@ -802,7 +898,11 @@ func (c *UserManagementController) GetRoles() {
 // @Failure 403 body is empty
 // @router /get-permissions [get]
 func (c *UserManagementController) GetPermissions() {
-
+	if !c.RequirePermission("ROLE", "READ") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	var isSuccess bool = false
 	statusDesc := ""
 	permissionsResp := functions.GetPermissions(&c.Controller)
@@ -830,7 +930,11 @@ func (c *UserManagementController) GetPermissions() {
 // @Failure 403 body is empty
 // @router /get-actions [get]
 func (c *UserManagementController) GetActions() {
-
+	if !c.RequirePermission("ROLE", "READ") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	var isSuccess bool = false
 	statusDesc := ""
 	actionsResp := functions.GetActions(&c.Controller)
@@ -858,7 +962,11 @@ func (c *UserManagementController) GetActions() {
 // @Failure 403 body is empty
 // @router /add-role [post]
 func (c *UserManagementController) AddRole() {
-
+	if !c.RequirePermission("ROLE", "CREATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	var isSuccess bool = false
 
 	addRoleReq := requests.AddRoleRequest{}
@@ -899,6 +1007,11 @@ func (c *UserManagementController) AddRole() {
 // @Failure 403 body is empty
 // @router /delete-role/:role [delete]
 func (c *UserManagementController) DeleteRole() {
+	if !c.RequirePermission("ROLE", "DELETE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	role := c.Ctx.Input.Param(":role")
 
 	var isSuccess bool = false
@@ -925,6 +1038,11 @@ func (c *UserManagementController) DeleteRole() {
 // @Failure 403 body is empty
 // @router /update-role [post]
 func (c *UserManagementController) UpdateRole() {
+	if !c.RequirePermission("ROLE", "UPDATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	var isSuccess bool = false
 
 	updateRoleReq := requests.UpdateRolePermissionRequest{}
@@ -974,7 +1092,11 @@ func (c *UserManagementController) UpdateRole() {
 // @Failure 403 body is empty
 // @router /get-invites [get]
 func (c *UserManagementController) GetUserInvites() {
-
+	if !c.RequirePermission("USER", "READ") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	var isSuccess bool = false
 
 	invitesResp := functions.GetInvites(&c.Controller)
@@ -1060,6 +1182,11 @@ func (c *UserManagementController) GetUserInvites() {
 // @Failure 403 body is empty
 // @router /update-user-image [post]
 func (c *UserManagementController) UpdateUserImage() {
+	if !c.RequirePermission("USER", "UPDATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	authorization := c.Ctx.Input.Header("Authorization")
 
 	token := strings.Split(authorization, " ")
@@ -1087,7 +1214,7 @@ func (c *UserManagementController) UpdateUserImage() {
 				if respCode == 200 {
 					var data responses.UserGateway
 
-					userResp := functions.UpdateUserImage(&c.Controller, filePath, verifyToken.Result.UserId)
+					userResp := functions.UpdateUserImage(&c.Controller, filePath, verifyToken.Result.UserID)
 
 					if userResp.StatusCode == 200 {
 						logs.Info("Name returned: ", userResp.Result.FullName)
@@ -1179,7 +1306,11 @@ func (c *UserManagementController) UpdateUserImage() {
 // @Failure 403 body is empty
 // @router /upload-image [post]
 func (c *UserManagementController) UploadSystemImage() {
-
+	if !c.RequirePermission("SETTINGS", "UPDATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	var isSuccess bool = false
 
 	image, header, err := c.GetFile("Image")
@@ -1229,6 +1360,11 @@ func (c *UserManagementController) UploadSystemImage() {
 // @Failure 403 body is empty
 // @router /update-user/:id [put]
 func (c *UserManagementController) UpdateUser() {
+	if !c.RequirePermission("USER", "UPDATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	var v requests.UpdateUserRequestDTO
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
 	authorization := c.Ctx.Input.Header("Authorization")
@@ -1336,6 +1472,11 @@ func (c *UserManagementController) UpdateUser() {
 // @Failure 403 body is empty
 // @router /update-user-role/:userid [put]
 func (c *UserManagementController) UpdateUserRole() {
+	if !c.RequirePermission("ROLE", "ASSIGN") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	var v requests.UpdateUserRoleRequestDTO
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
 	authorization := c.Ctx.Input.Header("Authorization")
@@ -1443,6 +1584,11 @@ func (c *UserManagementController) UpdateUserRole() {
 // @Failure 403 body is empty
 // @router /update-user-branch/:userid [put]
 func (c *UserManagementController) UpdateUserBranch() {
+	if !c.RequirePermission("USER", "ASSIGN") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	var v requests.UpdateUserBranchRequestDTO
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
 	authorization := c.Ctx.Input.Header("Authorization")
@@ -1549,6 +1695,11 @@ func (c *UserManagementController) UpdateUserBranch() {
 // @Failure 403 body is empty
 // @router /revoke-invite/:id [put]
 func (c *UserManagementController) UpdateInviteToken() {
+	if !c.RequirePermission("USER", "UPDATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	idStr := c.Ctx.Input.Param(":id")
 
 	authorization := c.Ctx.Input.Header("Authorization")
@@ -1645,6 +1796,11 @@ func (c *UserManagementController) UpdateInviteToken() {
 // @Failure 403 body is empty
 // @router /get-user-invite/:token [get]
 func (c *UserManagementController) GetUserInvite() {
+	if !c.RequirePermission("USER", "READ") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	inviteToken := c.Ctx.Input.Param(":token")
 	authorization := c.Ctx.Input.Header("Authorization")
 
@@ -1660,7 +1816,7 @@ func (c *UserManagementController) GetUserInvite() {
 			// var message string
 
 			if inviteResp.StatusCode == 200 {
-				logs.Info("Name returned: ", verifyToken.Result.FullName)
+				// logs.Info("Name returned: ", verifyToken.Result.FullName)
 
 				// splitName := strings.Split(inviteResp.UserInvite.InvitedBy.FullName, " | ")
 

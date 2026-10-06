@@ -96,14 +96,14 @@ func ChangePassword(c *beego.Controller, userid string, req requests.ChangePassw
 	return data
 }
 
-func VerifyToken(c *beego.Controller, token string) (resp responses.UserOriResponseDTO) {
+func VerifyToken(c *beego.Controller, token string) (resp responses.VerifyTokenOriResponseDTO) {
 	host, _ := beego.AppConfig.String("authenticationBaseUrl")
 
 	logs.Info("About to verify token ", token)
 
 	request := api.NewRequest(
 		host,
-		"/v1/auth/token/check",
+		"/v1/auth/token/verify",
 		api.POST)
 	request.InterfaceParams["Value"] = token
 	// request.Params = {"UserId": strconv.Itoa(int(userid))}
@@ -135,21 +135,21 @@ func VerifyToken(c *beego.Controller, token string) (resp responses.UserOriRespo
 		logs.Info("Raw response received is \n", string(rjson))
 	}
 	// data := map[string]interface{}{}
-	var data responses.UserOriResponseDTO
+	var data responses.VerifyTokenOriResponseDTO
 	json.Unmarshal(read, &data)
 	c.Data["json"] = data
 
 	return data
 }
 
-func VerifyTokenNew(token string) (resp responses.UserOriResponseDTO) {
+func VerifyTokenNew(token string) (resp responses.VerifyTokenOriResponseDTO) {
 	host, _ := beego.AppConfig.String("authenticationBaseUrl")
 
 	logs.Info("About to verify token ", token)
 
 	request := api.NewRequest(
 		host,
-		"/v1/auth/token/check",
+		"/v1/auth/token/verify",
 		api.POST)
 	request.InterfaceParams["Value"] = token
 	// request.Params = {"UserId": strconv.Itoa(int(userid))}
@@ -170,7 +170,7 @@ func VerifyTokenNew(token string) (resp responses.UserOriResponseDTO) {
 
 	// logs.Info("Raw response received is ", string(read))
 	// data := map[string]interface{}{}
-	var data responses.UserOriResponseDTO
+	var data responses.VerifyTokenOriResponseDTO
 	json.Unmarshal(read, &data)
 
 	return data
@@ -183,7 +183,7 @@ func VerifyCustomerToken(token string) (resp responses.CustomerResponseDTO) {
 
 	request := api.NewRequest(
 		host,
-		"/v1/auth/customer-token/check",
+		"/v1/auth/customer-token/verify",
 		api.POST)
 	request.InterfaceParams["Value"] = token
 	// request.Params = {"UserId": strconv.Itoa(int(userid))}
@@ -230,8 +230,9 @@ func RegistrationRequest(c *beego.Controller, req requests.RegisterUser) (resp r
 	request.InterfaceParams["PhoneNumber"] = req.PhoneNumber
 	request.InterfaceParams["Role"] = req.RoleId
 	request.InterfaceParams["Dob"] = req.Dob
-	request.InterfaceParams["Branch"] = req.BranchId
+	request.InterfaceParams["Branch"] = req.Branch
 	request.InterfaceParams["RoleRequired"] = true
+	request.InterfaceParams["AddedBy"] = req.AddedBy
 
 	// request.Params = {"UserId": strconv.Itoa(int(userid))}
 	client := api.Client{

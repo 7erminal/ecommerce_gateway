@@ -9,12 +9,11 @@ import (
 	"strings"
 
 	"github.com/beego/beego/v2/core/logs"
-	beego "github.com/beego/beego/v2/server/web"
 )
 
 // AuthenticationController operations for Authentication
 type AuthenticationController struct {
-	beego.Controller
+	BaseController
 }
 
 // URLMapping ...
@@ -36,6 +35,11 @@ func (c *AuthenticationController) URLMapping() {
 // @router /register [post]
 func (c *AuthenticationController) Register() {
 	var v requests.Registration
+	if !c.RequirePermission("USER", "CREATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
 
 	// if v.Token == "" {
@@ -185,51 +189,42 @@ func (c *AuthenticationController) SignIn() {
 // @Failure 403 body is empty
 // @router /change-password [post]
 func (c *AuthenticationController) ChangePassword() {
-	authorization := c.Ctx.Input.Header("Authorization")
-
-	token := strings.Split(authorization, " ")
+	u := c.Ctx.Input.GetData("user")
+	if !c.RequirePermission("USER", "UPDATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
+	userData, err := u.(*responses.UsersOri)
+	if err {
+		logs.Error("Unable to get user data")
+	}
 
 	var isSuccess bool = false
 
-	if token[0] == "Bearer" {
-		verifyToken := functions.VerifyToken(&c.Controller, token[1])
+	var v requests.ChangePassword
+	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
 
-		logs.Info("Success response")
+	logs.Info("Received ", v.OldPassword, v.NewPassword)
 
-		if verifyToken.StatusCode == 200 {
-			var v requests.ChangePassword
-			json.Unmarshal(c.Ctx.Input.RequestBody, &v)
+	idStr := strconv.FormatInt(userData.UserId, 10)
 
-			logs.Info("Received ", v.OldPassword, v.NewPassword)
+	loginResp := functions.ChangePassword(&c.Controller, idStr, v)
 
-			idStr := strconv.FormatInt(verifyToken.Result.UserId, 10)
+	// var data models.UserGateway
 
-			loginResp := functions.ChangePassword(&c.Controller, idStr, v)
+	isSuccess = false
+	var tkn *string
 
-			// var data models.UserGateway
+	if loginResp.StatusCode == 200 {
 
-			var isSuccess bool = false
-			var tkn *string
-
-			if loginResp.StatusCode == 200 {
-
-				isSuccess = true
-				tkn = &loginResp.Value
-			}
-
-			var resp responses.StringResponseDTO = responses.StringResponseDTO{Success: isSuccess, Result: tkn, StatusDesc: loginResp.StatusDesc}
-
-			c.Data["json"] = resp
-		} else {
-			logs.Error("Unable to verify user")
-			var resp responses.StringResponseDTO = responses.StringResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
-			c.Data["json"] = resp
-		}
-	} else {
-		logs.Error("Unable to verify user")
-		var resp responses.StringResponseDTO = responses.StringResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
-		c.Data["json"] = resp
+		isSuccess = true
+		tkn = &loginResp.Value
 	}
+
+	var resp responses.StringResponseDTO = responses.StringResponseDTO{Success: isSuccess, Result: tkn, StatusDesc: loginResp.StatusDesc}
+
+	c.Data["json"] = resp
 
 	c.ServeJSON()
 }

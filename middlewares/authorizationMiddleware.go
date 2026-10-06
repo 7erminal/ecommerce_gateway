@@ -102,7 +102,7 @@ func AuthWithRoleBasedAppMiddleware(ctx *context.Context) {
 	ctx.Input.SetData("user", verifyToken.Result)
 
 	// Check if user role is SUPER_ADMIN - if so, skip application verification
-	if verifyToken.Result != nil && verifyToken.Result.Role.Role == "SUPER_ADMIN" {
+	if verifyToken.Result != nil && verifyToken.Result.RoleName == "SUPER_ADMIN" {
 		// logs.Info("SUPER_ADMIN role detected, skipping application verification")
 		return
 	}

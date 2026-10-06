@@ -14,7 +14,7 @@ import (
 
 // ItemsController operations for Items
 type ItemsController struct {
-	beego.Controller
+	BaseController
 }
 
 // URLMapping ...
@@ -40,6 +40,11 @@ func (c *ItemsController) URLMapping() {
 // @Failure 403 body is empty
 // @router /add-sales-product [post]
 func (c *ItemsController) AddSalesItem() {
+	if !c.RequirePermission("ITEM", "CREATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	u := c.Ctx.Input.GetData("user")
 	userData, err := u.(*responses.UsersOri)
 	logs.Info("Error is ", err)
@@ -206,6 +211,11 @@ func (c *ItemsController) AddSalesItem() {
 // @Failure 403 body is empty
 // @router /add-rental-product [post]
 func (c *ItemsController) AddRentalsItem() {
+	if !c.RequirePermission("ITEM", "CREATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	u := c.Ctx.Input.GetData("user")
 	userData, err := u.(*responses.UsersOri)
 	logs.Info("Error is ", err)
@@ -303,6 +313,11 @@ func (c *ItemsController) AddRentalsItem() {
 // @Failure 403 body is empty
 // @router /update-product/:id [put]
 func (c *ItemsController) UpdateItem() {
+	if !c.RequirePermission("ITEM", "UPDATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	u := c.Ctx.Input.GetData("user")
 	userData, err := u.(*responses.UsersOri)
 	logs.Info("Error is ", err)
@@ -517,7 +532,11 @@ func (c *ItemsController) UpdateItem() {
 // @Failure 403 body is empty
 // @router /upload-product-image [post]
 func (c *ItemsController) UpdateItemImage() {
-
+	if !c.RequirePermission("ITEM", "UPDATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	var isSuccess bool = false
 
 	image, header, err := c.GetFile("Image")
@@ -564,6 +583,11 @@ func (c *ItemsController) UpdateItemImage() {
 // @Failure 403 body is empty
 // @router /add-category [post]
 func (c *ItemsController) AddCategory() {
+	if !c.RequirePermission("ITEM", "CREATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	var isSuccess bool = false
 
 	image, header, err := c.GetFile("CategoryImage")
@@ -612,6 +636,11 @@ func (c *ItemsController) AddCategory() {
 // @Failure 403 body is empty
 // @router /add-feature [post]
 func (c *ItemsController) AddFeature() {
+	if !c.RequirePermission("ITEM", "CREATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	var isSuccess bool = false
 
 	image, header, err := c.GetFile("FeatureImage")
@@ -660,6 +689,11 @@ func (c *ItemsController) AddFeature() {
 // @Failure 403 body is empty
 // @router /add-purpose [post]
 func (c *ItemsController) AddPurpose() {
+	if !c.RequirePermission("ITEM", "CREATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	var isSuccess bool = false
 
 	image, header, err := c.GetFile("PurposeImage")
@@ -706,6 +740,11 @@ func (c *ItemsController) AddPurpose() {
 // @Failure 403 body is empty
 // @router /get-categories [get]
 func (c *ItemsController) GetCategories() {
+	if !c.RequirePermission("ITEM", "READ") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	var isSuccess bool = false
 
 	logs.Info("Success response received")
@@ -736,6 +775,11 @@ func (c *ItemsController) GetCategories() {
 // @Failure 403 body is empty
 // @router /get-features [get]
 func (c *ItemsController) GetFeatures() {
+	if !c.RequirePermission("ITEM", "READ") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	var isSuccess bool = false
 
 	logs.Info("Success response received")
@@ -766,6 +810,11 @@ func (c *ItemsController) GetFeatures() {
 // @Failure 403 body is empty
 // @router /get-purposes [get]
 func (c *ItemsController) GetPurposes() {
+	if !c.RequirePermission("ITEM", "READ") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	var isSuccess bool = false
 
 	logs.Info("Success response received")
@@ -802,120 +851,106 @@ func (c *ItemsController) GetPurposes() {
 // @Failure 403 body is empty
 // @router /get-items [get]
 func (c *ItemsController) GetItems() {
-	authorization := c.Ctx.Input.Header("Authorization")
-
-	token := strings.Split(authorization, " ")
+	if !c.RequirePermission("ITEM", "READ") && !c.RequirePermission("ITEM", "LIST") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
+	v := c.Ctx.Input.GetData("user")
+	userData, err := v.(*responses.UsersOri)
+	if err {
+		logs.Error("Unable to get user data")
+	}
 
 	var isSuccess bool = false
 
-	if token[0] == "Bearer" {
-		logs.Info("Token is ", token[1])
-		verifyToken := functions.VerifyToken(&c.Controller, token[1])
+	var fields string
+	var sortby string
+	var order string
+	var query string
+	var limit string
+	var offset string
 
-		logs.Info("Success response")
+	// limit: 10 (default is 10)
+	if v := c.GetString("limit"); v != "" {
+		limit = v
+	}
+	// offset: 0 (default is 0)
+	if v := c.GetString("offset"); v != "" {
+		offset = v
+	}
+	// sortby: col1,col2
+	if v := c.GetString("sortby"); v != "" {
+		sortby = v
+	}
+	// order: desc,asc
+	if v := c.GetString("order"); v != "" {
+		order = v
+	}
+	// query: k:v,k:v
+	if v := c.GetString("query"); v != "" {
+		query = v
+	}
+	logs.Info("Success response received")
+	isSuccess = false
 
-		if verifyToken.StatusCode == 200 {
-			var fields string
-			var sortby string
-			var order string
-			var query string
-			var limit string
-			var offset string
+	logs.Info("User data received ", userData.UserDetails.Branch)
 
-			// limit: 10 (default is 10)
-			if v := c.GetString("limit"); v != "" {
-				limit = v
-			}
-			// offset: 0 (default is 0)
-			if v := c.GetString("offset"); v != "" {
-				offset = v
-			}
-			// sortby: col1,col2
-			if v := c.GetString("sortby"); v != "" {
-				sortby = v
-			}
-			// order: desc,asc
-			if v := c.GetString("order"); v != "" {
-				order = v
-			}
-			// query: k:v,k:v
-			if v := c.GetString("query"); v != "" {
-				query = v
-			}
-			logs.Info("Success response received")
-			isSuccess = false
+	// if verifyToken.User.UserDetails.Branch != nil {
+	// 	branchId := strconv.FormatInt(verifyToken.User.UserDetails.Branch.BranchId, 10)
 
-			logs.Info("User data received ", verifyToken.Result.UserDetails.Branch)
+	// Depending on the role, fetch items
+	var getItemsResp responses.ItemsOriResponseDTO
+	if userData.Role.Role == "SUPER_ADMIN" {
+		getItemsResp = functions.GetItems(&c.Controller, query, fields, sortby, order, offset, limit)
+	} else {
+		branchId := ""
+		if userData.UserDetails.Branch != nil {
+			branchId = strconv.FormatInt(userData.UserDetails.Branch.BranchId, 10)
+		}
+		getItemsResp = functions.GetItemsByBranch(&c.Controller, branchId, query, fields, sortby, order, offset, limit)
+	}
 
-			// if verifyToken.User.UserDetails.Branch != nil {
-			// 	branchId := strconv.FormatInt(verifyToken.User.UserDetails.Branch.BranchId, 10)
+	if getItemsResp.StatusCode == 200 {
+		logs.Info("Items returned: ", getItemsResp.Items)
 
-			// Depending on the role, fetch items
-			var getItemsResp responses.ItemsOriResponseDTO
-			if verifyToken.Result.Role.Role == "SUPER_ADMIN" {
-				getItemsResp = functions.GetItems(&c.Controller, query, fields, sortby, order, offset, limit)
-			} else {
-				branchId := ""
-				if verifyToken.Result.UserDetails.Branch != nil {
-					branchId = strconv.FormatInt(verifyToken.Result.UserDetails.Branch.BranchId, 10)
-				}
-				getItemsResp = functions.GetItemsByBranch(&c.Controller, branchId, query, fields, sortby, order, offset, limit)
-			}
-
-			if getItemsResp.StatusCode == 200 {
-				logs.Info("Items returned: ", getItemsResp.Items)
-
-				items := []responses.Item{}
-				if getItemsResp.Items != nil && len(*getItemsResp.Items) > 0 {
-					for _, item := range *getItemsResp.Items {
-						availableSizes := strings.Split(item.AvailableSizes, ",")
-						availableColors := strings.Split(item.AvailableColors, ",")
-						itemT := responses.Item{
-							ProductId:        item.ItemId,
-							ProductName:      item.ItemName,
-							Description:      item.Description,
-							ProductPrice:     float64(item.ItemPrice.ItemPrice),
-							ProductCostPrice: float64(item.ItemPrice.AltItemPrice),
-							ImagePath:        item.ImagePath,
-							Quantity:         item.Quantity,
-							Branch:           item.Branch,
-							Category:         item.Category,
-							AvailableSizes:   &availableSizes,
-							AvailableColors:  &availableColors,
-							Features:         item.ItemFeatures,
-							Purposes:         item.ItemPurposes,
-							Status:           "ACTIVE",
-						}
-
-						items = append(items, itemT)
-					}
-
-				} else {
-					items = []responses.Item{}
+		items := []responses.Item{}
+		if getItemsResp.Items != nil && len(*getItemsResp.Items) > 0 {
+			for _, item := range *getItemsResp.Items {
+				availableSizes := strings.Split(item.AvailableSizes, ",")
+				availableColors := strings.Split(item.AvailableColors, ",")
+				itemT := responses.Item{
+					ProductId:        item.ItemId,
+					ProductName:      item.ItemName,
+					Description:      item.Description,
+					ProductPrice:     float64(item.ItemPrice.ItemPrice),
+					ProductCostPrice: float64(item.ItemPrice.AltItemPrice),
+					ImagePath:        item.ImagePath,
+					Quantity:         item.Quantity,
+					Branch:           item.Branch,
+					Category:         item.Category,
+					AvailableSizes:   &availableSizes,
+					AvailableColors:  &availableColors,
+					Features:         item.ItemFeatures,
+					Purposes:         item.ItemPurposes,
+					Status:           "ACTIVE",
 				}
 
-				isSuccess = true
-
-				data := responses.ItemsData{}
-				data.Data = &items
-				data.Count = len(items)
-
-				var resp responses.ItemsResponseDTO = responses.ItemsResponseDTO{Success: isSuccess, Result: &data, StatusDesc: getItemsResp.StatusDesc}
-				c.Data["json"] = resp
-			} else {
-				var resp responses.ItemsResponseDTO = responses.ItemsResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
-				c.Data["json"] = resp
+				items = append(items, itemT)
 			}
+
 		} else {
-			logs.Error("User is not linked to a branch")
-			var resp responses.ItemsResponseDTO = responses.ItemsResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred. User is not linked to a branch"}
-			c.Data["json"] = resp
+			items = []responses.Item{}
 		}
 
-		// } else {
-		// 	var resp responses.ItemsResponseDTO = responses.ItemsResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
-		// 	c.Data["json"] = resp
-		// }
+		isSuccess = true
+
+		data := responses.ItemsData{}
+		data.Data = &items
+		data.Count = len(items)
+
+		var resp responses.ItemsResponseDTO = responses.ItemsResponseDTO{Success: isSuccess, Result: &data, StatusDesc: getItemsResp.StatusDesc}
+		c.Data["json"] = resp
 	} else {
 		var resp responses.ItemsResponseDTO = responses.ItemsResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
 		c.Data["json"] = resp
@@ -933,6 +968,11 @@ func (c *ItemsController) GetItems() {
 // @Failure 403 body is empty
 // @router /get-item/:id [get]
 func (c *ItemsController) GetProduct() {
+	if !c.RequirePermission("ITEM", "READ") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	var isSuccess bool = false
 
 	logs.Info("Success response received")
@@ -985,6 +1025,11 @@ func (c *ItemsController) GetProduct() {
 // @Failure 403 body is empty
 // @router /delete-category/:id [delete]
 func (c *ItemsController) DeleteCategory() {
+	if !c.RequirePermission("ITEM", "DELETE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	var isSuccess bool = false
 
 	logs.Info("Success response received")
@@ -1016,6 +1061,11 @@ func (c *ItemsController) DeleteCategory() {
 // @Failure 403 body is empty
 // @router /delete-feature/:id [delete]
 func (c *ItemsController) DeleteFeature() {
+	if !c.RequirePermission("ITEM", "DELETE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	var isSuccess bool = false
 
 	logs.Info("Success response received")
@@ -1047,6 +1097,11 @@ func (c *ItemsController) DeleteFeature() {
 // @Failure 403 body is empty
 // @router /delete-purpose/:id [delete]
 func (c *ItemsController) DeletePurpose() {
+	if !c.RequirePermission("ITEM", "DELETE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	var isSuccess bool = false
 
 	logs.Info("Success response received")
@@ -1078,6 +1133,11 @@ func (c *ItemsController) DeletePurpose() {
 // @Failure 403 body is empty
 // @router /delete-item/:id [delete]
 func (c *ItemsController) DeleteItem() {
+	if !c.RequirePermission("ITEM", "DELETE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	var isSuccess bool = false
 
 	logs.Info("Success response received")

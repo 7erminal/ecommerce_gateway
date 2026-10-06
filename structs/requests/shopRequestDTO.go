@@ -23,9 +23,16 @@ type ShopApiRequestDTO struct {
 	Email               string
 	Image               string
 	Active              string
+	AddedBy             string
 }
 
 type ShopBranchRequestDTO struct {
 	BranchId string
 	ShopId   string
+}
+
+type ShopBranchApiRequestDTO struct {
+	BranchId string
+	ShopId   string
+	AddedBy  string
 }

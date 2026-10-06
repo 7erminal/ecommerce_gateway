@@ -9,12 +9,11 @@ import (
 	"strconv"
 
 	"github.com/beego/beego/v2/core/logs"
-	beego "github.com/beego/beego/v2/server/web"
 )
 
 // CustomermanagementController operations for Customermanagement
 type CustomermanagementController struct {
-	beego.Controller
+	BaseController
 }
 
 // URLMapping ...
@@ -31,11 +30,16 @@ func (c *CustomermanagementController) URLMapping() {
 // @Title Create
 // @Description create Customermanagement
 // @Param	Authorization		header 	string true		"header for User"
-// @Param	body		body 	requests.AddCustomer	true		"body for Customermanagement content"
+// @Param	body		body 	requests.AddCustomerRequest	true		"body for Customermanagement content"
 // @Success 200 {object} responses.CustomerGatewayResponseDTO
 // @Failure 403 body is empty
 // @router / [post]
 func (c *CustomermanagementController) Post() {
+	if !c.RequirePermission("CUSTOMER", "CREATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	v := c.Ctx.Input.GetData("user")
 	userData, err := v.(*responses.UsersOri)
 	userIdStr := strconv.FormatInt(userData.UserId, 10)
@@ -45,7 +49,7 @@ func (c *CustomermanagementController) Post() {
 
 	logs.Info("Error is ", err)
 
-	var cust requests.AddCustomer
+	var cust requests.AddCustomerRequest
 	json.Unmarshal(c.Ctx.Input.RequestBody, &cust)
 
 	// Manipulate data if needed
@@ -57,7 +61,21 @@ func (c *CustomermanagementController) Post() {
 
 	isSuccess := false
 	message := "An error occurred"
-	customerResp := functions.AddCustomer(&c.Controller, cust, userIdStr, "Individual")
+
+	branchStr := strconv.FormatInt(userData.UserDetails.Branch.BranchId, 10)
+	custData := requests.AddCustomer{
+		Email:       cust.Email,
+		Name:        cust.Name,
+		Dob:         cust.Dob,
+		PhoneNumber: cust.PhoneNumber,
+		Location:    cust.Location,
+		IdType:      cust.IdType,
+		IdNumber:    cust.IdNumber,
+		ImagePath:   cust.ImagePath,
+		Branch:      branchStr,
+		CreatedBy:   userIdStr,
+	}
+	customerResp := functions.AddCustomer(&c.Controller, custData, userIdStr, "Individual")
 
 	if customerResp.StatusCode == 200 {
 		isSuccess = true
@@ -94,6 +112,11 @@ func (c *CustomermanagementController) Post() {
 // @Failure 403 :id is empty
 // @router /:id [get]
 func (c *CustomermanagementController) GetOne() {
+	if !c.RequirePermission("CUSTOMER", "READ") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	idStr := c.Ctx.Input.Param(":id")
 	id, _ := strconv.ParseInt(idStr, 0, 64)
 	isSuccess := false
@@ -102,7 +125,7 @@ func (c *CustomermanagementController) GetOne() {
 
 	if customerResp.StatusCode == 200 {
 		isSuccess = true
-		message = "Customer successfully added"
+		message = "Customer successfully fetched"
 
 		var custGateway responses.CustomerGateway = responses.CustomerGateway{
 			CustomerId:           customerResp.Result.CustomerId,
@@ -140,6 +163,11 @@ func (c *CustomermanagementController) GetOne() {
 // @Failure 403
 // @router / [get]
 func (c *CustomermanagementController) GetAll() {
+	if !c.RequirePermission("CUSTOMER", "READ") && !c.RequirePermission("CUSTOMER", "LIST") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	v := c.Ctx.Input.GetData("user")
 	userData, err := v.(*responses.UsersOri)
 
@@ -227,7 +255,12 @@ func (c *CustomermanagementController) GetAll() {
 // @Failure 403 :id is not int
 // @router /:id [put]
 func (c *CustomermanagementController) Put() {
-
+	if !c.RequirePermission("CUSTOMER", "UPDATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
+	// Update implementation here
 }
 
 // UpdateCustomerImage ...
@@ -239,6 +272,11 @@ func (c *CustomermanagementController) Put() {
 // @Failure 403 body is empty
 // @router /upload-customer-image [post]
 func (c *CustomermanagementController) UpdateCustomerImage() {
+	if !c.RequirePermission("CUSTOMER", "UPDATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	var isSuccess bool = false
 
 	image, header, err := c.GetFile("Image")
@@ -276,5 +314,10 @@ func (c *CustomermanagementController) UpdateCustomerImage() {
 // @Failure 403 id is empty
 // @router /:id [delete]
 func (c *CustomermanagementController) Delete() {
-
+	if !c.RequirePermission("CUSTOMER", "DELETE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
+	// Delete implementation here
 }

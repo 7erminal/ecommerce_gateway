@@ -1647,6 +1647,7 @@ func AddShop(c *beego.Controller, v requests.ShopApiRequestDTO, userid string) (
 	request.InterfaceParams["Location"] = v.ShopLocation
 	request.InterfaceParams["AssistantName"] = v.ShopAssistantName
 	request.InterfaceParams["AssistantPhoneNumber"] = v.ShopAssistantNumber
+	request.InterfaceParams["AddedBy"] = v.AddedBy
 	client := api.Client{
 		Request: request,
 		Type_:   "body",
@@ -1678,7 +1679,7 @@ func AddShop(c *beego.Controller, v requests.ShopApiRequestDTO, userid string) (
 	return data
 }
 
-func AddShopBranch(c *beego.Controller, v requests.ShopBranchRequestDTO, userid string) (resp responses.ShopApiResponse) {
+func AddShopBranch(c *beego.Controller, v requests.ShopBranchApiRequestDTO, userid string) (resp responses.ShopApiResponse) {
 	host, _ := beego.AppConfig.String("customerBaseUrl")
 
 	logs.Info("Adding shops ")
@@ -1690,6 +1691,7 @@ func AddShopBranch(c *beego.Controller, v requests.ShopBranchRequestDTO, userid 
 	// request.Params = {"UserId": strconv.Itoa(int(userid))}
 	request.InterfaceParams["ShopId"] = v.ShopId
 	request.InterfaceParams["BranchId"] = v.BranchId
+	request.InterfaceParams["AddedBy"] = v.AddedBy
 	client := api.Client{
 		Request: request,
 		Type_:   "body",
@@ -1822,6 +1824,7 @@ func UpdateShop(c *beego.Controller, v requests.ShopApiRequestDTO, shopId string
 	request.Params["Location"] = v.ShopLocation
 	request.Params["AssistantName"] = v.ShopAssistantName
 	request.Params["AssistantPhoneNumber"] = v.ShopAssistantNumber
+	request.Params["ModifiedBy"] = v.AddedBy
 	// request.Params = {"UserId": strconv.Itoa(int(userid))}
 	client := api.Client{
 		Request: request,

@@ -57,7 +57,7 @@ func GetUserDetails(c *beego.Controller, userid int64) (resp responses.UserOriRe
 	return data
 }
 
-func InviteUser(c *beego.Controller, email string, role int64, link string, inviteby int64) (resp responses.StringOriResponseDTO) {
+func InviteUser(c *beego.Controller, email string, role int64, link string, inviteby string) (resp responses.StringOriResponseDTO) {
 	host, _ := beego.AppConfig.String("customerBaseUrl")
 
 	logs.Info("Sending email ", email)
@@ -69,7 +69,7 @@ func InviteUser(c *beego.Controller, email string, role int64, link string, invi
 	request.InterfaceParams["Email"] = email
 	request.InterfaceParams["Link"] = link
 	request.InterfaceParams["Role"] = strconv.FormatInt(role, 10)
-	request.InterfaceParams["InviteBy"] = strconv.FormatInt(inviteby, 10)
+	request.InterfaceParams["InviteBy"] = inviteby
 	// request.Params = {"UserId": strconv.Itoa(int(userid))}
 	client := api.Client{
 		Request: request,
@@ -845,7 +845,7 @@ func UpdateUserBranch(c *beego.Controller, id string, req requests.UpdateUserBra
 	return data
 }
 
-func UpdateUserImage(c *beego.Controller, userImage string, userId int64) (resp responses.UserOriResponseDTO) {
+func UpdateUserImage(c *beego.Controller, userImage string, userId string) (resp responses.UserOriResponseDTO) {
 	host, _ := beego.AppConfig.String("customerBaseUrl")
 
 	logs.Info("Sending file ", userImage)
@@ -856,7 +856,7 @@ func UpdateUserImage(c *beego.Controller, userImage string, userId int64) (resp 
 		api.POST)
 
 	request.FileField["UserImage"] = userImage
-	request.Params["UserId"] = strconv.FormatInt(userId, 10)
+	request.Params["UserId"] = userId
 	// request.HeaderField["content-type"] = "multipart/form-data"
 	// request.Params = {"UserId": strconv.Itoa(int(userid))}
 	client := api.Client{

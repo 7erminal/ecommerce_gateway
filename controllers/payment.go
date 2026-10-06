@@ -5,12 +5,11 @@ import (
 	"AMC_gateway/structs/responses"
 
 	"github.com/beego/beego/v2/core/logs"
-	beego "github.com/beego/beego/v2/server/web"
 )
 
 // PaymentController operations for Payment
 type PaymentController struct {
-	beego.Controller
+	BaseController
 }
 
 // URLMapping ...
@@ -27,6 +26,11 @@ func (c *PaymentController) URLMapping() {
 // @Failure 403
 // @router /payment-methods [get]
 func (c *PaymentController) GetPaymentMethods() {
+	if !c.RequirePermission("PAYMENT", "READ") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	paymentMethodsResp := functions.GetPaymentMethods(&c.Controller)
 
 	isSuccess := false
@@ -54,6 +58,11 @@ func (c *PaymentController) GetPaymentMethods() {
 // @Failure 403 body is empty
 // @router /upload-payment-proof [post]
 func (c *PaymentController) UploadPaymentProof() {
+	if !c.RequirePermission("PAYMENT", "CREATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 
 	var isSuccess bool = false
 	image, header, err := c.GetFile("Image")

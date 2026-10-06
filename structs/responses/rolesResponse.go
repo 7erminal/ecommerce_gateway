@@ -57,3 +57,8 @@ type RoleGatewayResponseDTO struct {
 	Result     *Roles
 	StatusDesc string
 }
+
+type UserPermission struct {
+	PermissionCode string
+	ActionCode     string
+}

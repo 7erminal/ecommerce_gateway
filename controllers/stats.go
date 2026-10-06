@@ -4,15 +4,13 @@ import (
 	"AMC_gateway/controllers/functions"
 	"AMC_gateway/structs/responses"
 	"strconv"
-	"strings"
 
 	"github.com/beego/beego/v2/core/logs"
-	beego "github.com/beego/beego/v2/server/web"
 )
 
 // StatsController operations for Stats
 type StatsController struct {
-	beego.Controller
+	BaseController
 }
 
 // URLMapping ...
@@ -28,47 +26,38 @@ func (c *StatsController) URLMapping() {
 // @Failure 403 body is empty
 // @router /get-stats [get]
 func (c *StatsController) GetGeneralStats() {
-	authorization := c.Ctx.Input.Header("Authorization")
-
-	token := strings.Split(authorization, " ")
+	if !c.RequirePermission("REPORT", "READ") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
+	v := c.Ctx.Input.GetData("user")
+	userData, err := v.(*responses.UsersOri)
+	if err {
+		logs.Error("Unable to get user data")
+	}
 
 	var isSuccess bool = false
 
-	if token[0] == "Bearer" {
-		logs.Info("Token is ", token[1])
-		verifyToken := functions.VerifyToken(&c.Controller, token[1])
+	logs.Info("Success response received")
+	branchidStr := strconv.FormatInt(userData.UserDetails.Branch.BranchId, 10)
 
-		logs.Info("Success response")
+	getItemStatsResp := functions.GetItemStats(&c.Controller, branchidStr)
 
-		if verifyToken.StatusCode == 200 {
-			logs.Info("Success response received")
-			branchidStr := strconv.FormatInt(verifyToken.Result.UserDetails.Branch.BranchId, 10)
+	if getItemStatsResp.StatusCode == 200 {
+		logs.Info("Item stats returned: ")
+		isSuccess = true
 
-			getItemStatsResp := functions.GetItemStats(&c.Controller, branchidStr)
+		itemStats := responses.StatsDTO{}
+		if getItemStatsResp.Stats != nil {
 
-			if getItemStatsResp.StatusCode == 200 {
-				logs.Info("Item stats returned: ")
-				isSuccess = true
-
-				itemStats := responses.StatsDTO{}
-				if getItemStatsResp.Stats != nil {
-
-					itemStats = *getItemStatsResp.Stats
-				}
-
-				isSuccess = true
-
-				var resp responses.ItemsStatsResponseDTO = responses.ItemsStatsResponseDTO{Success: isSuccess, Result: &itemStats, StatusDesc: getItemStatsResp.StatusDesc}
-				c.Data["json"] = resp
-			} else {
-				var resp responses.ItemsStatsResponseDTO = responses.ItemsStatsResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
-				c.Data["json"] = resp
-			}
-
-		} else {
-			var resp responses.ItemsStatsResponseDTO = responses.ItemsStatsResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
-			c.Data["json"] = resp
+			itemStats = *getItemStatsResp.Stats
 		}
+
+		isSuccess = true
+
+		var resp responses.ItemsStatsResponseDTO = responses.ItemsStatsResponseDTO{Success: isSuccess, Result: &itemStats, StatusDesc: getItemStatsResp.StatusDesc}
+		c.Data["json"] = resp
 	} else {
 		var resp responses.ItemsStatsResponseDTO = responses.ItemsStatsResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
 		c.Data["json"] = resp

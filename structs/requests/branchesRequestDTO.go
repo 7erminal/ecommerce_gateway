@@ -15,4 +15,5 @@ type BranchAPIRequestDTO struct {
 	Location      string
 	BranchManager int64
 	Active        string
+	AddedBy       string
 }

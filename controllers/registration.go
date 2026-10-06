@@ -8,12 +8,11 @@ import (
 	"strings"
 
 	"github.com/beego/beego/v2/core/logs"
-	beego "github.com/beego/beego/v2/server/web"
 )
 
 // RegistrationController operations for Registration
 type RegistrationController struct {
-	beego.Controller
+	BaseController
 }
 
 // URLMapping ...
@@ -29,6 +28,11 @@ func (c *RegistrationController) URLMapping() {
 // @Failure 403 body is empty
 // @router / [post]
 func (c *RegistrationController) RegisterAlt() {
+	if !c.RequirePermission("USER", "CREATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	var v requests.Registration
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
 
