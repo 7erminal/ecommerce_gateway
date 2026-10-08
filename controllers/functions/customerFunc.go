@@ -199,7 +199,7 @@ func UpdateCustomer(c *beego.Controller, id string, req requests.UpdateCustomer,
 	request.InterfaceParams["PhoneNumber"] = req.PhoneNumber
 	request.InterfaceParams["IdNumber"] = req.IdNumber
 	// request.InterfaceParams["Dob"] = req.IdNumber
-	request.InterfaceParams["UpdatedBy"] = updatedBy
+	request.InterfaceParams["ModifiedBy"] = updatedBy
 	request.InterfaceParams["Location"] = req.Location
 	request.FileField["ImagePath"] = req.ImagePath
 	// request.Params = {"UserId": strconv.Itoa(int(userid))}
