@@ -3,7 +3,6 @@ package controllers
 import (
 	"AMC_gateway/controllers/functions"
 	"AMC_gateway/structs/responses"
-	"strconv"
 
 	"github.com/beego/beego/v2/core/logs"
 )
@@ -32,7 +31,7 @@ func (c *StatsController) GetGeneralStats() {
 		return
 	}
 	v := c.Ctx.Input.GetData("user")
-	userData, err := v.(*responses.UsersOri)
+	userData, err := v.(*responses.AuthenticatedUser)
 	if err {
 		logs.Error("Unable to get user data")
 	}
@@ -40,7 +39,7 @@ func (c *StatsController) GetGeneralStats() {
 	var isSuccess bool = false
 
 	logs.Info("Success response received")
-	branchidStr := strconv.FormatInt(userData.UserDetails.Branch.BranchId, 10)
+	branchidStr := userData.BranchID
 
 	getItemStatsResp := functions.GetItemStats(&c.Controller, branchidStr)
 

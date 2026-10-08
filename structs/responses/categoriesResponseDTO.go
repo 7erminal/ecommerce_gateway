@@ -3,14 +3,14 @@ package responses
 import "time"
 
 type Categories struct {
-	CategoryId   int64
+	CategoryId   string
 	CategoryName string
 	ImagePath    string
 	Icon         string
 }
 
 type Feature struct {
-	FeatureId    int64
+	FeatureId    string
 	FeatureName  string
 	ImagePath    string
 	Visible      bool
@@ -23,7 +23,7 @@ type Feature struct {
 }
 
 type Purpose struct {
-	PurposeId    int64
+	PurposeId    string
 	Purpose      string
 	ImagePath    string
 	Visible      bool

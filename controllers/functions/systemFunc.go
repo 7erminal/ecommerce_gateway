@@ -15,10 +15,10 @@ import (
 	beego "github.com/beego/beego/v2/server/web"
 )
 
-func AddBranch(c *beego.Controller, req requests.BranchAPIRequestDTO, addedBy int64) (resp responses.BranchOriResponseDTO) {
+func AddBranch(c *beego.Controller, req requests.BranchAPIRequestDTO, addedBy string) (resp responses.BranchOriResponseDTO) {
 	host, _ := beego.AppConfig.String("customerBaseUrl")
 
-	logs.Info("Sending user name ", strconv.FormatInt(addedBy, 10))
+	logs.Info("Sending user name ", addedBy)
 	logs.Info("Getting branches")
 
 	request := api.NewRequest(
@@ -31,7 +31,7 @@ func AddBranch(c *beego.Controller, req requests.BranchAPIRequestDTO, addedBy in
 	request.InterfaceParams["Location"] = req.Location
 	// request.InterfaceParams["BranchManager"] = strconv.FormatInt(req.BranchManager, 10)
 	request.InterfaceParams["Active"] = req.Active
-	request.InterfaceParams["AddedBy"] = strconv.FormatInt(addedBy, 10)
+	request.InterfaceParams["AddedBy"] = addedBy
 	// request.Params["Dob"] = req.Dob
 	// request.Params["Gender"] = req.Gender
 	// request.Params["PhoneNumber"] = req.PhoneNumber
@@ -69,10 +69,10 @@ func AddBranch(c *beego.Controller, req requests.BranchAPIRequestDTO, addedBy in
 	return data
 }
 
-func UpdateBranch(c *beego.Controller, req requests.BranchRequestDTO, addedBy int64, branchId string) (resp responses.BranchOriResponseDTO) {
+func UpdateBranch(c *beego.Controller, req requests.BranchRequestDTO, addedBy string, branchId string) (resp responses.BranchOriResponseDTO) {
 	host, _ := beego.AppConfig.String("customerBaseUrl")
 
-	logs.Info("Sending user name ", strconv.FormatInt(addedBy, 10))
+	logs.Info("Sending user name ", addedBy)
 
 	request := api.NewRequest(
 		host,
@@ -82,7 +82,7 @@ func UpdateBranch(c *beego.Controller, req requests.BranchRequestDTO, addedBy in
 	request.InterfaceParams["CountryCode"] = req.CountryCode
 	request.InterfaceParams["PhoneNumber"] = req.PhoneNumber
 	request.InterfaceParams["Location"] = req.Location
-	request.InterfaceParams["AddedBy"] = strconv.FormatInt(addedBy, 10)
+	request.InterfaceParams["AddedBy"] = addedBy
 	// request.Params["Dob"] = req.Dob
 	// request.Params["Gender"] = req.Gender
 	// request.Params["PhoneNumber"] = req.PhoneNumber
@@ -166,7 +166,7 @@ func GetBranch(c *beego.Controller, branchid string) (resp responses.BranchOriRe
 	return data
 }
 
-func DeleteBranch(c *beego.Controller, branchid string) (resp responses.StringOriResponseDTO) {
+func DeleteBranch(c *beego.Controller, branchid string, deletedBy string) (resp responses.StringOriResponseDTO) {
 	host, _ := beego.AppConfig.String("customerBaseUrl")
 
 	logs.Info("Getting branch details for ", branchid)
@@ -175,6 +175,7 @@ func DeleteBranch(c *beego.Controller, branchid string) (resp responses.StringOr
 		host,
 		"/v1/branches/"+branchid,
 		api.DELETE)
+	request.Params["DeletedBy"] = deletedBy
 	// request.Params["Dob"] = req.Dob
 	// request.Params["Gender"] = req.Gender
 	// request.Params["PhoneNumber"] = req.PhoneNumber
@@ -330,7 +331,7 @@ func GetBranches(c *beego.Controller) (resp responses.BranchesOriResponseDTO) {
 	return data
 }
 
-func UpdateBranchBranchManger(c *beego.Controller, userid string, branchid string) (resp responses.BranchesOriResponseDTO) {
+func UpdateBranchBranchManger(c *beego.Controller, userid string, branchid string, updatedBy string) (resp responses.BranchesOriResponseDTO) {
 	host, _ := beego.AppConfig.String("customerBaseUrl")
 
 	request := api.NewRequest(
@@ -338,6 +339,7 @@ func UpdateBranchBranchManger(c *beego.Controller, userid string, branchid strin
 		"/v1/branches/branch-manager/"+branchid,
 		api.PUT)
 	request.InterfaceParams["BranchManager"] = userid
+	request.InterfaceParams["UpdatedBy"] = updatedBy
 	// request.Params["Gender"] = req.Gender
 	// request.Params["PhoneNumber"] = req.PhoneNumber
 	// request.Params["Username"] = req.Username
@@ -599,7 +601,7 @@ func GetCurrencyByCode(c *beego.Controller, code string) (resp responses.Countri
 	return data
 }
 
-func AddApplication(c *beego.Controller, req requests.ApplicationApiRequest, addedBy int64) (resp responses.ApplicationResponseDTO) {
+func AddApplication(c *beego.Controller, req requests.ApplicationApiRequest, addedBy string) (resp responses.ApplicationResponseDTO) {
 	host, _ := beego.AppConfig.String("systemBaseUrl")
 
 	request := api.NewRequest(
@@ -612,6 +614,7 @@ func AddApplication(c *beego.Controller, req requests.ApplicationApiRequest, add
 	request.InterfaceParams["DefaultFontsize"] = req.DefaultFontsize
 	request.InterfaceParams["ApplicationImage"] = req.ApplicationImage
 	request.InterfaceParams["ThemeCode"] = req.ThemeCode
+	request.InterfaceParams["AddedBy"] = addedBy
 
 	client := api.Client{
 		Request: request,
@@ -751,7 +754,7 @@ func UpdateApplication(c *beego.Controller, req requests.UpdateApplicationReques
 	return resp
 }
 
-func UpdateApplicationTheme(c *beego.Controller, applicationId string, themeCode string) (resp responses.ApplicationResponseDTO) {
+func UpdateApplicationTheme(c *beego.Controller, applicationId string, themeCode string, updatedBy string) (resp responses.ApplicationResponseDTO) {
 	host, _ := beego.AppConfig.String("systemBaseUrl")
 
 	logs.Info("Updating application theme for application id: ", applicationId)
@@ -761,6 +764,7 @@ func UpdateApplicationTheme(c *beego.Controller, applicationId string, themeCode
 		"/v1/applications/"+applicationId+"/theme",
 		api.PUT)
 	request.InterfaceParams["ThemeCode"] = strings.TrimSpace(themeCode)
+	request.InterfaceParams["UpdatedBy"] = updatedBy
 
 	client := api.Client{
 		Request: request,
@@ -826,7 +830,7 @@ func UpdateApplicationTheme(c *beego.Controller, applicationId string, themeCode
 	return resp
 }
 
-func AddTheme(c *beego.Controller, req requests.ThemeRequest) (resp responses.ThemeResponseDTO) {
+func AddTheme(c *beego.Controller, req requests.ThemeRequest, addedBy string) (resp responses.ThemeResponseOriDTO) {
 	host, _ := beego.AppConfig.String("systemBaseUrl")
 
 	logs.Info("Adding theme with code: ", req.ThemeCode)
@@ -837,6 +841,7 @@ func AddTheme(c *beego.Controller, req requests.ThemeRequest) (resp responses.Th
 		api.POST)
 	request.InterfaceParams["ThemeCode"] = req.ThemeCode
 	request.InterfaceParams["ThemeName"] = req.ThemeName
+	request.InterfaceParams["AddedBy"] = addedBy
 
 	client := api.Client{
 		Request: request,
@@ -865,20 +870,20 @@ func AddTheme(c *beego.Controller, req requests.ThemeRequest) (resp responses.Th
 
 	// Transform backend response to gateway response
 	if backendResp.StatusCode == 201 || backendResp.StatusCode == 200 {
-		resp = responses.ThemeResponseDTO{
-			Success: true,
+		resp = responses.ThemeResponseOriDTO{
+			StatusCode: 200,
 			Result: &responses.ThemeResp{
 				ThemeId:   backendResp.Result.ThemeId,
 				ThemeCode: backendResp.Result.ThemeCode,
 				ThemeName: backendResp.Result.ThemeName,
 			},
-			StatusDesc: backendResp.StatusMessage,
+			StatusMessage: backendResp.StatusMessage,
 		}
 	} else {
-		resp = responses.ThemeResponseDTO{
-			Success:    false,
-			Result:     nil,
-			StatusDesc: backendResp.StatusMessage,
+		resp = responses.ThemeResponseOriDTO{
+			StatusCode:    backendResp.StatusCode,
+			Result:        nil,
+			StatusMessage: backendResp.StatusMessage,
 		}
 	}
 
@@ -886,7 +891,7 @@ func AddTheme(c *beego.Controller, req requests.ThemeRequest) (resp responses.Th
 	return resp
 }
 
-func UpdateTheme(c *beego.Controller, req requests.ThemeRequest, themeId string) (resp responses.ThemeResponseDTO) {
+func UpdateTheme(c *beego.Controller, req requests.ThemeRequest, themeId string, updatedBy string) (resp responses.ThemeResponseOriDTO) {
 	host, _ := beego.AppConfig.String("systemBaseUrl")
 
 	logs.Info("Updating theme with id: ", themeId)
@@ -897,6 +902,7 @@ func UpdateTheme(c *beego.Controller, req requests.ThemeRequest, themeId string)
 		api.PUT)
 	request.InterfaceParams["ThemeCode"] = req.ThemeCode
 	request.InterfaceParams["ThemeName"] = req.ThemeName
+	request.InterfaceParams["UpdatedBy"] = updatedBy
 
 	client := api.Client{
 		Request: request,
@@ -925,20 +931,20 @@ func UpdateTheme(c *beego.Controller, req requests.ThemeRequest, themeId string)
 
 	// Transform backend response to gateway response
 	if backendResp.StatusCode == 200 {
-		resp = responses.ThemeResponseDTO{
-			Success: true,
+		resp = responses.ThemeResponseOriDTO{
+			StatusCode: 200,
 			Result: &responses.ThemeResp{
 				ThemeId:   backendResp.Result.ThemeId,
 				ThemeCode: backendResp.Result.ThemeCode,
 				ThemeName: backendResp.Result.ThemeName,
 			},
-			StatusDesc: backendResp.StatusMessage,
+			StatusMessage: backendResp.StatusMessage,
 		}
 	} else {
-		resp = responses.ThemeResponseDTO{
-			Success:    false,
-			Result:     nil,
-			StatusDesc: backendResp.StatusMessage,
+		resp = responses.ThemeResponseOriDTO{
+			StatusCode:    backendResp.StatusCode,
+			Result:        nil,
+			StatusMessage: backendResp.StatusMessage,
 		}
 	}
 
@@ -987,7 +993,7 @@ func FetchThemes(c *beego.Controller) (resp responses.ThemesResponseOriDTO) {
 	return resp
 }
 
-func AddThemeConfig(c *beego.Controller, themeId string, config string) (resp responses.ThemeResponseDTO) {
+func AddThemeConfig(c *beego.Controller, themeId string, config string, addedBy string) (resp responses.ThemeResponseOriDTO) {
 	host, _ := beego.AppConfig.String("systemBaseUrl")
 
 	logs.Info("Adding theme config for theme id: ", themeId)
@@ -997,6 +1003,7 @@ func AddThemeConfig(c *beego.Controller, themeId string, config string) (resp re
 		"/v1/themes/"+themeId+"/config",
 		api.POST)
 	request.InterfaceParams["Config"] = config
+	request.InterfaceParams["AddedBy"] = addedBy
 
 	client := api.Client{
 		Request: request,
@@ -1053,16 +1060,16 @@ func AddThemeConfig(c *beego.Controller, themeId string, config string) (resp re
 			themeResp.ThemeConfig = mappedConfigs
 		}
 
-		resp = responses.ThemeResponseDTO{
-			Success:    true,
-			Result:     &themeResp,
-			StatusDesc: backendResp.StatusMessage,
+		resp = responses.ThemeResponseOriDTO{
+			StatusCode:    200,
+			Result:        &themeResp,
+			StatusMessage: backendResp.StatusMessage,
 		}
 	} else {
-		resp = responses.ThemeResponseDTO{
-			Success:    false,
-			Result:     nil,
-			StatusDesc: backendResp.StatusMessage,
+		resp = responses.ThemeResponseOriDTO{
+			StatusCode:    backendResp.StatusCode,
+			Result:        nil,
+			StatusMessage: backendResp.StatusMessage,
 		}
 	}
 
@@ -1070,7 +1077,7 @@ func AddThemeConfig(c *beego.Controller, themeId string, config string) (resp re
 	return resp
 }
 
-func RemoveThemeConfig(c *beego.Controller, themeConfigId string) (resp responses.ThemeResponseDTO) {
+func RemoveThemeConfig(c *beego.Controller, themeConfigId string, deletedBy string) (resp responses.ThemeResponseOriDTO) {
 	host, _ := beego.AppConfig.String("systemBaseUrl")
 
 	logs.Info("Removing theme config with id: ", themeConfigId)
@@ -1079,6 +1086,7 @@ func RemoveThemeConfig(c *beego.Controller, themeConfigId string) (resp response
 		host,
 		"/v1/themes/config/"+themeConfigId,
 		api.DELETE)
+	request.InterfaceParams["DeletedBy"] = deletedBy
 
 	client := api.Client{
 		Request: request,
@@ -1135,16 +1143,16 @@ func RemoveThemeConfig(c *beego.Controller, themeConfigId string) (resp response
 			themeResp.ThemeConfig = mappedConfigs
 		}
 
-		resp = responses.ThemeResponseDTO{
-			Success:    true,
-			Result:     &themeResp,
-			StatusDesc: backendResp.StatusMessage,
+		resp = responses.ThemeResponseOriDTO{
+			StatusCode:    200,
+			Result:        &themeResp,
+			StatusMessage: backendResp.StatusMessage,
 		}
 	} else {
-		resp = responses.ThemeResponseDTO{
-			Success:    false,
-			Result:     nil,
-			StatusDesc: backendResp.StatusMessage,
+		resp = responses.ThemeResponseOriDTO{
+			StatusCode:    backendResp.StatusCode,
+			Result:        nil,
+			StatusMessage: backendResp.StatusMessage,
 		}
 	}
 
@@ -1152,7 +1160,7 @@ func RemoveThemeConfig(c *beego.Controller, themeConfigId string) (resp response
 	return resp
 }
 
-func RemoveTheme(c *beego.Controller, themeId string) (resp responses.ThemeResponseOriDTO) {
+func RemoveTheme(c *beego.Controller, themeId string, deletedBy string) (resp responses.ThemeResponseOriDTO) {
 	host, _ := beego.AppConfig.String("systemBaseUrl")
 
 	logs.Info("Removing theme with id: ", themeId)
@@ -1161,6 +1169,7 @@ func RemoveTheme(c *beego.Controller, themeId string) (resp responses.ThemeRespo
 		host,
 		"/v1/themes/"+themeId,
 		api.DELETE)
+	request.InterfaceParams["DeletedBy"] = deletedBy
 
 	client := api.Client{
 		Request: request,
@@ -1430,6 +1439,7 @@ func AddStatus(c *beego.Controller, v requests.Status, userid string) (resp resp
 	// request.Params = {"UserId": strconv.Itoa(int(userid))}
 	request.InterfaceParams["Status"] = v.Status
 	request.InterfaceParams["StatusCode"] = v.StatusCode
+	request.InterfaceParams["AddedBy"] = userid
 	client := api.Client{
 		Request: request,
 		Type_:   "body",
@@ -1461,7 +1471,7 @@ func AddStatus(c *beego.Controller, v requests.Status, userid string) (resp resp
 	return data
 }
 
-func DeleteStatus(c *beego.Controller, statusId string) (resp responses.StatusApiResponse) {
+func DeleteStatus(c *beego.Controller, statusId string, deletedBy string) (resp responses.StatusApiResponse) {
 	host, _ := beego.AppConfig.String("systemBaseUrl")
 
 	logs.Info("Deleting status ")
@@ -1471,7 +1481,7 @@ func DeleteStatus(c *beego.Controller, statusId string) (resp responses.StatusAp
 		"/v1/status/"+statusId,
 		api.DELETE)
 	// request.Params = {"UserId": strconv.Itoa(int(userid))}
-	// request.InterfaceParams["StatusId"] = statusId
+	request.InterfaceParams["DeletedBy"] = deletedBy
 	client := api.Client{
 		Request: request,
 		Type_:   "body",
@@ -1516,6 +1526,7 @@ func UpdateStatus(c *beego.Controller, v requests.Status, statusId string, useri
 	request.InterfaceParams["Status"] = v.Status
 	request.InterfaceParams["StatusCode"] = v.StatusCode
 	request.InterfaceParams["StatusId"] = statusId
+	request.InterfaceParams["UpdatedBy"] = userid
 	client := api.Client{
 		Request: request,
 		Type_:   "body",
@@ -1735,6 +1746,7 @@ func RemoveShopBranch(c *beego.Controller, v requests.ShopBranchRequestDTO, user
 	// request.Params = {"UserId": strconv.Itoa(int(userid))}
 	request.InterfaceParams["ShopId"] = v.ShopId
 	request.InterfaceParams["BranchId"] = v.BranchId
+	request.InterfaceParams["DeletedBy"] = userid
 	client := api.Client{
 		Request: request,
 		Type_:   "body",
@@ -1766,7 +1778,7 @@ func RemoveShopBranch(c *beego.Controller, v requests.ShopBranchRequestDTO, user
 	return data
 }
 
-func DeleteShop(c *beego.Controller, shopId string) (resp responses.ShopApiResponse) {
+func DeleteShop(c *beego.Controller, shopId string, deletedBy string) (resp responses.ShopApiResponse) {
 	host, _ := beego.AppConfig.String("customerBaseUrl")
 
 	logs.Info("Deleting shops ")
@@ -1775,7 +1787,7 @@ func DeleteShop(c *beego.Controller, shopId string) (resp responses.ShopApiRespo
 		host,
 		"/v1/shops/"+shopId,
 		api.DELETE)
-	// request.Params = {"UserId": strconv.Itoa(int(userid))}
+	request.InterfaceParams["DeletedBy"] = deletedBy
 	client := api.Client{
 		Request: request,
 		Type_:   "body",
@@ -1869,6 +1881,7 @@ func AddApplicationShop(c *beego.Controller, v requests.ApplicationShopRequest, 
 	// request.Params = {"UserId": strconv.Itoa(int(userid))}
 	request.InterfaceParams["ShopId"] = v.ShopId
 	request.InterfaceParams["ApplicationId"] = v.ApplicationId
+	request.InterfaceParams["AddedBy"] = userid
 	client := api.Client{
 		Request: request,
 		Type_:   "body",
@@ -1912,6 +1925,7 @@ func RemoveApplicationShop(c *beego.Controller, v requests.ApplicationShopReques
 	// request.Params = {"UserId": strconv.Itoa(int(userid))}
 	request.InterfaceParams["ShopId"] = v.ShopId
 	request.InterfaceParams["ApplicationId"] = v.ApplicationId
+	request.InterfaceParams["DeletedBy"] = userid
 	client := api.Client{
 		Request: request,
 		Type_:   "body",

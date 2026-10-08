@@ -7,13 +7,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
-	"strconv"
 
 	"github.com/beego/beego/v2/core/logs"
 	beego "github.com/beego/beego/v2/server/web"
 )
 
-func AddItem(c *beego.Controller, req requests.AddItemRequestDTO, productTypeId int64, countryCode string, branchId int64, addedBy int) (resp responses.ItemOriResponseDTO) {
+func AddItem(c *beego.Controller, req requests.AddItemRequestDTO, productTypeId string, countryCode string, branchId string, addedBy string) (resp responses.ItemOriResponseDTO) {
 	host, _ := beego.AppConfig.String("itemBaseUrl")
 
 	// logs.Info("Sending first name ", req.BranchId)
@@ -67,7 +66,7 @@ func AddItem(c *beego.Controller, req requests.AddItemRequestDTO, productTypeId 
 	return data
 }
 
-func UpdateItem(c *beego.Controller, req requests.UpdateItemRequestDTO, countryCode string, branchId int64, addedBy int, itemId string) (resp responses.ItemOriResponseDTO) {
+func UpdateItem(c *beego.Controller, req requests.UpdateItemRequestDTO, countryCode string, branchId string, addedBy string, itemId string) (resp responses.ItemOriResponseDTO) {
 	host, _ := beego.AppConfig.String("itemBaseUrl")
 
 	// logs.Info("Sending first name ", req.BranchId)
@@ -120,12 +119,12 @@ func UpdateItem(c *beego.Controller, req requests.UpdateItemRequestDTO, countryC
 	return data
 }
 
-func UpdateItemImage(c *beego.Controller, itemId int64, imagePath string) (resp responses.ItemOriResponseDTO) {
+func UpdateItemImage(c *beego.Controller, itemId string, imagePath string) (resp responses.ItemOriResponseDTO) {
 	host, _ := beego.AppConfig.String("itemBaseUrl")
 
 	// logs.Info("Sending first name ", req.BranchId)
 
-	item_id := strconv.FormatInt(itemId, 10)
+	item_id := itemId
 
 	request := api.NewRequest(
 		host,
@@ -347,7 +346,7 @@ func GetItemStats(c *beego.Controller, branchId string) (resp responses.ItemsSta
 	return data
 }
 
-func AddCategory(c *beego.Controller, categoryImage string, categoryName string, categoryDescription string) (resp responses.CategoryOriResponseDTO) {
+func AddCategory(c *beego.Controller, categoryImage string, categoryName string, categoryDescription string, addedBy string) (resp responses.CategoryOriResponseDTO) {
 	host, _ := beego.AppConfig.String("itemBaseUrl")
 
 	logs.Info("Sending file ", categoryImage)
@@ -361,6 +360,7 @@ func AddCategory(c *beego.Controller, categoryImage string, categoryName string,
 	request.Params["CategoryName"] = categoryName
 	request.Params["CategoryDescription"] = categoryDescription
 	request.Params["Icon"] = ""
+	request.Params["AddedBy"] = addedBy
 	// request.HeaderField["content-type"] = "multipart/form-data"
 	// request.Params = {"UserId": strconv.Itoa(int(userid))}
 	client := api.Client{
@@ -396,7 +396,7 @@ func AddCategory(c *beego.Controller, categoryImage string, categoryName string,
 	return data
 }
 
-func AddFeature(c *beego.Controller, categoryImage string, categoryName string, categoryDescription string) (resp responses.FeaturesOriResponseDTO) {
+func AddFeature(c *beego.Controller, categoryImage string, categoryName string, categoryDescription string, addedBy string) (resp responses.FeaturesOriResponseDTO) {
 	host, _ := beego.AppConfig.String("itemBaseUrl")
 
 	logs.Info("Sending file ", categoryImage)
@@ -409,6 +409,7 @@ func AddFeature(c *beego.Controller, categoryImage string, categoryName string, 
 	request.FileField["Image"] = categoryImage
 	request.Params["FeatureName"] = categoryName
 	request.Params["Description"] = categoryDescription
+	request.Params["AddedBy"] = addedBy
 	// request.HeaderField["content-type"] = "multipart/form-data"
 	// request.Params = {"UserId": strconv.Itoa(int(userid))}
 	client := api.Client{
@@ -444,7 +445,7 @@ func AddFeature(c *beego.Controller, categoryImage string, categoryName string, 
 	return data
 }
 
-func AddPurpose(c *beego.Controller, categoryImage string, categoryName string, categoryDescription string) (resp responses.PurposesOriResponseDTO) {
+func AddPurpose(c *beego.Controller, categoryImage string, categoryName string, categoryDescription string, addedBy string) (resp responses.PurposesOriResponseDTO) {
 	host, _ := beego.AppConfig.String("itemBaseUrl")
 
 	logs.Info("Sending file ", categoryImage)
@@ -458,6 +459,7 @@ func AddPurpose(c *beego.Controller, categoryImage string, categoryName string, 
 	request.Params["PurposeName"] = categoryName
 	request.Params["Description"] = categoryDescription
 	request.Params["Icon"] = ""
+	request.Params["AddedBy"] = addedBy
 	// request.HeaderField["content-type"] = "multipart/form-data"
 	// request.Params = {"UserId": strconv.Itoa(int(userid))}
 	client := api.Client{
@@ -811,13 +813,14 @@ func GetItemImages(c *beego.Controller) (resp responses.ItemImagesOriResponseDTO
 	return data
 }
 
-func DeleteCategory(c *beego.Controller, id string) (resp responses.StringOriResponseDTO) {
+func DeleteCategory(c *beego.Controller, id string, userIdStr string) (resp responses.StringOriResponseDTO) {
 	host, _ := beego.AppConfig.String("itemBaseUrl")
 
 	request := api.NewRequest(
 		host,
 		"/v1/categories/"+id,
 		api.DELETE)
+	request.Params["DeletedBy"] = userIdStr
 
 	// request.FileField["UserImage"] = userImage
 	// request.Params["UserId"] = strconv.FormatInt(userId, 10)
@@ -856,14 +859,14 @@ func DeleteCategory(c *beego.Controller, id string) (resp responses.StringOriRes
 	return data
 }
 
-func DeleteFeature(c *beego.Controller, id string) (resp responses.StringOriResponseDTO) {
+func DeleteFeature(c *beego.Controller, id string, userIdStr string) (resp responses.StringOriResponseDTO) {
 	host, _ := beego.AppConfig.String("itemBaseUrl")
 
 	request := api.NewRequest(
 		host,
 		"/v1/features/"+id,
 		api.DELETE)
-
+	request.Params["DeletedBy"] = userIdStr
 	// request.FileField["UserImage"] = userImage
 	// request.Params["UserId"] = strconv.FormatInt(userId, 10)
 	// request.HeaderField["content-type"] = "multipart/form-data"
@@ -901,13 +904,14 @@ func DeleteFeature(c *beego.Controller, id string) (resp responses.StringOriResp
 	return data
 }
 
-func DeletePurpose(c *beego.Controller, id string) (resp responses.StringOriResponseDTO) {
+func DeletePurpose(c *beego.Controller, id string, userIdStr string) (resp responses.StringOriResponseDTO) {
 	host, _ := beego.AppConfig.String("itemBaseUrl")
 
 	request := api.NewRequest(
 		host,
 		"/v1/purposes/"+id,
 		api.DELETE)
+	request.Params["DeletedBy"] = userIdStr
 
 	// request.FileField["UserImage"] = userImage
 	// request.Params["UserId"] = strconv.FormatInt(userId, 10)
@@ -946,13 +950,14 @@ func DeletePurpose(c *beego.Controller, id string) (resp responses.StringOriResp
 	return data
 }
 
-func DeleteItem(c *beego.Controller, id string) (resp responses.StringOriResponseDTO) {
+func DeleteItem(c *beego.Controller, id string, deletedBy string) (resp responses.StringOriResponseDTO) {
 	host, _ := beego.AppConfig.String("itemBaseUrl")
 
 	request := api.NewRequest(
 		host,
 		"/v1/items/"+id,
 		api.DELETE)
+	request.Params["DeletedBy"] = deletedBy
 
 	// request.FileField["UserImage"] = userImage
 	// request.Params["UserId"] = strconv.FormatInt(userId, 10)
@@ -991,14 +996,14 @@ func DeleteItem(c *beego.Controller, id string) (resp responses.StringOriRespons
 	return data
 }
 
-func DeleteItemFeature(c *beego.Controller, id string) (resp responses.StringOriResponseDTO) {
+func DeleteItemFeature(c *beego.Controller, id string, deletedBy string) (resp responses.StringOriResponseDTO) {
 	host, _ := beego.AppConfig.String("itemBaseUrl")
 
 	request := api.NewRequest(
 		host,
 		"/v1/item-features/"+id,
 		api.DELETE)
-
+	request.Params["DeletedBy"] = deletedBy
 	// request.FileField["UserImage"] = userImage
 	// request.Params["UserId"] = strconv.FormatInt(userId, 10)
 	// request.HeaderField["content-type"] = "multipart/form-data"
@@ -1036,14 +1041,14 @@ func DeleteItemFeature(c *beego.Controller, id string) (resp responses.StringOri
 	return data
 }
 
-func DeleteItemPurpose(c *beego.Controller, id string) (resp responses.StringOriResponseDTO) {
+func DeleteItemPurpose(c *beego.Controller, id string, deletedBy string) (resp responses.StringOriResponseDTO) {
 	host, _ := beego.AppConfig.String("itemBaseUrl")
 
 	request := api.NewRequest(
 		host,
 		"/v1/item-purposes/"+id,
 		api.DELETE)
-
+	request.Params["DeletedBy"] = deletedBy
 	// request.FileField["UserImage"] = userImage
 	// request.Params["UserId"] = strconv.FormatInt(userId, 10)
 	// request.HeaderField["content-type"] = "multipart/form-data"
@@ -1081,20 +1086,21 @@ func DeleteItemPurpose(c *beego.Controller, id string) (resp responses.StringOri
 	return data
 }
 
-func AddItemFeatures(c *beego.Controller, req requests.AddProductFeatureRequestDTO) (resp responses.ItemFeatureResponseDTO) {
+func AddItemFeatures(c *beego.Controller, req requests.AddProductFeatureRequestDTO, addedBy string) (resp responses.ItemFeatureResponseDTO) {
 	host, _ := beego.AppConfig.String("itemBaseUrl")
 
 	// logs.Info("Sending first name ", req.BranchId)
 	logs.Info("Adding feature with product id ", req.ProductId, " and feature id ", req.FeatureId)
 
-	productId := strconv.FormatInt(req.ProductId, 10)
-	featureId := strconv.FormatInt(req.FeatureId, 10)
+	productId := req.ProductId
+	featureId := req.FeatureId
 	request := api.NewRequest(
 		host,
 		"/v1/item-features/",
 		api.POST)
 	request.InterfaceParams["ItemId"] = productId
 	request.InterfaceParams["FeatureId"] = featureId
+	request.InterfaceParams["AddedBy"] = addedBy
 
 	client := api.Client{
 		Request: request,
@@ -1127,7 +1133,7 @@ func AddItemFeatures(c *beego.Controller, req requests.AddProductFeatureRequestD
 	return data
 }
 
-func AddItemPurposes(c *beego.Controller, req requests.AddProductPurposeRequestDTO) (resp responses.ItemPurposeResponseDTO) {
+func AddItemPurposes(c *beego.Controller, req requests.AddProductPurposeRequestDTO, addedBy string) (resp responses.ItemPurposeResponseDTO) {
 	host, _ := beego.AppConfig.String("itemBaseUrl")
 
 	// logs.Info("Sending first name ", req.BranchId)
@@ -1136,8 +1142,8 @@ func AddItemPurposes(c *beego.Controller, req requests.AddProductPurposeRequestD
 		host,
 		"/v1/item-purposes/",
 		api.POST)
-	productId := strconv.FormatInt(req.ProductId, 10)
-	purposeId := strconv.FormatInt(req.PurposeId, 10)
+	productId := req.ProductId
+	purposeId := req.PurposeId
 	request.InterfaceParams["ItemId"] = productId
 	request.InterfaceParams["PurposeId"] = purposeId
 
@@ -1181,7 +1187,7 @@ func GetItemFeatures(c *beego.Controller, req requests.AddProductFeatureRequestD
 		host,
 		"/v1/item-features/",
 		api.GET)
-	request.InterfaceParams["query"] = "ItemId:" + strconv.FormatInt(req.ProductId, 10)
+	request.InterfaceParams["query"] = "ItemId:" + req.ProductId
 
 	client := api.Client{
 		Request: request,
@@ -1223,7 +1229,7 @@ func GetItemPurposes(c *beego.Controller, req requests.AddProductPurposeRequestD
 		host,
 		"/v1/item-purposes/",
 		api.GET)
-	productId := strconv.FormatInt(req.ProductId, 10)
+	productId := req.ProductId
 	request.InterfaceParams["query"] = "ItemId:" + productId
 
 	client := api.Client{

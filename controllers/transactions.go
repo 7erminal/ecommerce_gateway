@@ -6,7 +6,6 @@ import (
 	"AMC_gateway/structs/responses"
 	"encoding/json"
 	"fmt"
-	"strconv"
 
 	"github.com/beego/beego/v2/core/logs"
 )
@@ -41,7 +40,7 @@ func (c *TransactionsController) PlaceRentalRequest() {
 		return
 	}
 	u := c.Ctx.Input.GetData("user")
-	userData, err := u.(*responses.UsersOri)
+	userData, err := u.(*responses.AuthenticatedUser)
 
 	fmt.Printf("Type of v: %T\n", u)
 	fmt.Printf("Value of v: %+v\n", u)
@@ -69,7 +68,7 @@ func (c *TransactionsController) PlaceRentalRequest() {
 		products = append(products, tProduct)
 	}
 
-	userIdStr := strconv.FormatInt(userData.UserId, 10)
+	userIdStr := userData.UserID
 	q := requests.PostTransactionRequest{
 		Items:           products,
 		RequestType:     requestType,
@@ -118,7 +117,7 @@ func (c *TransactionsController) PlaceSalesRequest() {
 		return
 	}
 	u := c.Ctx.Input.GetData("user")
-	userData, err := u.(*responses.UsersOri)
+	userData, err := u.(*responses.AuthenticatedUser)
 
 	fmt.Printf("Type of v: %T\n", u)
 	fmt.Printf("Value of v: %+v\n", u)
@@ -140,7 +139,7 @@ func (c *TransactionsController) PlaceSalesRequest() {
 		products = append(products, tProduct)
 	}
 
-	userIdStr := strconv.FormatInt(userData.UserId, 10)
+	userIdStr := userData.UserID
 	q := requests.PostTransactionRequest{
 		Items:           products,
 		RequestType:     requestType,
@@ -187,7 +186,7 @@ func (c *TransactionsController) PlaceOrderRequest() {
 		return
 	}
 	u := c.Ctx.Input.GetData("user")
-	userData, err := u.(*responses.UsersOri)
+	userData, err := u.(*responses.AuthenticatedUser)
 
 	fmt.Printf("Type of v: %T\n", u)
 	fmt.Printf("Value of v: %+v\n", u)
@@ -227,7 +226,7 @@ func (c *TransactionsController) PlaceOrderRequest() {
 	// Customer      string
 	// Branch        string
 
-	userIdStr := strconv.FormatInt(userData.UserId, 10)
+	userIdStr := userData.UserID
 
 	q := requests.PostTransactionRequest{
 		Items:           products,
@@ -274,7 +273,7 @@ func (c *TransactionsController) GetAllTransactions() {
 		return
 	}
 	u := c.Ctx.Input.GetData("user")
-	userData, err := u.(*responses.UsersOri)
+	userData, err := u.(*responses.AuthenticatedUser)
 
 	fmt.Printf("Type of v: %T\n", u)
 	fmt.Printf("Value of v: %+v\n", u)
@@ -284,7 +283,7 @@ func (c *TransactionsController) GetAllTransactions() {
 		return
 	}
 
-	userIdStr := strconv.FormatInt(userData.UserId, 10)
+	userIdStr := userData.UserID
 
 	logs.Info("About to get transactions. Ordering by desc")
 	serviceResp := functions.GetTransactions(&c.Controller, requests.GetTransactionsRequestDTO{
@@ -329,7 +328,7 @@ func (c *TransactionsController) GetAllOrders() {
 		return
 	}
 	u := c.Ctx.Input.GetData("user")
-	userData, err := u.(*responses.UsersOri)
+	userData, err := u.(*responses.AuthenticatedUser)
 
 	var order string
 	var sortBy string
@@ -352,7 +351,7 @@ func (c *TransactionsController) GetAllOrders() {
 		sortBy = v
 	}
 
-	userIdStr := strconv.FormatInt(userData.UserId, 10)
+	userIdStr := userData.UserID
 
 	logs.Info("Order from frontend is by ", order)
 	serviceResp := functions.GetOrders(&c.Controller, requests.GetOrdersRequestDTO{

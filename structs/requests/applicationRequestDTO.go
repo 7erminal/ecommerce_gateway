@@ -25,7 +25,7 @@ type UpdateApplicationRequest struct {
 	DefaultFontsize  string
 	ApplicationImage string
 	ThemeCode        string
-	UpdatedBy        int64
+	UpdatedBy        string
 }
 
 type ThemeRequest struct {

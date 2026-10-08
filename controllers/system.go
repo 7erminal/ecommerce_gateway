@@ -5,7 +5,6 @@ import (
 	"AMC_gateway/structs/requests"
 	"AMC_gateway/structs/responses"
 	"encoding/json"
-	"strconv"
 	"strings"
 
 	"github.com/beego/beego/v2/core/logs"
@@ -186,7 +185,7 @@ func (c *SystemController) AddStatus() {
 		return
 	}
 	u := c.Ctx.Input.GetData("user")
-	userData, err := u.(*responses.UsersOri)
+	userData, err := u.(*responses.AuthenticatedUser)
 	// fmt.Printf("Type of v: %T\n", v)
 	// fmt.Printf("Value of v: %+v\n", v)
 	if err != false {
@@ -197,7 +196,7 @@ func (c *SystemController) AddStatus() {
 
 	var isSuccess bool = false
 
-	userIdStr := strconv.Itoa(int(userData.UserId))
+	userIdStr := userData.UserID
 	addStatusResp := functions.AddStatus(&c.Controller, v, userIdStr)
 
 	if addStatusResp.StatusCode == 200 {
@@ -239,7 +238,7 @@ func (c *SystemController) UpdateStatus() {
 		return
 	}
 	u := c.Ctx.Input.GetData("user")
-	userData, err := u.(*responses.UsersOri)
+	userData, err := u.(*responses.AuthenticatedUser)
 	// fmt.Printf("Type of v: %T\n", v)
 	// fmt.Printf("Value of v: %+v\n", v)
 	if err != false {
@@ -255,7 +254,7 @@ func (c *SystemController) UpdateStatus() {
 		StatusCode: v.StatusCode,
 	}
 
-	userIdStr := strconv.Itoa(int(userData.UserId))
+	userIdStr := userData.UserID
 	addStatusResp := functions.UpdateStatus(&c.Controller, statusReq, v.StatusId, userIdStr)
 
 	if addStatusResp.StatusCode == 200 {
@@ -292,7 +291,7 @@ func (c *SystemController) DeleteStatus() {
 		return
 	}
 	u := c.Ctx.Input.GetData("user")
-	userData, err := u.(*responses.UsersOri)
+	userData, err := u.(*responses.AuthenticatedUser)
 	// fmt.Printf("Type of v: %T\n", v)
 	// fmt.Printf("Value of v: %+v\n", v)
 	if err != false {
@@ -303,7 +302,7 @@ func (c *SystemController) DeleteStatus() {
 
 	var isSuccess bool = false
 
-	addStatusResp := functions.DeleteStatus(&c.Controller, strconv.Itoa(int(userData.UserId)))
+	addStatusResp := functions.DeleteStatus(&c.Controller, v.StatusId, userData.BranchID)
 
 	if addStatusResp.StatusCode == 200 {
 
@@ -380,7 +379,7 @@ func (c *SystemController) AddBranch() {
 		return
 	}
 	u := c.Ctx.Input.GetData("user")
-	userData, err := u.(*responses.UsersOri)
+	userData, err := u.(*responses.AuthenticatedUser)
 	// fmt.Printf("Type of v: %T\n", v)
 	// fmt.Printf("Value of v: %+v\n", v)
 	if err != false {
@@ -391,36 +390,36 @@ func (c *SystemController) AddBranch() {
 
 	var isSuccess bool = false
 
-	branchManager := v.BranchManager
-	if branchManager == 0 {
+	branchManager := v.BranchManagerId
+	if branchManager == "" {
 		logs.Error("Branch manager is not specified")
-		if userData != nil && userData.Role.Role == "SUPER_ADMIN" {
+		if userData != nil && userData.RoleName == "SUPER_ADMIN" {
 			logs.Info("User is however a super admin")
-			branchManager = userData.UserId
+			branchManager = userData.UserID
 		}
 	}
 
 	userDetailsResp := functions.GetUserDetails(&c.Controller, branchManager)
 
 	activeState := "false"
-	if userData != nil && userData.Role.Role == "SUPER_ADMIN" {
+	if userData != nil && userData.RoleName == "SUPER_ADMIN" {
 		activeState = "true"
 	}
 	if userDetailsResp.StatusCode == 200 {
 		branchRequest := requests.BranchAPIRequestDTO{
-			Branch:        v.Branch,
-			CountryCode:   v.CountryCode,
-			PhoneNumber:   v.PhoneNumber,
-			Location:      v.Location,
-			BranchManager: v.BranchManager,
-			Active:        activeState,
-			AddedBy:       strconv.FormatInt(userData.UserId, 10),
+			Branch:          v.Branch,
+			CountryCode:     v.CountryCode,
+			PhoneNumber:     v.PhoneNumber,
+			Location:        v.Location,
+			BranchManagerId: v.BranchManagerId,
+			Active:          activeState,
+			AddedBy:         userData.UserID,
 		}
-		addBranchResp := functions.AddBranch(&c.Controller, branchRequest, userData.UserId)
+		addBranchResp := functions.AddBranch(&c.Controller, branchRequest, userData.UserID)
 
 		if addBranchResp.StatusCode == 200 {
 			// Assign branch manager to added branch
-			splitName := strings.Split(userDetailsResp.Result.FullName, " | ")
+			splitName := strings.Split(userDetailsResp.Result.FullName, " ")
 			firstname := ""
 			lastname := ""
 			if len(splitName) > 1 {
@@ -430,10 +429,10 @@ func (c *SystemController) AddBranch() {
 				firstname = splitName[0]
 			}
 			userDetails := requests.UpdateUserRequestDTO{BranchId: addBranchResp.Result.BranchId, FirstName: firstname, LastName: lastname, Username: userDetailsResp.Result.Username, PhoneNumber: userDetailsResp.Result.PhoneNumber, Gender: userDetailsResp.Result.Gender, Dob: userDetailsResp.Result.Dob.GoString(), Address: userDetailsResp.Result.Address}
-			userId := strconv.FormatInt(userDetailsResp.Result.UserId, 10)
+			userId := userDetailsResp.Result.UserId
 			updateUserResp := functions.UpdateUser(&c.Controller, userId, userDetails)
-			branchIdStr := strconv.FormatInt(addBranchResp.Result.BranchId, 10)
-			updateBranchResp := functions.UpdateBranchBranchManger(&c.Controller, userId, branchIdStr)
+			branchIdStr := addBranchResp.Result.BranchId
+			updateBranchResp := functions.UpdateBranchBranchManger(&c.Controller, userId, branchIdStr, userData.UserID)
 			message := "Branch Added Successfully"
 			if updateUserResp.StatusCode != 200 {
 				message = "Branch added but failed to assign manager"
@@ -703,7 +702,7 @@ func (c *SystemController) UpdateBranch() {
 		return
 	}
 	u := c.Ctx.Input.GetData("user")
-	userData, err := u.(*responses.UsersOri)
+	userData, err := u.(*responses.AuthenticatedUser)
 
 	if err != false {
 		logs.Error("Error asserting user data")
@@ -719,60 +718,65 @@ func (c *SystemController) UpdateBranch() {
 	message := "Branch updated successfully"
 	branchResp := &responses.BranchResp{}
 
-	updateBranch := functions.UpdateBranch(&c.Controller, r, userData.UserId, idStr)
+	updateBranch := functions.UpdateBranch(&c.Controller, r, userData.UserID, idStr)
 
 	if updateBranch.StatusCode == 200 {
-		splitName := strings.Split(userData.FullName, " | ")
-		firstname := ""
-		lastname := ""
-		if len(splitName) > 1 {
-			firstname = splitName[0]
-			lastname = splitName[1]
+		if branchManagerResp := functions.GetUserDetails(&c.Controller, r.BranchManagerId); branchManagerResp.StatusCode == 200 {
+			splitName := strings.Split(branchManagerResp.Result.FullName, " | ")
+			firstname := ""
+			lastname := ""
+			if len(splitName) > 1 {
+				firstname = splitName[0]
+				lastname = splitName[1]
+			} else {
+				firstname = splitName[0]
+			}
+			// role_name, _ := beego.AppConfig.String("branchManagerRoleName")
+			// role := functions.GetRoleWithRoleName(&c.Controller, role_name)
+
+			logs.Info("Update user response is ", updateBranch.StatusDesc)
+			// branchIdStr := strconv.FormatInt(updateBranch.Result.BranchId, 10)
+			// updateBranchResp := functions.UpdateBranchBranchManger(&c.Controller, userId, branchIdStr)
+
+			branchManager := responses.UserGateway{
+				UserId:      branchManagerResp.Result.UserId,
+				FirstName:   firstname,
+				LastName:    lastname,
+				Username:    userData.Username,
+				Email:       branchManagerResp.Result.Email,
+				PhoneNumber: branchManagerResp.Result.PhoneNumber,
+				ImagePath:   branchManagerResp.Result.ImagePath,
+				Customer:    branchManagerResp.Result.UserDetails,
+				// Gender:
+				// Dob:
+				// Address:
+				// IdType:
+				// IdNumber:
+				// Active:
+				IsVerified: branchManagerResp.Result.IsVerified,
+				Role:       branchManagerResp.Result.Role,
+			}
+
+			branchResp = &responses.BranchResp{
+				BranchId:    updateBranch.Result.BranchId,
+				Branch:      updateBranch.Result.BranchName,
+				Description: updateBranch.Result.Description,
+				// Country:       &country,
+				Location:      updateBranch.Result.Location,
+				PhoneNumber:   updateBranch.Result.PhoneNumber,
+				DateCreated:   updateBranch.Result.DateCreated,
+				BranchManager: &branchManager,
+			}
+
+			// if updateBranchResp.StatusCode != 200 {
+			// 	message = "Branch updated. Failed to update branch's branch manager"
+			// }
+
+			isSuccess = true
 		} else {
-			firstname = splitName[0]
+			message = "Failed to update branch manager"
+			branchResp = nil
 		}
-		// role_name, _ := beego.AppConfig.String("branchManagerRoleName")
-		// role := functions.GetRoleWithRoleName(&c.Controller, role_name)
-
-		logs.Info("Update user response is ", updateBranch.StatusDesc)
-		// branchIdStr := strconv.FormatInt(updateBranch.Result.BranchId, 10)
-		// updateBranchResp := functions.UpdateBranchBranchManger(&c.Controller, userId, branchIdStr)
-
-		branchManager := responses.UserGateway{
-			UserId:      userData.UserId,
-			FirstName:   firstname,
-			LastName:    lastname,
-			Username:    userData.Username,
-			Email:       userData.Email,
-			PhoneNumber: userData.PhoneNumber,
-			ImagePath:   userData.ImagePath,
-			Customer:    userData.UserDetails,
-			// Gender:
-			// Dob:
-			// Address:
-			// IdType:
-			// IdNumber:
-			// Active:
-			IsVerified: userData.IsVerified,
-			Role:       userData.Role,
-		}
-
-		branchResp = &responses.BranchResp{
-			BranchId:    updateBranch.Result.BranchId,
-			Branch:      updateBranch.Result.BranchName,
-			Description: updateBranch.Result.Description,
-			// Country:       &country,
-			Location:      updateBranch.Result.Location,
-			PhoneNumber:   updateBranch.Result.PhoneNumber,
-			DateCreated:   updateBranch.Result.DateCreated,
-			BranchManager: &branchManager,
-		}
-
-		// if updateBranchResp.StatusCode != 200 {
-		// 	message = "Branch updated. Failed to update branch's branch manager"
-		// }
-
-		isSuccess = true
 	} else {
 		message = "Failed to update branch"
 		branchResp = nil
@@ -800,37 +804,27 @@ func (c *SystemController) Delete() {
 	}
 	idStr := c.Ctx.Input.Param(":id")
 
-	authorization := c.Ctx.Input.Header("Authorization")
-	token := strings.Split(authorization, " ")
+	u := c.Ctx.Input.GetData("user")
+	userData, err := u.(*responses.AuthenticatedUser)
+
+	if err != false {
+		logs.Error("Error asserting user data")
+	}
 
 	var isSuccess bool = false
 
-	if token[0] == "Bearer" {
-		logs.Info("Token is ", token[1])
-		verifyToken := functions.VerifyToken(&c.Controller, token[1])
-
-		if verifyToken.StatusCode == 200 {
-			message := "Deleted"
-			deleteResp := functions.DeleteBranch(&c.Controller, idStr)
-			if deleteResp.StatusCode == 200 {
-				resp := responses.StringResponseDTO{Success: true, Result: &message, StatusDesc: "Branch deleted successfully"}
-				c.Ctx.Output.SetStatus(200)
-				c.Data["json"] = resp
-			} else {
-				message = "Deletion Failed:: "
-				resp := responses.StringResponseDTO{Success: false, Result: &message, StatusDesc: deleteResp.StatusDesc}
-				c.Ctx.Output.SetStatus(301)
-				c.Data["json"] = resp
-			}
-		} else {
-			c.Ctx.Output.SetStatus(200)
-			logs.Info("Failed to verify token")
-			resp := responses.BranchResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "Failed to verify token"}
-			c.Data["json"] = resp
-		}
-	} else {
+	message := "Deleted"
+	deleteResp := functions.DeleteBranch(&c.Controller, idStr, userData.UserID)
+	if deleteResp.StatusCode == 200 {
+		isSuccess = true
+		resp := responses.StringResponseDTO{Success: isSuccess, Result: &message, StatusDesc: "Branch deleted successfully"}
 		c.Ctx.Output.SetStatus(200)
-		var resp responses.BranchResponseDTO = responses.BranchResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
+		c.Data["json"] = resp
+	} else {
+		message = "Deletion Failed:: "
+		isSuccess = false
+		resp := responses.StringResponseDTO{Success: isSuccess, Result: &message, StatusDesc: deleteResp.StatusDesc}
+		c.Ctx.Output.SetStatus(301)
 		c.Data["json"] = resp
 	}
 	c.ServeJSON()
@@ -850,7 +844,7 @@ func (c *SystemController) GetIdTypes() {
 		return
 	}
 	// v := c.Ctx.Input.GetData("user")
-	// userData, err := v.(*responses.UsersOri)
+	// userData, err := v.(*responses.AuthenticatedUser)
 
 	// fmt.Printf("Type of v: %T\n", v)
 	// fmt.Printf("Value of v: %+v\n", v)
@@ -1057,7 +1051,7 @@ func (c *SystemController) UpdateApplication() {
 		c.ServeJSON()
 		return
 	}
-	userData, _ := c.Ctx.Input.GetData("user").(*responses.UsersOri)
+	userData, _ := c.Ctx.Input.GetData("user").(*responses.AuthenticatedUser)
 	idStr := c.Ctx.Input.Param(":id")
 	var v requests.ApplicationRequest
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
@@ -1073,7 +1067,7 @@ func (c *SystemController) UpdateApplication() {
 		DefaultFontsize:  v.DefaultFontsize,
 		ApplicationImage: v.ApplicationImage,
 		ThemeCode:        v.ThemeCode,
-		UpdatedBy:        userData.UserId,
+		UpdatedBy:        userData.UserID,
 	}
 	appResp := functions.UpdateApplication(&c.Controller, updateRequest, idStr)
 	if appResp.Success {
@@ -1105,6 +1099,7 @@ func (c *SystemController) UpdateApplicationTheme() {
 		c.ServeJSON()
 		return
 	}
+	userData, _ := c.Ctx.Input.GetData("user").(*responses.AuthenticatedUser)
 	idStr := c.Ctx.Input.Param(":id")
 	var v requests.ThemeRequest
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
@@ -1118,7 +1113,7 @@ func (c *SystemController) UpdateApplicationTheme() {
 		return
 	}
 
-	appResp := functions.UpdateApplicationTheme(&c.Controller, idStr, v.ThemeCode)
+	appResp := functions.UpdateApplicationTheme(&c.Controller, idStr, v.ThemeCode, userData.UserID)
 	if appResp.Success {
 		isSuccess = true
 		resp := responses.ApplicationResponseDTO{Success: isSuccess, Result: appResp.Result, StatusDesc: "Application theme updated successfully"}
@@ -1147,30 +1142,25 @@ func (c *SystemController) AddTheme() {
 	}
 	var v requests.ThemeRequest
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
-
-	authorization := c.Ctx.Input.Header("Authorization")
-	token := strings.Split(authorization, " ")
+	userData, _ := c.Ctx.Input.GetData("user").(*responses.AuthenticatedUser)
 
 	var isSuccess bool = false
 
-	if token[0] == "Bearer" {
-		logs.Info("Token is ", token[1])
-		verifyToken := functions.VerifyToken(&c.Controller, token[1])
-
-		if verifyToken.StatusCode == 200 {
-			logs.Info("Token verified")
-			isSuccess = true
-			themeResp := functions.AddTheme(&c.Controller, v)
-			c.Data["json"] = themeResp
-		} else {
-			var resp responses.ThemeResponseDTO = responses.ThemeResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "You are not authorized to perform this request"}
-			c.Data["json"] = resp
-		}
-
+	logs.Info("Token verified")
+	message := ""
+	themeResp := functions.AddTheme(&c.Controller, v, userData.UserID)
+	if themeResp.StatusCode == 200 {
+		isSuccess = true
+		message = "Theme added successfully"
 	} else {
-		var resp responses.ThemeResponseDTO = responses.ThemeResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "You are not authorized to perform this request"}
-		c.Data["json"] = resp
+		message = themeResp.StatusMessage
 	}
+	resp := responses.ThemeResponseDTO{
+		Success:    isSuccess,
+		Result:     themeResp.Result,
+		StatusDesc: message,
+	}
+	c.Data["json"] = resp
 
 	c.ServeJSON()
 }
@@ -1190,12 +1180,13 @@ func (c *SystemController) RemoveTheme() {
 		return
 	}
 	idStr := c.Ctx.Input.Param(":id")
+	userData, _ := c.Ctx.Input.GetData("user").(*responses.AuthenticatedUser)
 
 	var isSuccess bool = false
 	message := "You are not authorized to perform this request"
 
 	logs.Info("Token verified")
-	themeResp := functions.RemoveTheme(&c.Controller, idStr)
+	themeResp := functions.RemoveTheme(&c.Controller, idStr, userData.UserID)
 	if themeResp.StatusCode == 200 {
 		isSuccess = true
 		message = themeResp.StatusMessage
@@ -1236,31 +1227,24 @@ func (c *SystemController) UpdateTheme() {
 	idStr := c.Ctx.Input.Param(":id")
 	var v requests.ThemeRequest
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
-
-	authorization := c.Ctx.Input.Header("Authorization")
-	token := strings.Split(authorization, " ")
+	userData, _ := c.Ctx.Input.GetData("user").(*responses.AuthenticatedUser)
 
 	var isSuccess bool = false
+	message := "You are not authorized to perform this request"
 
-	if token[0] == "Bearer" {
-		logs.Info("Token is ", token[1])
-		verifyToken := functions.VerifyToken(&c.Controller, token[1])
-
-		if verifyToken.StatusCode == 200 {
-			logs.Info("Token verified")
-			isSuccess = true
-			themeResp := functions.UpdateTheme(&c.Controller, v, idStr)
-			c.Data["json"] = themeResp
-		} else {
-			var resp responses.ThemeResponseDTO = responses.ThemeResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "You are not authorized to perform this request"}
-			c.Data["json"] = resp
-		}
-
+	logs.Info("Token verified")
+	isSuccess = true
+	themeResp := functions.UpdateTheme(&c.Controller, v, idStr, userData.UserID)
+	if themeResp.StatusCode == 200 {
+		isSuccess = true
+		message = themeResp.StatusMessage
 	} else {
-		var resp responses.ThemeResponseDTO = responses.ThemeResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "You are not authorized to perform this request"}
-		c.Data["json"] = resp
+		isSuccess = false
+		message = themeResp.StatusMessage
 	}
 
+	var resp responses.ThemeResponseDTO = responses.ThemeResponseDTO{Success: isSuccess, Result: themeResp.Result, StatusDesc: message}
+	c.Data["json"] = resp
 	c.ServeJSON()
 }
 
@@ -1316,12 +1300,14 @@ func (c *SystemController) AddThemeConfig() {
 		return
 	}
 	idStr := c.Ctx.Input.Param(":id")
+	userData, _ := c.Ctx.Input.GetData("user").(*responses.AuthenticatedUser)
+
 	var v requests.ThemeConfigRequest
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
 
 	var isSuccess bool = false
+	message := ""
 
-	logs.Info("Token verified")
 	if strings.TrimSpace(v.Config) == "" {
 		resp := responses.ThemeResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "config is required"}
 		c.Data["json"] = resp
@@ -1329,9 +1315,17 @@ func (c *SystemController) AddThemeConfig() {
 		return
 	}
 
-	themeResp := functions.AddThemeConfig(&c.Controller, idStr, v.Config)
-	c.Data["json"] = themeResp
+	themeResp := functions.AddThemeConfig(&c.Controller, idStr, v.Config, userData.UserID)
 
+	if themeResp.StatusCode == 200 {
+		isSuccess = true
+		message = "Successfully added theme config"
+	} else {
+		isSuccess = false
+		message = "Failed to add theme config. " + themeResp.StatusMessage
+	}
+	resp := responses.ThemeResponseDTO{Success: isSuccess, Result: themeResp.Result, StatusDesc: message}
+	c.Data["json"] = resp
 	c.ServeJSON()
 }
 
@@ -1350,29 +1344,22 @@ func (c *SystemController) RemoveThemeConfig() {
 		return
 	}
 	idStr := c.Ctx.Input.Param(":id")
-
-	authorization := c.Ctx.Input.Header("Authorization")
-	token := strings.Split(authorization, " ")
+	userData, _ := c.Ctx.Input.GetData("user").(*responses.AuthenticatedUser)
 
 	var isSuccess bool = false
+	message := ""
 
-	if token[0] == "Bearer" {
-		logs.Info("Token is ", token[1])
-		verifyToken := functions.VerifyToken(&c.Controller, token[1])
-
-		if verifyToken.StatusCode == 200 {
-			logs.Info("Token verified")
-			themeResp := functions.RemoveThemeConfig(&c.Controller, idStr)
-			c.Data["json"] = themeResp
-		} else {
-			var resp responses.ThemeResponseDTO = responses.ThemeResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "You are not authorized to perform this request"}
-			c.Data["json"] = resp
-		}
-
+	logs.Info("Token verified")
+	themeResp := functions.RemoveThemeConfig(&c.Controller, idStr, userData.UserID)
+	if themeResp.StatusCode == 200 {
+		isSuccess = true
+		message = themeResp.StatusMessage
 	} else {
-		var resp responses.ThemeResponseDTO = responses.ThemeResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "You are not authorized to perform this request"}
-		c.Data["json"] = resp
+		isSuccess = false
+		message = themeResp.StatusMessage
 	}
+	resp := responses.ThemeResponseDTO{Success: isSuccess, Result: themeResp.Result, StatusDesc: message}
+	c.Data["json"] = resp
 
 	c.ServeJSON()
 }
@@ -1514,7 +1501,7 @@ func (c *SystemController) AddShop() {
 		return
 	}
 	u := c.Ctx.Input.GetData("user")
-	userData, err := u.(*responses.UsersOri)
+	userData, err := u.(*responses.AuthenticatedUser)
 	// fmt.Printf("Type of v: %T\n", v)
 	// fmt.Printf("Value of v: %+v\n", v)
 	if err != false {
@@ -1526,11 +1513,11 @@ func (c *SystemController) AddShop() {
 	var isSuccess bool = false
 
 	activeState := "false"
-	if userData != nil && userData.Role.Role == "SUPER_ADMIN" {
+	if userData != nil && userData.RoleName == "SUPER_ADMIN" {
 		activeState = "true"
 	}
 
-	userIdStr := strconv.Itoa(int(userData.UserId))
+	userIdStr := userData.UserID
 	shopRequest := requests.ShopApiRequestDTO{
 		ShopName:            v.ShopName,
 		PhoneNumber:         v.PhoneNumber,
@@ -1579,7 +1566,7 @@ func (c *SystemController) UpdateShop() {
 		return
 	}
 	u := c.Ctx.Input.GetData("user")
-	userData, err := u.(*responses.UsersOri)
+	userData, err := u.(*responses.AuthenticatedUser)
 	// fmt.Printf("Type of v: %T\n", v)
 	// fmt.Printf("Value of v: %+v\n", v)
 	if err != false {
@@ -1590,10 +1577,10 @@ func (c *SystemController) UpdateShop() {
 
 	var isSuccess bool = false
 	activeState := "false"
-	if userData != nil && userData.Role.Role == "SUPER_ADMIN" {
+	if userData != nil && userData.RoleName == "SUPER_ADMIN" {
 		activeState = "true"
 	}
-	userIdStr := strconv.Itoa(int(userData.UserId))
+	userIdStr := userData.UserID
 	shopRequest := requests.ShopApiRequestDTO{
 		ShopId:              v.ShopId,
 		ShopName:            v.ShopName,
@@ -1644,7 +1631,7 @@ func (c *SystemController) DeleteShop() {
 		return
 	}
 	u := c.Ctx.Input.GetData("user")
-	userData, err := u.(*responses.UsersOri)
+	userData, err := u.(*responses.AuthenticatedUser)
 	// fmt.Printf("Type of v: %T\n", v)
 	// fmt.Printf("Value of v: %+v\n", v)
 	if err != false {
@@ -1655,8 +1642,8 @@ func (c *SystemController) DeleteShop() {
 
 	var isSuccess bool = false
 
-	userIdStr := strconv.Itoa(int(userData.UserId))
-	addStatusResp := functions.DeleteShop(&c.Controller, userIdStr)
+	userIdStr := userData.UserID
+	addStatusResp := functions.DeleteShop(&c.Controller, v.ShopId, userIdStr)
 
 	if addStatusResp.StatusCode == 200 {
 
@@ -1692,7 +1679,7 @@ func (c *SystemController) AddShopBranch() {
 		return
 	}
 	u := c.Ctx.Input.GetData("user")
-	userData, err := u.(*responses.UsersOri)
+	userData, err := u.(*responses.AuthenticatedUser)
 	// fmt.Printf("Type of v: %T\n", v)
 	// fmt.Printf("Value of v: %+v\n", v)
 	if err != false {
@@ -1703,7 +1690,7 @@ func (c *SystemController) AddShopBranch() {
 
 	var isSuccess bool = false
 
-	userIdStr := strconv.Itoa(int(userData.UserId))
+	userIdStr := userData.UserID
 	shopBranchRequest := requests.ShopBranchApiRequestDTO{
 		BranchId: v.BranchId,
 		ShopId:   v.ShopId,
@@ -1745,7 +1732,7 @@ func (c *SystemController) RemoveShopBranch() {
 		return
 	}
 	u := c.Ctx.Input.GetData("user")
-	userData, err := u.(*responses.UsersOri)
+	userData, err := u.(*responses.AuthenticatedUser)
 	// fmt.Printf("Type of v: %T\n", v)
 	// fmt.Printf("Value of v: %+v\n", v)
 	if err != false {
@@ -1756,7 +1743,7 @@ func (c *SystemController) RemoveShopBranch() {
 
 	var isSuccess bool = false
 
-	userIdStr := strconv.Itoa(int(userData.UserId))
+	userIdStr := userData.UserID
 	addStatusResp := functions.RemoveShopBranch(&c.Controller, v, userIdStr)
 
 	if addStatusResp.StatusCode == 200 {
@@ -1793,7 +1780,7 @@ func (c *SystemController) AddApplicationShop() {
 		return
 	}
 	u := c.Ctx.Input.GetData("user")
-	userData, err := u.(*responses.UsersOri)
+	userData, err := u.(*responses.AuthenticatedUser)
 	// fmt.Printf("Type of v: %T\n", v)
 	// fmt.Printf("Value of v: %+v\n", v)
 	if err != false {
@@ -1804,7 +1791,7 @@ func (c *SystemController) AddApplicationShop() {
 
 	var isSuccess bool = false
 
-	userIdStr := strconv.Itoa(int(userData.UserId))
+	userIdStr := userData.UserID
 	addStatusResp := functions.AddApplicationShop(&c.Controller, v, userIdStr)
 
 	if addStatusResp.StatusCode == 200 {
@@ -1847,7 +1834,7 @@ func (c *SystemController) RemoveApplicationShop() {
 		return
 	}
 	u := c.Ctx.Input.GetData("user")
-	userData, err := u.(*responses.UsersOri)
+	userData, err := u.(*responses.AuthenticatedUser)
 	// fmt.Printf("Type of v: %T\n", v)
 	// fmt.Printf("Value of v: %+v\n", v)
 	if err != false {
@@ -1858,7 +1845,7 @@ func (c *SystemController) RemoveApplicationShop() {
 
 	var isSuccess bool = false
 
-	userIdStr := strconv.Itoa(int(userData.UserId))
+	userIdStr := userData.UserID
 	addStatusResp := functions.RemoveApplicationShop(&c.Controller, v, userIdStr)
 
 	if addStatusResp.StatusCode == 200 {

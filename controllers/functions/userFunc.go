@@ -13,14 +13,14 @@ import (
 	beego "github.com/beego/beego/v2/server/web"
 )
 
-func GetUserDetails(c *beego.Controller, userid int64) (resp responses.UserOriResponseDTO) {
+func GetUserDetails(c *beego.Controller, userid string) (resp responses.UserOriResponseDTO) {
 	host, _ := beego.AppConfig.String("customerBaseUrl")
 
 	logs.Info("Getting user details ", userid)
 
 	request := api.NewRequest(
 		host,
-		"/v1/users/"+strconv.FormatInt(userid, 10),
+		"/v1/users/"+userid,
 		api.GET)
 	// request.Params["username"] = username
 	// request.Params = {"UserId": strconv.Itoa(int(userid))}

@@ -41,8 +41,8 @@ func (c *CustomermanagementController) Post() {
 		return
 	}
 	v := c.Ctx.Input.GetData("user")
-	userData, err := v.(*responses.UsersOri)
-	userIdStr := strconv.FormatInt(userData.UserId, 10)
+	userData, err := v.(*responses.AuthenticatedUser)
+	userIdStr := userData.UserID
 
 	fmt.Printf("Type of v: %T\n", v)
 	fmt.Printf("Value of v: %+v\n", v)
@@ -62,41 +62,48 @@ func (c *CustomermanagementController) Post() {
 	isSuccess := false
 	message := "An error occurred"
 
-	branchStr := strconv.FormatInt(userData.UserDetails.Branch.BranchId, 10)
-	custData := requests.AddCustomer{
-		Email:       cust.Email,
-		Name:        cust.Name,
-		Dob:         cust.Dob,
-		PhoneNumber: cust.PhoneNumber,
-		Location:    cust.Location,
-		IdType:      cust.IdType,
-		IdNumber:    cust.IdNumber,
-		ImagePath:   cust.ImagePath,
-		Branch:      branchStr,
-		CreatedBy:   userIdStr,
-	}
-	customerResp := functions.AddCustomer(&c.Controller, custData, userIdStr, "Individual")
-
-	if customerResp.StatusCode == 200 {
-		isSuccess = true
-		message = "Customer successfully added"
-
-		var custGateway responses.CustomerGateway = responses.CustomerGateway{
-			CustomerId:           customerResp.Result.CustomerId,
-			FullName:             customerResp.Result.FullName,
-			Email:                customerResp.Result.Email,
-			PhoneNumber:          customerResp.Result.PhoneNumber,
-			Location:             customerResp.Result.Location,
-			IdentificationType:   customerResp.Result.IdentificationType,
-			IdentificationNumber: customerResp.Result.IdentificationNumber,
-			DateCreated:          customerResp.Result.DateCreated,
-			Status:               customerResp.Result.Active,
+	if userResp := functions.GetUserDetails(&c.Controller, userIdStr); userResp.StatusCode == 200 {
+		branchStr := userResp.Result.UserDetails.Branch.BranchId
+		custData := requests.AddCustomer{
+			Email:       cust.Email,
+			Name:        cust.Name,
+			Dob:         cust.Dob,
+			PhoneNumber: cust.PhoneNumber,
+			Location:    cust.Location,
+			IdType:      cust.IdType,
+			IdNumber:    cust.IdNumber,
+			ImagePath:   cust.ImagePath,
+			Branch:      branchStr,
+			CreatedBy:   userIdStr,
 		}
-		resp := responses.CustomerGatewayResponseDTO{Success: isSuccess, Result: &custGateway, StatusDesc: message}
-		c.Data["json"] = resp
+		customerResp := functions.AddCustomer(&c.Controller, custData, userIdStr, "Individual")
+
+		if customerResp.StatusCode == 200 {
+			isSuccess = true
+			message = "Customer successfully added"
+
+			var custGateway responses.CustomerGateway = responses.CustomerGateway{
+				CustomerId:           customerResp.Result.CustomerId,
+				FullName:             customerResp.Result.FullName,
+				Email:                customerResp.Result.Email,
+				PhoneNumber:          customerResp.Result.PhoneNumber,
+				Location:             customerResp.Result.Location,
+				IdentificationType:   customerResp.Result.IdentificationType,
+				IdentificationNumber: customerResp.Result.IdentificationNumber,
+				DateCreated:          customerResp.Result.DateCreated,
+				Status:               customerResp.Result.Active,
+			}
+			resp := responses.CustomerGatewayResponseDTO{Success: isSuccess, Result: &custGateway, StatusDesc: message}
+			c.Data["json"] = resp
+		} else {
+			logs.Error("An error occurred while saving customer details ", customerResp.StatusDesc)
+			message = "An error occurred while saving customer details"
+			var resp responses.CustomerGatewayResponseDTO = responses.CustomerGatewayResponseDTO{Success: isSuccess, Result: nil, StatusDesc: message}
+			c.Data["json"] = resp
+		}
 	} else {
-		logs.Error("An error occurred while saving customer details ", customerResp.StatusDesc)
-		message = "An error occurred while saving customer details"
+		logs.Error("Error fetching user details ", userResp.StatusDesc)
+		message = "Error fetching user details"
 		var resp responses.CustomerGatewayResponseDTO = responses.CustomerGatewayResponseDTO{Success: isSuccess, Result: nil, StatusDesc: message}
 		c.Data["json"] = resp
 	}
@@ -169,7 +176,7 @@ func (c *CustomermanagementController) GetAll() {
 		return
 	}
 	v := c.Ctx.Input.GetData("user")
-	userData, err := v.(*responses.UsersOri)
+	userData, err := v.(*responses.AuthenticatedUser)
 
 	// fmt.Printf("Type of v: %T\n", v)
 	// fmt.Printf("Value of v: %+v\n", v)

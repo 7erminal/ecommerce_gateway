@@ -184,7 +184,7 @@ func GetCustomers(c *beego.Controller, query string, fields string, sortby strin
 	return data
 }
 
-func UpdateCustomer(c *beego.Controller, id string, req requests.UpdateCustomer) (resp responses.CustomerResponseDTO) {
+func UpdateCustomer(c *beego.Controller, id string, req requests.UpdateCustomer, updatedBy string) (resp responses.CustomerResponseDTO) {
 	host, _ := beego.AppConfig.String("customerBaseUrl")
 
 	logs.Info("Sending first name ", req.Name)
@@ -193,13 +193,13 @@ func UpdateCustomer(c *beego.Controller, id string, req requests.UpdateCustomer)
 		host,
 		"/v1/customers/"+id,
 		api.PUT)
-	request.InterfaceParams["Name"] = req.Email
+	request.InterfaceParams["Name"] = req.Name
 	request.InterfaceParams["Email"] = req.Email
 	request.InterfaceParams["IdType"] = req.IdType
 	request.InterfaceParams["PhoneNumber"] = req.PhoneNumber
 	request.InterfaceParams["IdNumber"] = req.IdNumber
 	// request.InterfaceParams["Dob"] = req.IdNumber
-	// request.InterfaceParams["AddedBy"] = req.IdNumber
+	request.InterfaceParams["UpdatedBy"] = updatedBy
 	request.InterfaceParams["Location"] = req.Location
 	request.FileField["ImagePath"] = req.ImagePath
 	// request.Params = {"UserId": strconv.Itoa(int(userid))}
@@ -236,7 +236,7 @@ func UpdateCustomer(c *beego.Controller, id string, req requests.UpdateCustomer)
 	return data
 }
 
-func DeleteCustomer(c *beego.Controller, id string, req requests.UpdateCustomer) (resp responses.StringOriResponseDTO) {
+func DeleteCustomer(c *beego.Controller, id string, req requests.UpdateCustomer, deletedBy string) (resp responses.StringOriResponseDTO) {
 	host, _ := beego.AppConfig.String("customerBaseUrl")
 
 	logs.Info("Sending first name ", req.Name)
@@ -245,6 +245,7 @@ func DeleteCustomer(c *beego.Controller, id string, req requests.UpdateCustomer)
 		host,
 		"/v1/customers/"+id,
 		api.DELETE)
+	request.Params["DeletedBy"] = deletedBy
 	// request.Params = {"UserId": strconv.Itoa(int(userid))}
 	client := api.Client{
 		Request: request,

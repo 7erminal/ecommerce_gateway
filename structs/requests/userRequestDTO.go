@@ -8,16 +8,16 @@ type UpdateUserRequestDTO struct {
 	Gender      string `orm:"size(10); omitempty; null"`
 	Dob         string `orm:"size(50); omitempty; null"`
 	Address     string `orm:"size(255); omitempty; null"`
-	BranchId    int64
-	RoleId      int64
+	BranchId    string
+	RoleId      string
 }
 
 type UpdateUserRoleRequestDTO struct {
-	RoleId int64
+	RoleId string
 }
 
 type UpdateUserBranchRequestDTO struct {
-	BranchId int64
+	BranchId string
 }
 
 type AddRoleRequestDTO struct {

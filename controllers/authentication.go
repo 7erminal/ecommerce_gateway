@@ -5,7 +5,6 @@ import (
 	"AMC_gateway/structs/requests"
 	"AMC_gateway/structs/responses"
 	"encoding/json"
-	"strconv"
 	"strings"
 
 	"github.com/beego/beego/v2/core/logs"
@@ -195,7 +194,7 @@ func (c *AuthenticationController) ChangePassword() {
 		c.ServeJSON()
 		return
 	}
-	userData, err := u.(*responses.UsersOri)
+	userData, err := u.(*responses.AuthenticatedUser)
 	if err {
 		logs.Error("Unable to get user data")
 	}
@@ -207,7 +206,7 @@ func (c *AuthenticationController) ChangePassword() {
 
 	logs.Info("Received ", v.OldPassword, v.NewPassword)
 
-	idStr := strconv.FormatInt(userData.UserId, 10)
+	idStr := userData.UserID
 
 	loginResp := functions.ChangePassword(&c.Controller, idStr, v)
 

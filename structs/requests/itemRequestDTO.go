@@ -10,9 +10,9 @@ type AddItemRequestDTO struct {
 	BranchId        string
 	ImagePath       string
 	ReorderLevel    int
-	CategoryId      int64
-	Purposes        *[]int64
-	Features        *[]int64
+	CategoryId      string
+	Purposes        *[]string
+	Features        *[]string
 	AvailableSizes  *[]string
 	AvailableColors *[]string
 	Country         string
@@ -21,9 +21,9 @@ type AddItemRequestDTO struct {
 type AddSalesItemRequestDTO struct {
 	ProductName     string
 	Description     string
-	CategoryId      int64
-	Purposes        *[]int64
-	Features        *[]int64
+	CategoryId      string
+	Purposes        *[]string
+	Features        *[]string
 	AvailableSizes  *[]string
 	AvailableColors *[]string
 	Quantity        int
@@ -36,13 +36,13 @@ type AddSalesItemRequestDTO struct {
 }
 
 type AddProductFeatureRequestDTO struct {
-	ProductId int64
-	FeatureId int64
+	ProductId string
+	FeatureId string
 }
 
 type AddProductPurposeRequestDTO struct {
-	ProductId int64
-	PurposeId int64
+	ProductId string
+	PurposeId string
 }
 
 type AddRentalItemRequestDTO struct {
@@ -61,12 +61,12 @@ type UpdateItemRequestDTO struct {
 	AvailableColors *[]string
 	CostPrice       float64
 	SellingPrice    float64
-	BranchId        int64
+	BranchId        string
 	ImagePath       string
 	Description     string
-	CategoryId      int64
-	Purposes        *[]int64
-	Features        *[]int64
+	CategoryId      string
+	Purposes        *[]string
+	Features        *[]string
 	Weight          string
 }
 

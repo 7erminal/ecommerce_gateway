@@ -23,8 +23,8 @@ type UserExtraDetails struct {
 }
 
 type UsersOri struct {
-	UserId        int64
-	UserType      int
+	UserId        string
+	UserType      string
 	ImagePath     string
 	UserDetails   *UserExtraDetails
 	FullName      string
@@ -48,39 +48,39 @@ type UsersOri struct {
 }
 
 type Users struct {
-	UserId        int64 `orm:"auto"`
-	UserType      int
+	UserId        string
+	UserType      string
 	ImagePath     string
-	Customer      *UserExtraDetails `orm:"rel(fk);column(customer_id)"`
-	FullName      string            `orm:"size(255)"`
-	Username      string            `orm:"size(255)"`
-	Password      string            `orm:"size(255)"`
-	Email         string            `orm:"size(255)"`
-	PhoneNumber   string            `orm:"size(255)"`
-	Gender        string            `orm:"size(10)"`
-	Dob           time.Time         `orm:"type(datetime)"`
-	Address       string            `orm:"size(255)"`
-	IdType        string            `orm:"size(5)"`
-	IdNumber      string            `orm:"size(100)"`
+	Customer      *UserExtraDetails
+	FullName      string
+	Username      string
+	Password      string
+	Email         string
+	PhoneNumber   string
+	Gender        string
+	Dob           time.Time
+	Address       string
+	IdType        string
+	IdNumber      string
 	Role          *Role
-	MaritalStatus string `orm:"size(255);omitempty"`
+	MaritalStatus string
 	Active        int
 	IsVerified    bool
-	DateCreated   time.Time `orm:"type(datetime)"`
-	DateModified  time.Time `orm:"type(datetime)"`
+	DateCreated   time.Time
+	DateModified  time.Time
 	CreatedBy     int
 	ModifiedBy    int
 	Branch        *BranchResp
 }
 
 type UserGateway struct {
-	UserId int64 `orm:"auto"`
+	UserId string
 	// UserType    int
-	FirstName   string `orm:"size(255)"`
-	LastName    string `orm:"size(255)"`
-	Username    string `orm:"size(255)"`
-	Email       string `orm:"size(255)"`
-	PhoneNumber string `orm:"size(255)"`
+	FirstName   string
+	LastName    string
+	Username    string
+	Email       string
+	PhoneNumber string
 	ImagePath   string
 	Customer    *UserExtraDetails
 	// Gender         string    `orm:"size(10)"`

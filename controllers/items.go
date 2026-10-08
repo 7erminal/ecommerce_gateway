@@ -5,7 +5,6 @@ import (
 	"AMC_gateway/structs/requests"
 	"AMC_gateway/structs/responses"
 	"encoding/json"
-	"strconv"
 	"strings"
 
 	"github.com/beego/beego/v2/core/logs"
@@ -46,156 +45,162 @@ func (c *ItemsController) AddSalesItem() {
 		return
 	}
 	u := c.Ctx.Input.GetData("user")
-	userData, err := u.(*responses.UsersOri)
+	userData, err := u.(*responses.AuthenticatedUser)
 	logs.Info("Error is ", err)
 	var v requests.AddSalesItemRequestDTO
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
 
 	var isSuccess bool = false
 
-	logs.Info("Received \nProduct name: ", v.ProductName, "Branch ID:: ", userData.UserDetails.Branch.BranchId, "Cost price:: ", v.CostPrice, "Image path:: ", v.ImagePath, "Quantity:: ", v.Quantity, "Selling price:: ", v.SellingPrice)
-	proceed := true
-	errorMessage := "An error occurred"
-	logs.Info("Token verified!")
-	branchId := strconv.FormatInt(userData.UserDetails.Branch.BranchId, 10)
+	if userResp := functions.GetUserDetails(&c.Controller, userData.UserID); userResp.StatusCode == 200 {
+		logs.Info("Received \nProduct name: ", v.ProductName, "Branch ID:: ", userResp.Result.UserDetails.Branch.BranchId, "Cost price:: ", v.CostPrice, "Image path:: ", v.ImagePath, "Quantity:: ", v.Quantity, "Selling price:: ", v.SellingPrice)
+		proceed := true
+		errorMessage := "An error occurred"
+		logs.Info("Token verified!")
+		branchId := userResp.Result.UserDetails.Branch.BranchId
 
-	getBranchResp, erri := functions.GetSystemDetails(&c.Controller, branchId)
-	if erri != nil {
-		errorMessage = "Failed to fetch branch details"
-		proceed = false
-	}
-
-	if proceed == true {
-		if getBranchResp.Success != true {
-			errorMessage = getBranchResp.StatusDesc
+		getBranchResp, erri := functions.GetSystemDetails(&c.Controller, branchId)
+		if erri != nil {
+			errorMessage = "Failed to fetch branch details"
 			proceed = false
 		}
-	}
 
-	getProductTypes := functions.GetCategory(&c.Controller, strconv.FormatInt(v.CategoryId, 10))
-	if getProductTypes.StatusCode != 200 {
-		errorMessage = "Product type provided does not exist"
-		proceed = false
-	}
-
-	if proceed {
-		req := requests.AddItemRequestDTO{
-			ProductName:     v.ProductName,
-			Description:     v.Description,
-			Weight:          v.Weight,
-			Quantity:        v.Quantity,
-			ReorderLevel:    0,
-			CostPrice:       v.CostPrice,
-			SellingPrice:    v.SellingPrice,
-			BranchId:        branchId,
-			ImagePath:       v.ImagePath,
-			AvailableSizes:  v.AvailableSizes,
-			AvailableColors: v.AvailableColors,
-			Purposes:        v.Purposes,
-			Features:        v.Features,
-			Country:         "GHA",
+		if proceed == true {
+			if getBranchResp.Success != true {
+				errorMessage = getBranchResp.StatusDesc
+				proceed = false
+			}
 		}
-		addItemResp := functions.AddItem(
-			&c.Controller,
-			req,
-			getProductTypes.Category.CategoryId,
-			getBranchResp.Result.Branch.Country.CountryCode,
-			userData.UserDetails.Branch.BranchId,
-			int(userData.UserId))
 
-		itemResp := responses.Item{}
-		if addItemResp.StatusCode == 200 {
-			if addItemResp.Item != nil {
-				logs.Info("About to update item image")
-				itemImageUpdateResp := functions.UpdateItemImage(&c.Controller, addItemResp.Item.ItemId, v.ImagePath)
-				if itemImageUpdateResp.StatusCode == 200 {
-					logs.Info("Successfully updated item image")
+		getProductTypes := functions.GetCategory(&c.Controller, v.CategoryId)
+		if getProductTypes.StatusCode != 200 {
+			errorMessage = "Product type provided does not exist"
+			proceed = false
+		}
+
+		if proceed {
+			req := requests.AddItemRequestDTO{
+				ProductName:     v.ProductName,
+				Description:     v.Description,
+				Weight:          v.Weight,
+				Quantity:        v.Quantity,
+				ReorderLevel:    0,
+				CostPrice:       v.CostPrice,
+				SellingPrice:    v.SellingPrice,
+				BranchId:        branchId,
+				ImagePath:       v.ImagePath,
+				AvailableSizes:  v.AvailableSizes,
+				AvailableColors: v.AvailableColors,
+				Purposes:        v.Purposes,
+				Features:        v.Features,
+				Country:         "GHA",
+			}
+			addItemResp := functions.AddItem(
+				&c.Controller,
+				req,
+				getProductTypes.Category.CategoryId,
+				getBranchResp.Result.Branch.Country.CountryCode,
+				branchId,
+				userData.UserID,
+			)
+
+			itemResp := responses.Item{}
+			if addItemResp.StatusCode == 200 {
+				if addItemResp.Item != nil {
+					logs.Info("About to update item image")
+					itemImageUpdateResp := functions.UpdateItemImage(&c.Controller, addItemResp.Item.ItemId, v.ImagePath)
+					if itemImageUpdateResp.StatusCode == 200 {
+						logs.Info("Successfully updated item image")
+					} else {
+						logs.Error("Failed update")
+					}
+
+					var features []responses.Feature
+
+					if v.Features != nil {
+						if len(*v.Features) > 0 {
+							for _, featureId := range *v.Features {
+
+								var ifResp requests.AddProductFeatureRequestDTO = requests.AddProductFeatureRequestDTO{
+									ProductId: addItemResp.Item.ItemId,
+									FeatureId: featureId,
+								}
+
+								addItemFeatureResp := functions.AddItemFeatures(&c.Controller, ifResp, userData.UserID)
+
+								if addItemFeatureResp.StatusCode == 200 {
+									logs.Info("Successfully added item feature")
+									features = append(features, *addItemFeatureResp.Result.Feature)
+								} else {
+									logs.Error("Failed to add item feature")
+								}
+							}
+						}
+					}
+
+					var purposes []responses.Purpose
+					if v.Purposes != nil {
+						if len(*v.Purposes) > 0 {
+							for _, purposeId := range *v.Purposes {
+
+								var ipResp requests.AddProductPurposeRequestDTO = requests.AddProductPurposeRequestDTO{
+									ProductId: addItemResp.Item.ItemId,
+									PurposeId: purposeId,
+								}
+
+								addItemPurposeResp := functions.AddItemPurposes(&c.Controller, ipResp, userData.UserID)
+
+								if addItemPurposeResp.StatusCode == 200 {
+									logs.Info("Successfully added item purpose")
+									purposes = append(purposes, *addItemPurposeResp.Result.Purpose)
+								} else {
+									logs.Error("Failed to add item purpose")
+								}
+							}
+						}
+					}
+
+					availableSizes := strings.Split(addItemResp.Item.AvailableSizes, ",")
+					availableColors := strings.Split(addItemResp.Item.AvailableColors, ",")
+
+					itemResp = responses.Item{
+						ProductId:        addItemResp.Item.ItemId,
+						ProductName:      addItemResp.Item.ItemName,
+						Description:      addItemResp.Item.Description,
+						ProductPrice:     float64(addItemResp.Item.ItemPrice.ItemPrice),
+						ProductCostPrice: float64(addItemResp.Item.ItemPrice.AltItemPrice),
+						ImagePath:        itemImageUpdateResp.Item.ImagePath,
+						Quantity:         addItemResp.Item.Quantity,
+						Branch:           addItemResp.Item.Branch,
+						Category:         addItemResp.Item.Category,
+						AvailableSizes:   &availableSizes,
+						AvailableColors:  &availableColors,
+						Purposes:         &purposes,
+						Features:         &features,
+					}
+
+					isSuccess = true
 				} else {
-					logs.Error("Failed update")
+					isSuccess = false
 				}
 
-				var features []responses.Feature
-
-				if v.Features != nil {
-					if len(*v.Features) > 0 {
-						for _, featureId := range *v.Features {
-
-							var ifResp requests.AddProductFeatureRequestDTO = requests.AddProductFeatureRequestDTO{
-								ProductId: addItemResp.Item.ItemId,
-								FeatureId: featureId,
-							}
-
-							addItemFeatureResp := functions.AddItemFeatures(&c.Controller, ifResp)
-
-							if addItemFeatureResp.StatusCode == 200 {
-								logs.Info("Successfully added item feature")
-								features = append(features, *addItemFeatureResp.Result.Feature)
-							} else {
-								logs.Error("Failed to add item feature")
-							}
-						}
-					}
-				}
-
-				var purposes []responses.Purpose
-				if v.Purposes != nil {
-					if len(*v.Purposes) > 0 {
-						for _, purposeId := range *v.Purposes {
-
-							var ipResp requests.AddProductPurposeRequestDTO = requests.AddProductPurposeRequestDTO{
-								ProductId: addItemResp.Item.ItemId,
-								PurposeId: purposeId,
-							}
-
-							addItemPurposeResp := functions.AddItemPurposes(&c.Controller, ipResp)
-
-							if addItemPurposeResp.StatusCode == 200 {
-								logs.Info("Successfully added item purpose")
-								purposes = append(purposes, *addItemPurposeResp.Result.Purpose)
-							} else {
-								logs.Error("Failed to add item purpose")
-							}
-						}
-					}
-				}
-
-				availableSizes := strings.Split(addItemResp.Item.AvailableSizes, ",")
-				availableColors := strings.Split(addItemResp.Item.AvailableColors, ",")
-
-				itemResp = responses.Item{
-					ProductId:        addItemResp.Item.ItemId,
-					ProductName:      addItemResp.Item.ItemName,
-					Description:      addItemResp.Item.Description,
-					ProductPrice:     float64(addItemResp.Item.ItemPrice.ItemPrice),
-					ProductCostPrice: float64(addItemResp.Item.ItemPrice.AltItemPrice),
-					ImagePath:        itemImageUpdateResp.Item.ImagePath,
-					Quantity:         addItemResp.Item.Quantity,
-					Branch:           addItemResp.Item.Branch,
-					Category:         addItemResp.Item.Category,
-					AvailableSizes:   &availableSizes,
-					AvailableColors:  &availableColors,
-					Purposes:         &purposes,
-					Features:         &features,
-				}
-
-				isSuccess = true
-			} else {
-				isSuccess = false
 			}
 
+			var resp responses.ItemResponseDTO = responses.ItemResponseDTO{Success: isSuccess, Result: &itemResp, StatusDesc: addItemResp.StatusDesc}
+
+			c.Data["json"] = resp
+			// } else {
+			// 	var resp responses.ItemResponseDTO = responses.ItemResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An error occurred"}
+
+			// 	c.Data["json"] = resp
+			// }
+		} else {
+			var resp responses.ItemResponseDTO = responses.ItemResponseDTO{Success: isSuccess, Result: nil, StatusDesc: errorMessage}
+
+			c.Data["json"] = resp
 		}
-
-		var resp responses.ItemResponseDTO = responses.ItemResponseDTO{Success: isSuccess, Result: &itemResp, StatusDesc: addItemResp.StatusDesc}
-
-		c.Data["json"] = resp
-		// } else {
-		// 	var resp responses.ItemResponseDTO = responses.ItemResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An error occurred"}
-
-		// 	c.Data["json"] = resp
-		// }
 	} else {
-		var resp responses.ItemResponseDTO = responses.ItemResponseDTO{Success: isSuccess, Result: nil, StatusDesc: errorMessage}
-
+		var resp responses.ItemResponseDTO = responses.ItemResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "Failed to fetch user details"}
 		c.Data["json"] = resp
 	}
 
@@ -217,7 +222,7 @@ func (c *ItemsController) AddRentalsItem() {
 		return
 	}
 	u := c.Ctx.Input.GetData("user")
-	userData, err := u.(*responses.UsersOri)
+	userData, err := u.(*responses.AuthenticatedUser)
 	logs.Info("Error is ", err)
 	// userIdStr := strconv.FormatInt(userData.UserId, 10)
 	var v requests.AddRentalItemRequestDTO
@@ -225,78 +230,83 @@ func (c *ItemsController) AddRentalsItem() {
 
 	var isSuccess bool = false
 
-	logs.Info("Received \nProduct name: ", v.ProductName, "Branch ID:: ", userData.UserDetails.Branch.BranchId, "Image path:: ", v.ImagePath, "Quantity:: ", v.Quantity, "Rental price:: ", v.RentalPrice)
-	proceed := true
-	errorMessage := "An error occurred"
-	logs.Info("Token verified!")
-	logs.Info("Branch is !", userData.UserDetails.Branch)
-	branchId := strconv.FormatInt(userData.UserDetails.Branch.BranchId, 10)
-	getBranchResp, erri := functions.GetSystemDetails(&c.Controller, branchId)
-	if erri != nil {
-		errorMessage = "Failed to fetch branch details"
-		proceed = false
-	}
-
-	if proceed == true {
-		if getBranchResp.Success != true {
-			errorMessage = getBranchResp.StatusDesc
+	if userResp := functions.GetUserDetails(&c.Controller, userData.UserID); userResp.StatusCode == 200 {
+		logs.Info("Received \nProduct name: ", v.ProductName, "Branch ID:: ", userResp.Result.UserDetails.Branch.BranchId, "Image path:: ", v.ImagePath, "Quantity:: ", v.Quantity, "Rental price:: ", v.RentalPrice)
+		proceed := true
+		errorMessage := "An error occurred"
+		logs.Info("Token verified!")
+		logs.Info("Branch is !", userResp.Result.UserDetails.Branch)
+		branchId := userResp.Result.UserDetails.Branch.BranchId
+		getBranchResp, erri := functions.GetSystemDetails(&c.Controller, branchId)
+		if erri != nil {
+			errorMessage = "Failed to fetch branch details"
 			proceed = false
 		}
-	}
 
-	sales_product_type_name, _ := beego.AppConfig.String("rentalsProductType")
-
-	getProductTypes := functions.GetCategoryByName(&c.Controller, sales_product_type_name)
-
-	if getProductTypes.StatusCode != 200 {
-		errorMessage = "Product type provided does not exist"
-		proceed = false
-	}
-
-	if proceed {
-		req := requests.AddItemRequestDTO{ProductName: v.ProductName, Quantity: v.Quantity, ReorderLevel: v.ReorderLevel, CostPrice: 0, SellingPrice: v.RentalPrice, BranchId: branchId, ImagePath: v.ImagePath}
-		addItemResp := functions.AddItem(&c.Controller, req, getProductTypes.Category.CategoryId, getBranchResp.Result.Branch.Country.CountryCode, userData.UserDetails.Branch.BranchId, int(userData.UserId))
-
-		itemResp := responses.Item{}
-		if addItemResp.StatusCode == 200 {
-			if addItemResp.Item != nil {
-				logs.Info("About to update item image")
-				itemImageUpdateResp := functions.UpdateItemImage(&c.Controller, addItemResp.Item.ItemId, v.ImagePath)
-				if itemImageUpdateResp.StatusCode == 200 {
-					logs.Info("Successfully updated item image")
-				} else {
-					logs.Error("Failed update")
-				}
-
-				itemResp = responses.Item{
-					ProductId:        addItemResp.Item.ItemId,
-					ProductName:      addItemResp.Item.ItemName,
-					Description:      addItemResp.Item.Description,
-					ProductPrice:     float64(addItemResp.Item.ItemPrice.ItemPrice),
-					ProductCostPrice: float64(addItemResp.Item.ItemPrice.AltItemPrice),
-					ImagePath:        itemImageUpdateResp.Item.ImagePath,
-					Quantity:         addItemResp.Item.Quantity,
-					Branch:           addItemResp.Item.Branch,
-				}
-
-				isSuccess = true
-			} else {
-				isSuccess = false
+		if proceed == true {
+			if getBranchResp.Success != true {
+				errorMessage = getBranchResp.StatusDesc
+				proceed = false
 			}
-
 		}
 
-		var resp responses.ItemResponseDTO = responses.ItemResponseDTO{Success: isSuccess, Result: &itemResp, StatusDesc: addItemResp.StatusDesc}
+		sales_product_type_name, _ := beego.AppConfig.String("rentalsProductType")
 
-		c.Data["json"] = resp
-		// } else {
-		// 	var resp responses.ItemResponseDTO = responses.ItemResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An error occurred"}
+		getProductTypes := functions.GetCategoryByName(&c.Controller, sales_product_type_name)
 
-		// 	c.Data["json"] = resp
-		// }
+		if getProductTypes.StatusCode != 200 {
+			errorMessage = "Product type provided does not exist"
+			proceed = false
+		}
+
+		if proceed {
+			req := requests.AddItemRequestDTO{ProductName: v.ProductName, Quantity: v.Quantity, ReorderLevel: v.ReorderLevel, CostPrice: 0, SellingPrice: v.RentalPrice, BranchId: branchId, ImagePath: v.ImagePath}
+			addItemResp := functions.AddItem(&c.Controller, req, getProductTypes.Category.CategoryId, getBranchResp.Result.Branch.Country.CountryCode, userResp.Result.UserDetails.Branch.BranchId, userData.UserID)
+
+			itemResp := responses.Item{}
+			if addItemResp.StatusCode == 200 {
+				if addItemResp.Item != nil {
+					logs.Info("About to update item image")
+					itemImageUpdateResp := functions.UpdateItemImage(&c.Controller, addItemResp.Item.ItemId, v.ImagePath)
+					if itemImageUpdateResp.StatusCode == 200 {
+						logs.Info("Successfully updated item image")
+					} else {
+						logs.Error("Failed update")
+					}
+
+					itemResp = responses.Item{
+						ProductId:        addItemResp.Item.ItemId,
+						ProductName:      addItemResp.Item.ItemName,
+						Description:      addItemResp.Item.Description,
+						ProductPrice:     float64(addItemResp.Item.ItemPrice.ItemPrice),
+						ProductCostPrice: float64(addItemResp.Item.ItemPrice.AltItemPrice),
+						ImagePath:        itemImageUpdateResp.Item.ImagePath,
+						Quantity:         addItemResp.Item.Quantity,
+						Branch:           addItemResp.Item.Branch,
+					}
+
+					isSuccess = true
+				} else {
+					isSuccess = false
+				}
+
+			}
+
+			var resp responses.ItemResponseDTO = responses.ItemResponseDTO{Success: isSuccess, Result: &itemResp, StatusDesc: addItemResp.StatusDesc}
+
+			c.Data["json"] = resp
+			// } else {
+			// 	var resp responses.ItemResponseDTO = responses.ItemResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An error occurred"}
+
+			// 	c.Data["json"] = resp
+			// }
+		} else {
+			var resp responses.ItemResponseDTO = responses.ItemResponseDTO{Success: isSuccess, Result: nil, StatusDesc: errorMessage}
+
+			c.Data["json"] = resp
+		}
 	} else {
-		var resp responses.ItemResponseDTO = responses.ItemResponseDTO{Success: isSuccess, Result: nil, StatusDesc: errorMessage}
-
+		var resp responses.ItemResponseDTO = responses.ItemResponseDTO{Success: false, Result: nil, StatusDesc: "User not authenticated"}
 		c.Data["json"] = resp
 	}
 
@@ -319,7 +329,7 @@ func (c *ItemsController) UpdateItem() {
 		return
 	}
 	u := c.Ctx.Input.GetData("user")
-	userData, err := u.(*responses.UsersOri)
+	userData, err := u.(*responses.AuthenticatedUser)
 	logs.Info("Error is ", err)
 	var v requests.UpdateItemRequestDTO
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
@@ -333,7 +343,7 @@ func (c *ItemsController) UpdateItem() {
 	proceed := true
 	errorMessage := "An error occurred"
 	logs.Info("Token verified!")
-	branchId := strconv.FormatInt(v.BranchId, 10)
+	branchId := v.BranchId
 	getBranchResp, erri := functions.GetSystemDetails(&c.Controller, branchId)
 	if erri != nil {
 		errorMessage = "Failed to fetch branch details"
@@ -347,7 +357,7 @@ func (c *ItemsController) UpdateItem() {
 		}
 	}
 
-	categoryId := strconv.FormatInt(v.CategoryId, 10)
+	categoryId := v.CategoryId
 
 	getProductTypes := functions.GetCategory(&c.Controller, categoryId)
 
@@ -364,7 +374,7 @@ func (c *ItemsController) UpdateItem() {
 	}
 
 	if proceed {
-		addItemResp := functions.UpdateItem(&c.Controller, v, getBranchResp.Result.Branch.Country.CountryCode, v.BranchId, int(userData.UserId), idStr)
+		addItemResp := functions.UpdateItem(&c.Controller, v, getBranchResp.Result.Branch.Country.CountryCode, v.BranchId, userData.UserID, idStr)
 
 		itemResp := responses.Item{}
 		if addItemResp.StatusCode == 200 {
@@ -391,7 +401,7 @@ func (c *ItemsController) UpdateItem() {
 
 						if !exists {
 							logs.Info("Feature does not exist, deleting ", feature.Feature.FeatureId)
-							deleteResp := functions.DeleteItemFeature(&c.Controller, strconv.FormatInt(feature.ItemFeatureId, 10))
+							deleteResp := functions.DeleteItemFeature(&c.Controller, feature.ItemFeatureId, userData.UserID)
 							if deleteResp.StatusCode == 200 {
 								logs.Info("Successfully deleted item feature")
 							} else {
@@ -415,7 +425,7 @@ func (c *ItemsController) UpdateItem() {
 								FeatureId: featureId,
 							}
 
-							addItemFeatureResp := functions.AddItemFeatures(&c.Controller, ifResp)
+							addItemFeatureResp := functions.AddItemFeatures(&c.Controller, ifResp, userData.UserID)
 
 							if addItemFeatureResp.StatusCode == 200 {
 								logs.Info("Successfully added item feature")
@@ -442,7 +452,7 @@ func (c *ItemsController) UpdateItem() {
 
 						if !exists {
 							logs.Info("Purpose does not exist, deleting ", purpose.Purpose.PurposeId)
-							deleteResp := functions.DeleteItemPurpose(&c.Controller, strconv.FormatInt(purpose.ItemPurposeId, 10))
+							deleteResp := functions.DeleteItemPurpose(&c.Controller, purpose.ItemPurposeId, userData.UserID)
 							if deleteResp.StatusCode == 200 {
 								logs.Info("Successfully deleted item purpose")
 							} else {
@@ -466,7 +476,7 @@ func (c *ItemsController) UpdateItem() {
 								PurposeId: purposeId,
 							}
 
-							addItemPurposeResp := functions.AddItemPurposes(&c.Controller, ifResp)
+							addItemPurposeResp := functions.AddItemPurposes(&c.Controller, ifResp, userData.UserID)
 
 							if addItemPurposeResp.StatusCode == 200 {
 								logs.Info("Successfully added item purpose")
@@ -588,6 +598,15 @@ func (c *ItemsController) AddCategory() {
 		c.ServeJSON()
 		return
 	}
+	v := c.Ctx.Input.GetData("user")
+	userData, err_ := v.(*responses.AuthenticatedUser)
+	userIdStr := userData.UserID
+	if !err_ {
+		c.Data["json"] = map[string]string{"error": "unauthorized"}
+		c.ServeJSON()
+		return
+	}
+
 	var isSuccess bool = false
 
 	image, header, err := c.GetFile("CategoryImage")
@@ -605,7 +624,7 @@ func (c *ItemsController) AddCategory() {
 			categoryName := c.Ctx.Input.Query("CategoryName")
 			categoryDescription := c.Ctx.Input.Query("CategoryDescription")
 
-			categoryResp := functions.AddCategory(&c.Controller, filePath, categoryName, categoryDescription)
+			categoryResp := functions.AddCategory(&c.Controller, filePath, categoryName, categoryDescription, userIdStr)
 
 			if categoryResp.StatusCode == 200 {
 
@@ -641,6 +660,14 @@ func (c *ItemsController) AddFeature() {
 		c.ServeJSON()
 		return
 	}
+	v := c.Ctx.Input.GetData("user")
+	userData, err_ := v.(*responses.AuthenticatedUser)
+	userIdStr := userData.UserID
+	if !err_ {
+		c.Data["json"] = map[string]string{"error": "unauthorized"}
+		c.ServeJSON()
+		return
+	}
 	var isSuccess bool = false
 
 	image, header, err := c.GetFile("FeatureImage")
@@ -658,7 +685,7 @@ func (c *ItemsController) AddFeature() {
 			featureName := c.Ctx.Input.Query("FeatureName")
 			featureDescription := c.Ctx.Input.Query("FeatureDescription")
 
-			featureResp := functions.AddFeature(&c.Controller, filePath, featureName, featureDescription)
+			featureResp := functions.AddFeature(&c.Controller, filePath, featureName, featureDescription, userIdStr)
 
 			if featureResp.StatusCode == 200 {
 
@@ -694,6 +721,14 @@ func (c *ItemsController) AddPurpose() {
 		c.ServeJSON()
 		return
 	}
+	v := c.Ctx.Input.GetData("user")
+	userData, err_ := v.(*responses.AuthenticatedUser)
+	userIdStr := userData.UserID
+	if !err_ {
+		c.Data["json"] = map[string]string{"error": "unauthorized"}
+		c.ServeJSON()
+		return
+	}
 	var isSuccess bool = false
 
 	image, header, err := c.GetFile("PurposeImage")
@@ -711,7 +746,7 @@ func (c *ItemsController) AddPurpose() {
 			purposeName := c.Ctx.Input.Query("PurposeName")
 			purposeDescription := c.Ctx.Input.Query("PurposeDescription")
 
-			purposeResp := functions.AddPurpose(&c.Controller, filePath, purposeName, purposeDescription)
+			purposeResp := functions.AddPurpose(&c.Controller, filePath, purposeName, purposeDescription, userIdStr)
 
 			if purposeResp.StatusCode == 200 {
 
@@ -857,9 +892,11 @@ func (c *ItemsController) GetItems() {
 		return
 	}
 	v := c.Ctx.Input.GetData("user")
-	userData, err := v.(*responses.UsersOri)
-	if err {
-		logs.Error("Unable to get user data")
+	userData, err_ := v.(*responses.AuthenticatedUser)
+	if !err_ {
+		c.Data["json"] = map[string]string{"error": "unauthorized"}
+		c.ServeJSON()
+		return
 	}
 
 	var isSuccess bool = false
@@ -894,20 +931,16 @@ func (c *ItemsController) GetItems() {
 	logs.Info("Success response received")
 	isSuccess = false
 
-	logs.Info("User data received ", userData.UserDetails.Branch)
-
 	// if verifyToken.User.UserDetails.Branch != nil {
 	// 	branchId := strconv.FormatInt(verifyToken.User.UserDetails.Branch.BranchId, 10)
 
 	// Depending on the role, fetch items
 	var getItemsResp responses.ItemsOriResponseDTO
-	if userData.Role.Role == "SUPER_ADMIN" {
+	if userData.RoleName == "SUPER_ADMIN" {
 		getItemsResp = functions.GetItems(&c.Controller, query, fields, sortby, order, offset, limit)
 	} else {
-		branchId := ""
-		if userData.UserDetails.Branch != nil {
-			branchId = strconv.FormatInt(userData.UserDetails.Branch.BranchId, 10)
-		}
+		branchId := userData.BranchID
+
 		getItemsResp = functions.GetItemsByBranch(&c.Controller, branchId, query, fields, sortby, order, offset, limit)
 	}
 
@@ -1030,6 +1063,14 @@ func (c *ItemsController) DeleteCategory() {
 		c.ServeJSON()
 		return
 	}
+	v := c.Ctx.Input.GetData("user")
+	userData, err_ := v.(*responses.AuthenticatedUser)
+	userIdStr := userData.UserID
+	if !err_ {
+		c.Data["json"] = map[string]string{"error": "unauthorized"}
+		c.ServeJSON()
+		return
+	}
 	var isSuccess bool = false
 
 	logs.Info("Success response received")
@@ -1037,7 +1078,7 @@ func (c *ItemsController) DeleteCategory() {
 
 	idStr := c.Ctx.Input.Param(":id")
 
-	deleteCategoryResp := functions.DeleteCategory(&c.Controller, idStr)
+	deleteCategoryResp := functions.DeleteCategory(&c.Controller, idStr, userIdStr)
 
 	if deleteCategoryResp.StatusCode == 200 {
 		isSuccess = true
@@ -1066,6 +1107,14 @@ func (c *ItemsController) DeleteFeature() {
 		c.ServeJSON()
 		return
 	}
+	v := c.Ctx.Input.GetData("user")
+	userData, err_ := v.(*responses.AuthenticatedUser)
+	userIdStr := userData.UserID
+	if !err_ {
+		c.Data["json"] = map[string]string{"error": "unauthorized"}
+		c.ServeJSON()
+		return
+	}
 	var isSuccess bool = false
 
 	logs.Info("Success response received")
@@ -1073,7 +1122,7 @@ func (c *ItemsController) DeleteFeature() {
 
 	idStr := c.Ctx.Input.Param(":id")
 
-	deleteFeatureResp := functions.DeleteFeature(&c.Controller, idStr)
+	deleteFeatureResp := functions.DeleteFeature(&c.Controller, idStr, userIdStr)
 
 	if deleteFeatureResp.StatusCode == 200 {
 		isSuccess = true
@@ -1102,6 +1151,14 @@ func (c *ItemsController) DeletePurpose() {
 		c.ServeJSON()
 		return
 	}
+	v := c.Ctx.Input.GetData("user")
+	userData, err_ := v.(*responses.AuthenticatedUser)
+	userIdStr := userData.UserID
+	if !err_ {
+		c.Data["json"] = map[string]string{"error": "unauthorized"}
+		c.ServeJSON()
+		return
+	}
 	var isSuccess bool = false
 
 	logs.Info("Success response received")
@@ -1109,7 +1166,7 @@ func (c *ItemsController) DeletePurpose() {
 
 	idStr := c.Ctx.Input.Param(":id")
 
-	deletePurposeResp := functions.DeletePurpose(&c.Controller, idStr)
+	deletePurposeResp := functions.DeletePurpose(&c.Controller, idStr, userIdStr)
 
 	if deletePurposeResp.StatusCode == 200 {
 		isSuccess = true
@@ -1138,6 +1195,14 @@ func (c *ItemsController) DeleteItem() {
 		c.ServeJSON()
 		return
 	}
+	v := c.Ctx.Input.GetData("user")
+	userData, err_ := v.(*responses.AuthenticatedUser)
+	userIdStr := userData.UserID
+	if !err_ {
+		c.Data["json"] = map[string]string{"error": "unauthorized"}
+		c.ServeJSON()
+		return
+	}
 	var isSuccess bool = false
 
 	logs.Info("Success response received")
@@ -1145,7 +1210,7 @@ func (c *ItemsController) DeleteItem() {
 
 	idStr := c.Ctx.Input.Param(":id")
 
-	deleteItemResp := functions.DeleteItem(&c.Controller, idStr)
+	deleteItemResp := functions.DeleteItem(&c.Controller, idStr, userIdStr)
 
 	if deleteItemResp.StatusCode == 200 {
 		isSuccess = true

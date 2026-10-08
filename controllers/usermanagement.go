@@ -55,7 +55,7 @@ func (c *UserManagementController) AddUser() {
 		return
 	}
 	u := c.Ctx.Input.GetData("user")
-	userData, err := u.(*responses.UsersOri)
+	userData, err := u.(*responses.AuthenticatedUser)
 	if !err {
 		logs.Error("Error retrieving user data: ", err)
 	}
@@ -72,7 +72,7 @@ func (c *UserManagementController) AddUser() {
 
 		if userRole.StatusCode == 200 {
 
-			var req requests.RegisterUser = requests.RegisterUser{Email: v.Email, Name: v.FirstName + " | " + v.LastName, Gender: "", PhoneNumber: v.PhoneNumber, Password: v.Password, RoleId: v.RoleId, AddedBy: strconv.FormatInt(userData.UserId, 10)}
+			var req requests.RegisterUser = requests.RegisterUser{Email: v.Email, Name: v.FirstName + " | " + v.LastName, Gender: "", PhoneNumber: v.PhoneNumber, Password: v.Password, RoleId: v.RoleId, AddedBy: userData.UserID}
 
 			regResp := functions.RegistrationRequest(&c.Controller, req)
 
@@ -88,8 +88,7 @@ func (c *UserManagementController) AddUser() {
 				role := responses.Role{Role: userRole.Role.Role}
 
 				data = responses.UserGateway{
-					// UserId:         regResp.User.UserId,
-					// UserType:    regResp.User.UserType,
+					UserId:      regResp.User.UserId,
 					FirstName:   splitName[0],
 					LastName:    splitName[1],
 					Username:    regResp.User.Username,
@@ -136,14 +135,14 @@ func (c *UserManagementController) GetUser() {
 		return
 	}
 	v := c.Ctx.Input.GetData("user")
-	userData, err := v.(*responses.UsersOri)
+	userData, err := v.(*responses.AuthenticatedUser)
 	if err != false {
 		logs.Error("Error retrieving user data: ", err)
 	}
 
 	var isSuccess bool = false
 
-	userResp := functions.GetUserDetails(&c.Controller, userData.UserId)
+	userResp := functions.GetUserDetails(&c.Controller, userData.UserID)
 
 	var data responses.UserGateway
 
@@ -231,10 +230,9 @@ func (c *UserManagementController) GetUserWithId() {
 		return
 	}
 	idStr := c.Ctx.Input.Param(":id")
-	id, _ := strconv.ParseInt(idStr, 0, 64)
 
 	var isSuccess bool = false
-	userResp := functions.GetUserDetails(&c.Controller, id)
+	userResp := functions.GetUserDetails(&c.Controller, idStr)
 
 	var data responses.UserGateway
 
@@ -327,16 +325,19 @@ func (c *UserManagementController) GetUsers() {
 		return
 	}
 	v := c.Ctx.Input.GetData("user")
-	userData, err := v.(*responses.UsersOri)
+	userData, ok := v.(*responses.AuthenticatedUser)
 
 	fmt.Printf("Type of v: %T\n", v)
 	fmt.Printf("Value of v: %+v\n", v)
 
-	logs.Info("Error is ", err)
+	logs.Info("Type assertion successful: ", ok)
 
 	logs.Info("User received is ", v, " AND ", userData)
 
 	var isSuccess bool = false
+	message := "An error occurred"
+	users := []responses.UserGateway{}
+	proceed := true
 
 	var fields string
 	var sortby string
@@ -362,107 +363,108 @@ func (c *UserManagementController) GetUsers() {
 		order = v
 	}
 	// query: k:v,k:v
+
+	if c.GetString("query") == "" && userData.RoleName != "SUPER_ADMIN" {
+		proceed = false
+		message = "Query parameter is required"
+	}
 	if v := c.GetString("query"); v != "" {
 		query = v
 	}
 
-	managingDirectorUserRole, _ := beego.AppConfig.String("managingDirectorRoleName")
-	superAdminRole, _ := beego.AppConfig.String("superAdminRoleName")
+	// managingDirectorUserRole, _ := beego.AppConfig.String("managingDirectorRoleName")
+	// superAdminRole, _ := beego.AppConfig.String("superAdminRoleName")
 	usersResp := responses.UsersOriResponseDTO{}
 	hasRole := false
-	if userData.Role != nil {
-		if userData.Role.Role == superAdminRole || userData.Role.Role == managingDirectorUserRole {
-			hasRole = true
-			usersResp = functions.GetUsers(&c.Controller, query, fields, sortby, order, offset, limit)
+
+	if proceed == true {
+		branchStr := userData.BranchID
+		usersResp = functions.GetUsersWithBranch(&c.Controller, branchStr, query, fields, sortby, order, offset, limit)
+
+		if !hasRole {
+			var resp responses.UsersGatewayResponseDTO = responses.UsersGatewayResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "User does not have a role"}
+			c.Data["json"] = resp
+			c.ServeJSON()
+		}
+
+		if usersResp.StatusCode == 200 {
+
+			// branch := &responses.BranchResp{}
+
+			// if userResp.User.Branch != nil {
+			// 	currency := responses.CurrencyResp{Symbol: userResp.User.Branch.Country.DefaultCurrency.Symbol, Currency: userResp.User.Branch.Country.DefaultCurrency.Currency}
+			// 	country := responses.CountryResp{Country: userResp.User.Branch.Country.Country, CountryCode: userResp.User.Branch.Country.CountryCode, Currency: &currency}
+			// 	branch = &responses.BranchResp{BranchId: userResp.User.Branch.BranchId, Branch: userResp.User.Branch.Branch, Country: &country, Location: userResp.User.Branch.Location, PhoneNumber: userResp.User.Branch.PhoneNumber}
+			// 	// userResp.User.Customer.Branch.Country = country
+			// 	} else {
+			// 	branch = nil
+			// }
+
+			for _, user := range *usersResp.Users {
+				logs.Info("Fullname is ", user.FullName)
+				splitName := strings.Split(user.FullName, " | ")
+				firstname := ""
+				lastname := ""
+				if len(splitName) > 1 {
+					firstname = splitName[0]
+					lastname = splitName[1]
+				} else {
+					firstname = splitName[0]
+				}
+
+				logs.Info("User Role is ", user.Role)
+
+				status := "ACTIVE"
+
+				if user.Active == 1 {
+					status = "ACTIVE"
+				}
+
+				if user.Active == 6 {
+					status = "INACTIVE"
+				}
+				if user.Active == 2 {
+					status = "PENDING"
+				}
+				if user.Active == 4 {
+					status = "INACTIVE"
+				}
+
+				data := responses.UserGateway{
+					UserId: user.UserId,
+					// UserType:    userResp.User.UserType,
+					FirstName:   firstname,
+					LastName:    lastname,
+					Username:    user.Username,
+					Email:       user.Email,
+					PhoneNumber: user.PhoneNumber,
+					Role:        user.Role,
+					Customer:    user.UserDetails,
+					ImagePath:   user.ImagePath,
+					Status:      status,
+					// Gender:         userResp.User.Gender,
+					// Dob:            userResp.User.Dob,
+					// Address:        userResp.User.Address,
+					// IdType:         userResp.User.IdType,
+					// IdNumber:       userResp.User.IdNumber,
+					// Active:         userResp.User.Active,
+					// IsVerified:     userResp.User.IsVerified,
+					DateRegistered: user.DateCreated,
+				}
+
+				users = append(users, data)
+			}
+
+			isSuccess = true
+			message = "Successfully fetched users"
 		} else {
-			logs.Info("User ", userData.UserId, " branch ID is ", userData.UserDetails)
-			branchStr := strconv.FormatInt(userData.UserDetails.Branch.BranchId, 10)
-			usersResp = functions.GetUsersWithBranch(&c.Controller, branchStr, query, fields, sortby, order, offset, limit)
+			isSuccess = false
+			message = usersResp.StatusDesc
 		}
 	}
 
-	if !hasRole {
-		var resp responses.UsersGatewayResponseDTO = responses.UsersGatewayResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "User does not have a role"}
-		c.Data["json"] = resp
-		c.ServeJSON()
-	}
-
-	if usersResp.StatusCode == 200 {
-
-		// branch := &responses.BranchResp{}
-
-		// if userResp.User.Branch != nil {
-		// 	currency := responses.CurrencyResp{Symbol: userResp.User.Branch.Country.DefaultCurrency.Symbol, Currency: userResp.User.Branch.Country.DefaultCurrency.Currency}
-		// 	country := responses.CountryResp{Country: userResp.User.Branch.Country.Country, CountryCode: userResp.User.Branch.Country.CountryCode, Currency: &currency}
-		// 	branch = &responses.BranchResp{BranchId: userResp.User.Branch.BranchId, Branch: userResp.User.Branch.Branch, Country: &country, Location: userResp.User.Branch.Location, PhoneNumber: userResp.User.Branch.PhoneNumber}
-		// 	// userResp.User.Customer.Branch.Country = country
-		// 	} else {
-		// 	branch = nil
-		// }
-		users := []responses.UserGateway{}
-		for _, user := range *usersResp.Users {
-			logs.Info("Fullname is ", user.FullName)
-			splitName := strings.Split(user.FullName, " | ")
-			firstname := ""
-			lastname := ""
-			if len(splitName) > 1 {
-				firstname = splitName[0]
-				lastname = splitName[1]
-			} else {
-				firstname = splitName[0]
-			}
-
-			logs.Info("User Role is ", user.Role)
-
-			status := "ACTIVE"
-
-			if user.Active == 1 {
-				status = "ACTIVE"
-			}
-
-			if user.Active == 6 {
-				status = "INACTIVE"
-			}
-			if user.Active == 2 {
-				status = "PENDING"
-			}
-			if user.Active == 4 {
-				status = "INACTIVE"
-			}
-
-			data := responses.UserGateway{
-				UserId: user.UserId,
-				// UserType:    userResp.User.UserType,
-				FirstName:   firstname,
-				LastName:    lastname,
-				Username:    user.Username,
-				Email:       user.Email,
-				PhoneNumber: user.PhoneNumber,
-				Role:        user.Role,
-				Customer:    user.UserDetails,
-				ImagePath:   user.ImagePath,
-				Status:      status,
-				// Gender:         userResp.User.Gender,
-				// Dob:            userResp.User.Dob,
-				// Address:        userResp.User.Address,
-				// IdType:         userResp.User.IdType,
-				// IdNumber:       userResp.User.IdNumber,
-				// Active:         userResp.User.Active,
-				// IsVerified:     userResp.User.IsVerified,
-				DateRegistered: user.DateCreated,
-			}
-
-			users = append(users, data)
-		}
-
-		isSuccess = true
-
-		var resp responses.UsersGatewayResponseDTO = responses.UsersGatewayResponseDTO{Success: isSuccess, Result: &users, StatusDesc: usersResp.StatusDesc}
-		c.Data["json"] = resp
-	} else {
-		var resp responses.UsersGatewayResponseDTO = responses.UsersGatewayResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
-		c.Data["json"] = resp
-	}
+	var resp responses.UsersGatewayResponseDTO = responses.UsersGatewayResponseDTO{Success: isSuccess, Result: &users, StatusDesc: message}
+	c.Data["json"] = resp
 
 	c.ServeJSON()
 }

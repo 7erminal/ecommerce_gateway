@@ -33,7 +33,7 @@ type Items struct {
 }
 
 type ItemsResp struct {
-	ItemId          int64
+	ItemId          string
 	ItemName        string
 	Description     string
 	Weight          string
@@ -52,7 +52,7 @@ type ItemsResp struct {
 }
 
 type Item struct {
-	ProductId        int64
+	ProductId        string
 	ProductName      string
 	Description      string
 	Weight           string
@@ -121,7 +121,7 @@ type ItemsStatsResponseDTO struct {
 }
 
 type Item_features struct {
-	ItemFeatureId int64
+	ItemFeatureId string
 	Item          *Items
 	Feature       *Feature
 	Active        int
@@ -140,7 +140,7 @@ type ItemFeaturesResponseDTO struct {
 }
 
 type Item_purposes struct {
-	ItemPurposeId int64
+	ItemPurposeId string
 	Item          *Items
 	Purpose       *Purpose
 	Active        int
