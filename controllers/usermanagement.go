@@ -140,6 +140,8 @@ func (c *UserManagementController) GetUser() {
 		logs.Error("Error retrieving user data: ", err)
 	}
 
+	logs.Info("Retrieving user details for user ID: ", userData.UserID)
+
 	var isSuccess bool = false
 
 	userResp := functions.GetUserDetails(&c.Controller, userData.UserID)
