@@ -5,14 +5,9 @@ import (
 )
 
 type Currencies struct {
-	CurrencyId   int64     `orm:"auto;omitempty"`
-	Symbol       string    `orm:"size(20)"`
-	Currency     string    `orm:"size(50)"`
-	Active       int       `orm:"omitempty"`
-	DateCreated  time.Time `orm:"type(datetime);omitempty"`
-	DateModified time.Time `orm:"type(datetime);omitempty"`
-	CreatedBy    int       `orm:"omitempty"`
-	ModifiedBy   int       `orm:"omitempty"`
+	CurrencyId string
+	Symbol     string
+	Currency   string
 }
 
 type CurrencyResp struct {
@@ -22,21 +17,17 @@ type CurrencyResp struct {
 }
 
 type CurrencyResp2 struct {
-	CurrencyId int64
+	CurrencyId string
 	Symbol     string
 	Currency   string
 }
 
 type Countries struct {
-	CountryId    int64  `orm:"auto"`
-	Country      string `orm:"size(255)"`
-	Description  string `orm:"size(500)"`
-	CountryCode  string `orm:"size(20)"`
-	Currency     *Currencies
-	DateCreated  time.Time `orm:"type(datetime)"`
-	DateModified time.Time `orm:"type(datetime)"`
-	CreatedBy    int
-	ModifiedBy   int
+	CountryId   string
+	Country     string
+	Description string
+	CountryCode string
+	Currency    *Currencies
 }
 
 type CountryRespOri struct {

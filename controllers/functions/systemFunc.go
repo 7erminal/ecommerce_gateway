@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"strconv"
 	"strings"
 
 	"github.com/beego/beego/v2/core/logs"
@@ -229,7 +228,7 @@ func GetSystemDetails(c *beego.Controller, branchid string) (resp responses.Syst
 	}
 
 	if proceed {
-		getCountryResp := GetCountry(c, strconv.FormatInt(getBranchResp.Result.Country.CountryId, 10))
+		getCountryResp := GetCountry(c, getBranchResp.Result.Country.CountryId)
 
 		if getCountryResp.StatusCode != 200 {
 			err = fmt.Errorf("Country provided does not exist")
@@ -238,7 +237,7 @@ func GetSystemDetails(c *beego.Controller, branchid string) (resp responses.Syst
 		}
 
 		if proceed {
-			// getCurrencyResp := GetCurrency(c, strconv.FormatInt(getCountryResp.Result.DefaultCurrency, 10))
+			// getCurrencyResp := GetCurrency(c, getCountryResp.Result.DefaultCurrency)
 
 			// if getCurrencyResp.StatusCode != 200 {
 			// 	err = fmt.Errorf("Currency provided does not exist")
@@ -248,7 +247,7 @@ func GetSystemDetails(c *beego.Controller, branchid string) (resp responses.Syst
 
 			if proceed {
 				currencyResp_ := responses.CurrencyResp{
-					CurrencyId: strconv.FormatInt(getBranchResp.Result.Country.Currency.CurrencyId, 10),
+					CurrencyId: getBranchResp.Result.Country.Currency.CurrencyId,
 					Currency:   getBranchResp.Result.Country.Currency.Currency,
 					Symbol:     getBranchResp.Result.Country.Currency.Symbol,
 				}
