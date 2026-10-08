@@ -419,24 +419,24 @@ func (c *SystemController) AddBranch() {
 
 		if addBranchResp.StatusCode == 200 {
 			// Assign branch manager to added branch
-			splitName := strings.Split(userDetailsResp.Result.FullName, " ")
-			firstname := ""
-			lastname := ""
-			if len(splitName) > 1 {
-				firstname = splitName[0]
-				lastname = splitName[1]
-			} else {
-				firstname = splitName[0]
-			}
-			userDetails := requests.UpdateUserRequestDTO{BranchId: addBranchResp.Result.BranchId, FirstName: firstname, LastName: lastname, Username: userDetailsResp.Result.Username, PhoneNumber: userDetailsResp.Result.PhoneNumber, Gender: userDetailsResp.Result.Gender, Dob: userDetailsResp.Result.Dob.GoString(), Address: userDetailsResp.Result.Address}
+			// splitName := strings.Split(userDetailsResp.Result.FullName, " ")
+			// firstname := ""
+			// lastname := ""
+			// if len(splitName) > 1 {
+			// 	firstname = splitName[0]
+			// 	lastname = splitName[1]
+			// } else {
+			// 	firstname = splitName[0]
+			// }
+			// userDetails := requests.UpdateUserRequestDTO{BranchId: addBranchResp.Result.BranchId, FirstName: firstname, LastName: lastname, Username: userDetailsResp.Result.Username, PhoneNumber: userDetailsResp.Result.PhoneNumber, Gender: userDetailsResp.Result.Gender, Dob: userDetailsResp.Result.Dob.GoString(), Address: userDetailsResp.Result.Address}
 			userId := userDetailsResp.Result.UserId
-			updateUserResp := functions.UpdateUser(&c.Controller, userId, userDetails, userData.UserID)
+			// updateUserResp := functions.UpdateUser(&c.Controller, userId, userDetails, userData.UserID)
 			branchIdStr := addBranchResp.Result.BranchId
 			updateBranchResp := functions.UpdateBranchBranchManger(&c.Controller, userId, branchIdStr, userData.UserID)
 			message := "Branch Added Successfully"
-			if updateUserResp.StatusCode != 200 {
-				message = "Branch added but failed to assign manager"
-			}
+			// if updateUserResp.StatusCode != 200 {
+			// 	message = "Branch added but failed to assign manager"
+			// }
 			if updateBranchResp.StatusCode != 200 {
 				message = "Branch added but failed to assign branch manager"
 			}
