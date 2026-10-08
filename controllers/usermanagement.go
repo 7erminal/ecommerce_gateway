@@ -1837,30 +1837,14 @@ func (c *UserManagementController) LogOut() {
 
 	var isSuccess bool = false
 
-	if token[0] == "Bearer" {
-		logs.Info("Token is ", token[1])
-		verifyToken := functions.VerifyToken(&c.Controller, token[1])
+	logout := functions.LogOut(&c.Controller, token[1])
 
-		logs.Info("Success response")
-
-		if verifyToken.StatusCode == 200 {
-
-			logout := functions.LogOut(&c.Controller, token[1])
-
-			if logout.StatusCode == 200 {
-				isSuccess = true
-			}
-
-			var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "User logout complete"}
-			c.Data["json"] = resp
-		} else {
-			var resp responses.UserInviteResponse = responses.UserInviteResponse{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
-			c.Data["json"] = resp
-		}
-	} else {
-		var resp responses.UserInviteResponse = responses.UserInviteResponse{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
-		c.Data["json"] = resp
+	if logout.StatusCode == 200 {
+		isSuccess = true
 	}
+
+	var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "User logout complete"}
+	c.Data["json"] = resp
 
 	c.ServeJSON()
 }
