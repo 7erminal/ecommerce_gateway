@@ -413,7 +413,7 @@ func GetRoleWithRoleName(c *beego.Controller, role string) (resp responses.RoleR
 	return data
 }
 
-func AddRole(c *beego.Controller, req requests.AddRoleRequestDTO) (resp responses.RoleResponseDTO) {
+func AddRole(c *beego.Controller, req requests.AddRoleRequestDTO, createdBy string) (resp responses.RoleResponseDTO) {
 	host, _ := beego.AppConfig.String("customerBaseUrl")
 
 	logs.Info("Adding role with name ", req.Name)
@@ -424,6 +424,7 @@ func AddRole(c *beego.Controller, req requests.AddRoleRequestDTO) (resp response
 		api.POST)
 	request.InterfaceParams["Role"] = req.Name
 	request.InterfaceParams["Description"] = req.Description
+	request.InterfaceParams["AddedBy"] = createdBy
 	// request.Params = {"UserId": strconv.Itoa(int(userid))}
 	client := api.Client{
 		Request: request,
@@ -456,7 +457,7 @@ func AddRole(c *beego.Controller, req requests.AddRoleRequestDTO) (resp response
 	return data
 }
 
-func DeleteRole(c *beego.Controller, role string) (resp responses.RoleResponseDTO) {
+func DeleteRole(c *beego.Controller, role string, deletedBy string) (resp responses.RoleResponseDTO) {
 	host, _ := beego.AppConfig.String("customerBaseUrl")
 
 	logs.Info("Deleting role with name ", role)
@@ -465,6 +466,7 @@ func DeleteRole(c *beego.Controller, role string) (resp responses.RoleResponseDT
 		host,
 		"/v1/roles/"+role,
 		api.DELETE)
+	request.Params["DeletedBy"] = deletedBy
 	// request.Params = {"UserId": strconv.Itoa(int(userid))}
 	client := api.Client{
 		Request: request,
@@ -577,7 +579,7 @@ func GetActions(c *beego.Controller) (resp responses.ActionsResponseDTO) {
 	return data
 }
 
-func AddRolePermission(c *beego.Controller, role string, req requests.UpdateRolePermissionRequestDTO) (resp responses.RoleResponseDTO) {
+func AddRolePermission(c *beego.Controller, role string, req requests.UpdateRolePermissionRequestDTO, addedBy string) (resp responses.RoleResponseDTO) {
 	host, _ := beego.AppConfig.String("customerBaseUrl")
 
 	logs.Info("Updating role permissions for role ", role)
@@ -589,6 +591,7 @@ func AddRolePermission(c *beego.Controller, role string, req requests.UpdateRole
 	request.InterfaceParams["Role"] = req.Role
 	request.InterfaceParams["PermissionCode"] = req.PermissionCode
 	request.InterfaceParams["Action"] = req.Action
+	request.InterfaceParams["AddedBy"] = addedBy
 
 	client := api.Client{
 		Request: request,
@@ -620,7 +623,7 @@ func AddRolePermission(c *beego.Controller, role string, req requests.UpdateRole
 	return data
 }
 
-func RemoveRolePermission(c *beego.Controller, role string, permission string, action string) (resp responses.RoleResponseDTO) {
+func RemoveRolePermission(c *beego.Controller, role string, permission string, action string, removedBy string) (resp responses.RoleResponseDTO) {
 	host, _ := beego.AppConfig.String("customerBaseUrl")
 
 	logs.Info("Removing role permissions for role ", role)
@@ -632,6 +635,7 @@ func RemoveRolePermission(c *beego.Controller, role string, permission string, a
 	request.Params["Role"] = role
 	request.Params["PermissionCode"] = permission
 	request.Params["Action"] = action
+	request.Params["RemovedBy"] = removedBy
 
 	client := api.Client{
 		Request: request,
@@ -704,7 +708,7 @@ func GetInvite(c *beego.Controller, token string) (resp responses.UserInviteResp
 	return data
 }
 
-func UpdateUser(c *beego.Controller, id string, req requests.UpdateUserRequestDTO) (resp responses.UserOriResponseDTO) {
+func UpdateUser(c *beego.Controller, id string, req requests.UpdateUserRequestDTO, updatedBy string) (resp responses.UserOriResponseDTO) {
 	host, _ := beego.AppConfig.String("customerBaseUrl")
 
 	logs.Info("Sending first name ", req.FirstName)
@@ -723,6 +727,7 @@ func UpdateUser(c *beego.Controller, id string, req requests.UpdateUserRequestDT
 	request.InterfaceParams["BranchId"] = req.BranchId
 	request.InterfaceParams["ImagePath"] = ""
 	request.InterfaceParams["RoleId"] = req.RoleId
+	request.InterfaceParams["UpdatedBy"] = updatedBy
 	// request.Params = {"UserId": strconv.Itoa(int(userid))}
 	client := api.Client{
 		Request: request,
@@ -757,7 +762,7 @@ func UpdateUser(c *beego.Controller, id string, req requests.UpdateUserRequestDT
 	return data
 }
 
-func UpdateUserRole(c *beego.Controller, id string, req requests.UpdateUserRoleRequestDTO) (resp responses.UserOriResponseDTO) {
+func UpdateUserRole(c *beego.Controller, id string, req requests.UpdateUserRoleRequestDTO, updatedBy string) (resp responses.UserOriResponseDTO) {
 	host, _ := beego.AppConfig.String("customerBaseUrl")
 
 	logs.Info("Sending first name ", req.RoleId)
@@ -767,6 +772,7 @@ func UpdateUserRole(c *beego.Controller, id string, req requests.UpdateUserRoleR
 		"/v1/users/role/"+id,
 		api.PUT)
 	request.InterfaceParams["RoleId"] = req.RoleId
+	request.InterfaceParams["UpdatedBy"] = updatedBy
 	// request.Params = {"UserId": strconv.Itoa(int(userid))}
 	client := api.Client{
 		Request: request,
@@ -801,7 +807,7 @@ func UpdateUserRole(c *beego.Controller, id string, req requests.UpdateUserRoleR
 	return data
 }
 
-func UpdateUserBranch(c *beego.Controller, id string, req requests.UpdateUserBranchRequestDTO) (resp responses.UserOriResponseDTO) {
+func UpdateUserBranch(c *beego.Controller, id string, req requests.UpdateUserBranchRequestDTO, updatedBy string) (resp responses.UserOriResponseDTO) {
 	host, _ := beego.AppConfig.String("customerBaseUrl")
 
 	logs.Info("Sending branch ID ", req.BranchId)
@@ -811,6 +817,7 @@ func UpdateUserBranch(c *beego.Controller, id string, req requests.UpdateUserBra
 		"/v1/users/branch/"+id,
 		api.PUT)
 	request.InterfaceParams["BranchId"] = req.BranchId
+	request.InterfaceParams["UpdatedBy"] = updatedBy
 	// request.Params = {"UserId": strconv.Itoa(int(userid))}
 	client := api.Client{
 		Request: request,
@@ -845,7 +852,7 @@ func UpdateUserBranch(c *beego.Controller, id string, req requests.UpdateUserBra
 	return data
 }
 
-func UpdateUserImage(c *beego.Controller, userImage string, userId string) (resp responses.UserOriResponseDTO) {
+func UpdateUserImage(c *beego.Controller, userImage string, userId string, updatedBy string) (resp responses.UserOriResponseDTO) {
 	host, _ := beego.AppConfig.String("customerBaseUrl")
 
 	logs.Info("Sending file ", userImage)
@@ -857,6 +864,7 @@ func UpdateUserImage(c *beego.Controller, userImage string, userId string) (resp
 
 	request.FileField["UserImage"] = userImage
 	request.Params["UserId"] = userId
+	request.Params["UpdatedBy"] = updatedBy
 	// request.HeaderField["content-type"] = "multipart/form-data"
 	// request.Params = {"UserId": strconv.Itoa(int(userid))}
 	client := api.Client{

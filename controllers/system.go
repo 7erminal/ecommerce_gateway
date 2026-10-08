@@ -430,7 +430,7 @@ func (c *SystemController) AddBranch() {
 			}
 			userDetails := requests.UpdateUserRequestDTO{BranchId: addBranchResp.Result.BranchId, FirstName: firstname, LastName: lastname, Username: userDetailsResp.Result.Username, PhoneNumber: userDetailsResp.Result.PhoneNumber, Gender: userDetailsResp.Result.Gender, Dob: userDetailsResp.Result.Dob.GoString(), Address: userDetailsResp.Result.Address}
 			userId := userDetailsResp.Result.UserId
-			updateUserResp := functions.UpdateUser(&c.Controller, userId, userDetails)
+			updateUserResp := functions.UpdateUser(&c.Controller, userId, userDetails, userData.UserID)
 			branchIdStr := addBranchResp.Result.BranchId
 			updateBranchResp := functions.UpdateBranchBranchManger(&c.Controller, userId, branchIdStr, userData.UserID)
 			message := "Branch Added Successfully"

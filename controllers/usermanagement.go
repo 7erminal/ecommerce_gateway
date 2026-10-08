@@ -969,6 +969,8 @@ func (c *UserManagementController) AddRole() {
 		c.ServeJSON()
 		return
 	}
+	userData := c.Ctx.Input.GetData("user").(*responses.AuthenticatedUser)
+
 	var isSuccess bool = false
 
 	addRoleReq := requests.AddRoleRequest{}
@@ -987,7 +989,7 @@ func (c *UserManagementController) AddRole() {
 		Name:        addRoleReq.Role,
 		Description: addRoleReq.Description,
 	}
-	roleResp := functions.AddRole(&c.Controller, roleReq)
+	roleResp := functions.AddRole(&c.Controller, roleReq, userData.UserID)
 
 	if roleResp.StatusCode == 200 {
 		isSuccess = true
@@ -1014,11 +1016,12 @@ func (c *UserManagementController) DeleteRole() {
 		c.ServeJSON()
 		return
 	}
+	userData := c.Ctx.Input.GetData("user").(*responses.AuthenticatedUser)
 	role := c.Ctx.Input.Param(":role")
 
 	var isSuccess bool = false
 
-	deleteRoleResp := functions.DeleteRole(&c.Controller, role)
+	deleteRoleResp := functions.DeleteRole(&c.Controller, role, userData.UserID)
 
 	if deleteRoleResp.StatusCode == 200 {
 		isSuccess = true
@@ -1045,6 +1048,7 @@ func (c *UserManagementController) UpdateRole() {
 		c.ServeJSON()
 		return
 	}
+	userData := c.Ctx.Input.GetData("user").(*responses.AuthenticatedUser)
 	var isSuccess bool = false
 
 	updateRoleReq := requests.UpdateRolePermissionRequest{}
@@ -1061,7 +1065,7 @@ func (c *UserManagementController) UpdateRole() {
 
 	switch updateRoleReq.Action {
 	case "REMOVE":
-		roleResp := functions.RemoveRolePermission(&c.Controller, updateRoleReq.Role, updateRoleReq.PermissionCode, updateRoleReq.ActionCode)
+		roleResp := functions.RemoveRolePermission(&c.Controller, updateRoleReq.Role, updateRoleReq.PermissionCode, updateRoleReq.ActionCode, userData.UserID)
 		if roleResp.StatusCode == 200 {
 			isSuccess = true
 		} else {
@@ -1073,7 +1077,7 @@ func (c *UserManagementController) UpdateRole() {
 			Action:         updateRoleReq.ActionCode,
 			PermissionCode: updateRoleReq.PermissionCode,
 		}
-		roleResp := functions.AddRolePermission(&c.Controller, updateRoleReq.Role, roleReq)
+		roleResp := functions.AddRolePermission(&c.Controller, updateRoleReq.Role, roleReq, userData.UserID)
 
 		if roleResp.StatusCode == 200 {
 			isSuccess = true
@@ -1182,118 +1186,102 @@ func (c *UserManagementController) GetUserInvites() {
 // @Param	UserImage		formData 	file	true		"User Image"
 // @Success 200 {object} responses.StringResponseDTO
 // @Failure 403 body is empty
-// @router /update-user-image [post]
+// @router /update-user-image/:id [put]
 func (c *UserManagementController) UpdateUserImage() {
 	if !c.RequirePermission("USER", "UPDATE") {
 		c.Data["json"] = map[string]string{"error": "forbidden"}
 		c.ServeJSON()
 		return
 	}
-	authorization := c.Ctx.Input.Header("Authorization")
-
-	token := strings.Split(authorization, " ")
+	userId := c.Ctx.Input.Param(":id")
+	userData := c.Ctx.Input.GetData("user").(*responses.AuthenticatedUser)
 
 	var isSuccess bool = false
 
-	if token[0] == "Bearer" {
-		logs.Info("Token is ", token[1])
-		verifyToken := functions.VerifyToken(&c.Controller, token[1])
+	image, header, err := c.GetFile("UserImage")
 
-		logs.Info("Success response")
+	if err != nil {
+		var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "No file uploaded"}
+		c.Data["json"] = resp
+	} else {
+		logs.Info("Success response received")
+		isSuccess = false
 
-		if verifyToken.StatusCode == 200 {
-			image, header, err := c.GetFile("UserImage")
+		respCode, filePath := functions.SaveImage(&c.Controller, "UserImage", image, *header)
 
-			if err != nil {
-				var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "No file uploaded"}
+		if respCode == 200 {
+			var data responses.UserGateway
+
+			userResp := functions.UpdateUserImage(&c.Controller, filePath, userId, userData.UserID)
+
+			if userResp.StatusCode == 200 {
+				logs.Info("Name returned: ", userResp.Result.FullName)
+				splitName := strings.Split(userResp.Result.FullName, " | ")
+
+				// logs.Debug("Name is ", splitName[0])
+				firstname := ""
+				lastname := ""
+				if len(splitName) > 1 {
+					firstname = splitName[0]
+					lastname = splitName[1]
+				} else {
+					firstname = splitName[0]
+				}
+
+				// branch := &responses.BranchResp{}
+				// if userResp.User.Branch != nil {
+				// 	currency := responses.CurrencyResp{Symbol: userResp.User.Branch.Country.DefaultCurrency.Symbol, Currency: userResp.User.Branch.Country.DefaultCurrency.Currency}
+				// 	country := responses.CountryResp{Country: userResp.User.Branch.Country.Country, CountryCode: userResp.User.Branch.Country.CountryCode, Currency: &currency}
+				// 	branch = &responses.BranchResp{BranchId: userResp.User.Branch.BranchId, Branch: userResp.User.Branch.Branch, Country: &country, Location: userResp.User.Branch.Location, PhoneNumber: userResp.User.Branch.PhoneNumber}
+				// } else {
+				// 	branch = nil
+				// }
+				status := "ACTIVE"
+
+				if userResp.Result.Active == 6 {
+					status = "INACTIVE"
+				}
+				if userResp.Result.Active == 2 {
+					status = "PENDING"
+				}
+				if userResp.Result.Active == 4 {
+					status = "INACTIVE"
+				}
+
+				data = responses.UserGateway{
+					UserId: userResp.Result.UserId,
+					// UserType:    userResp.User.UserType,
+					FirstName:   firstname,
+					LastName:    lastname,
+					Username:    userResp.Result.Username,
+					Email:       userResp.Result.Email,
+					PhoneNumber: userResp.Result.PhoneNumber,
+					Role:        userResp.Result.Role,
+					ImagePath:   userResp.Result.ImagePath,
+					Customer:    userResp.Result.UserDetails,
+					Status:      status,
+					// Gender:         userResp.User.Gender,
+					// Dob:            userResp.User.Dob,
+					// Address:        userResp.User.Address,
+					// IdType:         userResp.User.IdType,
+					// IdNumber:       userResp.User.IdNumber,
+					// Active:         userResp.User.Active,
+					// IsVerified:     userResp.User.IsVerified,
+					// DateRegistered: userResp.User.DateCreated,
+				}
+
+				isSuccess = true
+
+				var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: isSuccess, Result: &data, StatusDesc: userResp.StatusDesc}
 				c.Data["json"] = resp
 			} else {
-				logs.Info("Success response received")
-				isSuccess = false
-
-				respCode, filePath := functions.SaveImage(&c.Controller, "UserImage", image, *header)
-
-				if respCode == 200 {
-					var data responses.UserGateway
-
-					userResp := functions.UpdateUserImage(&c.Controller, filePath, verifyToken.Result.UserID)
-
-					if userResp.StatusCode == 200 {
-						logs.Info("Name returned: ", userResp.Result.FullName)
-						splitName := strings.Split(userResp.Result.FullName, " | ")
-
-						// logs.Debug("Name is ", splitName[0])
-						firstname := ""
-						lastname := ""
-						if len(splitName) > 1 {
-							firstname = splitName[0]
-							lastname = splitName[1]
-						} else {
-							firstname = splitName[0]
-						}
-
-						// branch := &responses.BranchResp{}
-						// if userResp.User.Branch != nil {
-						// 	currency := responses.CurrencyResp{Symbol: userResp.User.Branch.Country.DefaultCurrency.Symbol, Currency: userResp.User.Branch.Country.DefaultCurrency.Currency}
-						// 	country := responses.CountryResp{Country: userResp.User.Branch.Country.Country, CountryCode: userResp.User.Branch.Country.CountryCode, Currency: &currency}
-						// 	branch = &responses.BranchResp{BranchId: userResp.User.Branch.BranchId, Branch: userResp.User.Branch.Branch, Country: &country, Location: userResp.User.Branch.Location, PhoneNumber: userResp.User.Branch.PhoneNumber}
-						// } else {
-						// 	branch = nil
-						// }
-						status := "ACTIVE"
-
-						if userResp.Result.Active == 6 {
-							status = "INACTIVE"
-						}
-						if userResp.Result.Active == 2 {
-							status = "PENDING"
-						}
-						if userResp.Result.Active == 4 {
-							status = "INACTIVE"
-						}
-
-						data = responses.UserGateway{
-							UserId: userResp.Result.UserId,
-							// UserType:    userResp.User.UserType,
-							FirstName:   firstname,
-							LastName:    lastname,
-							Username:    userResp.Result.Username,
-							Email:       userResp.Result.Email,
-							PhoneNumber: userResp.Result.PhoneNumber,
-							Role:        userResp.Result.Role,
-							ImagePath:   userResp.Result.ImagePath,
-							Customer:    userResp.Result.UserDetails,
-							Status:      status,
-							// Gender:         userResp.User.Gender,
-							// Dob:            userResp.User.Dob,
-							// Address:        userResp.User.Address,
-							// IdType:         userResp.User.IdType,
-							// IdNumber:       userResp.User.IdNumber,
-							// Active:         userResp.User.Active,
-							// IsVerified:     userResp.User.IsVerified,
-							// DateRegistered: userResp.User.DateCreated,
-						}
-
-						isSuccess = true
-
-						var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: isSuccess, Result: &data, StatusDesc: userResp.StatusDesc}
-						c.Data["json"] = resp
-					} else {
-						var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
-						c.Data["json"] = resp
-					}
-				} else {
-					var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred. Error updating image"}
-					c.Data["json"] = resp
-				}
+				var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
+				c.Data["json"] = resp
 			}
 		} else {
-			var resp responses.StringResponseDTO = responses.StringResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
+			var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred. Error updating image"}
 			c.Data["json"] = resp
 		}
-	} else {
-		var resp responses.RolesAllGatewayResponseDTO = responses.RolesAllGatewayResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
-		c.Data["json"] = resp
 	}
 
 	c.ServeJSON()
@@ -1367,95 +1355,79 @@ func (c *UserManagementController) UpdateUser() {
 		c.ServeJSON()
 		return
 	}
+	userData := c.Ctx.Input.GetData("user").(*responses.AuthenticatedUser)
 	var v requests.UpdateUserRequestDTO
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
-	authorization := c.Ctx.Input.Header("Authorization")
+
 	logs.Info("Updating user ...")
 
 	idStr := c.Ctx.Input.Param(":id")
 	// id, _ := strconv.ParseInt(idStr, 0, 64)
 
-	token := strings.Split(authorization, " ")
-
 	var isSuccess bool = false
 
-	if token[0] == "Bearer" {
-		logs.Info("Token is ", token[1])
-		verifyToken := functions.VerifyToken(&c.Controller, token[1])
+	updateUserResp := functions.UpdateUser(&c.Controller, idStr, v, userData.UserID)
 
-		logs.Info("Success response")
+	if updateUserResp.StatusCode == 200 {
+		var data responses.UserGateway
 
-		if verifyToken.StatusCode == 200 {
-			updateUserResp := functions.UpdateUser(&c.Controller, idStr, v)
+		splitName := strings.Split(updateUserResp.Result.FullName, " | ")
 
-			if updateUserResp.StatusCode == 200 {
-				var data responses.UserGateway
-
-				splitName := strings.Split(updateUserResp.Result.FullName, " | ")
-
-				firstname := ""
-				lastname := ""
-				if len(splitName) > 1 {
-					firstname = splitName[0]
-					lastname = splitName[1]
-				} else {
-					firstname = splitName[0]
-				}
-
-				// branch := &responses.BranchResp{}
-				// if updateUserResp.User.Branch != nil {
-				// 	currency := responses.CurrencyResp{Symbol: updateUserResp.User.Branch.Country.DefaultCurrency.Symbol, Currency: updateUserResp.User.Branch.Country.DefaultCurrency.Currency}
-				// 	country := responses.CountryResp{Country: updateUserResp.User.Branch.Country.Country, CountryCode: updateUserResp.User.Branch.Country.CountryCode, Currency: &currency}
-				// 	branch = &responses.BranchResp{BranchId: updateUserResp.User.Branch.BranchId, Branch: updateUserResp.User.Branch.Branch, Country: &country, Location: updateUserResp.User.Branch.Location, PhoneNumber: updateUserResp.User.Branch.PhoneNumber}
-				// } else {
-				// 	branch = nil
-				// }
-				status := "ACTIVE"
-
-				if updateUserResp.Result.Active == 6 {
-					status = "DELETED"
-				}
-				if updateUserResp.Result.Active == 2 {
-					status = "PENDING"
-				}
-				if updateUserResp.Result.Active == 4 {
-					status = "INACTIVE"
-				}
-
-				data = responses.UserGateway{
-					UserId: updateUserResp.Result.UserId,
-					// UserType:    regResp.User.UserType,
-					FirstName:   firstname,
-					LastName:    lastname,
-					Username:    updateUserResp.Result.Username,
-					Email:       updateUserResp.Result.Email,
-					PhoneNumber: updateUserResp.Result.PhoneNumber,
-					Role:        updateUserResp.Result.Role,
-					Customer:    updateUserResp.Result.UserDetails,
-					ImagePath:   updateUserResp.Result.ImagePath,
-					Status:      status,
-					// Gender:         regResp.User.Gender,
-					// Dob:            regResp.User.Dob,
-					// Address:        regResp.User.Address,
-					// IdType:         regResp.User.IdType,
-					// IdNumber:       regResp.User.IdNumber,
-					// Active:         regResp.User.Active,
-					// IsVerified:     regResp.User.IsVerified,
-					// DateRegistered: regResp.User.DateCreated,
-				}
-
-				isSuccess = true
-				var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: isSuccess, Result: &data, StatusDesc: "User updated"}
-				c.Data["json"] = resp
-
-			} else {
-				var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
-				c.Data["json"] = resp
-			}
+		firstname := ""
+		lastname := ""
+		if len(splitName) > 1 {
+			firstname = splitName[0]
+			lastname = splitName[1]
 		} else {
-			var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
-			c.Data["json"] = resp
+			firstname = splitName[0]
 		}
+
+		// branch := &responses.BranchResp{}
+		// if updateUserResp.User.Branch != nil {
+		// 	currency := responses.CurrencyResp{Symbol: updateUserResp.User.Branch.Country.DefaultCurrency.Symbol, Currency: updateUserResp.User.Branch.Country.DefaultCurrency.Currency}
+		// 	country := responses.CountryResp{Country: updateUserResp.User.Branch.Country.Country, CountryCode: updateUserResp.User.Branch.Country.CountryCode, Currency: &currency}
+		// 	branch = &responses.BranchResp{BranchId: updateUserResp.User.Branch.BranchId, Branch: updateUserResp.User.Branch.Branch, Country: &country, Location: updateUserResp.User.Branch.Location, PhoneNumber: updateUserResp.User.Branch.PhoneNumber}
+		// } else {
+		// 	branch = nil
+		// }
+		status := "ACTIVE"
+
+		if updateUserResp.Result.Active == 6 {
+			status = "DELETED"
+		}
+		if updateUserResp.Result.Active == 2 {
+			status = "PENDING"
+		}
+		if updateUserResp.Result.Active == 4 {
+			status = "INACTIVE"
+		}
+
+		data = responses.UserGateway{
+			UserId: updateUserResp.Result.UserId,
+			// UserType:    regResp.User.UserType,
+			FirstName:   firstname,
+			LastName:    lastname,
+			Username:    updateUserResp.Result.Username,
+			Email:       updateUserResp.Result.Email,
+			PhoneNumber: updateUserResp.Result.PhoneNumber,
+			Role:        updateUserResp.Result.Role,
+			Customer:    updateUserResp.Result.UserDetails,
+			ImagePath:   updateUserResp.Result.ImagePath,
+			Status:      status,
+			// Gender:         regResp.User.Gender,
+			// Dob:            regResp.User.Dob,
+			// Address:        regResp.User.Address,
+			// IdType:         regResp.User.IdType,
+			// IdNumber:       regResp.User.IdNumber,
+			// Active:         regResp.User.Active,
+			// IsVerified:     regResp.User.IsVerified,
+			// DateRegistered: regResp.User.DateCreated,
+		}
+
+		isSuccess = true
+		var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: isSuccess, Result: &data, StatusDesc: "User updated"}
+		c.Data["json"] = resp
+
 	} else {
 		var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
 		c.Data["json"] = resp
@@ -1479,97 +1451,80 @@ func (c *UserManagementController) UpdateUserRole() {
 		c.ServeJSON()
 		return
 	}
+	userData := c.Ctx.Input.GetData("user").(*responses.AuthenticatedUser)
 	var v requests.UpdateUserRoleRequestDTO
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
-	authorization := c.Ctx.Input.Header("Authorization")
 	logs.Info("Updating user ...")
 
 	idStr := c.Ctx.Input.Param(":userid")
 	// id, _ := strconv.ParseInt(idStr, 0, 64)
 
-	token := strings.Split(authorization, " ")
-
 	var isSuccess bool = false
 
-	if token[0] == "Bearer" {
-		logs.Info("Token is ", token[1])
-		verifyToken := functions.VerifyToken(&c.Controller, token[1])
+	updateUserResp := functions.UpdateUserRole(&c.Controller, idStr, v, userData.UserID)
 
-		logs.Info("Success response")
+	if updateUserResp.StatusCode == 200 {
+		var data responses.UserGateway
 
-		if verifyToken.StatusCode == 200 {
-			updateUserResp := functions.UpdateUserRole(&c.Controller, idStr, v)
+		splitName := strings.Split(updateUserResp.Result.FullName, " | ")
 
-			if updateUserResp.StatusCode == 200 {
-				var data responses.UserGateway
-
-				splitName := strings.Split(updateUserResp.Result.FullName, " | ")
-
-				firstname := ""
-				lastname := ""
-				if len(splitName) > 1 {
-					firstname = splitName[0]
-					lastname = splitName[1]
-				} else {
-					firstname = splitName[0]
-				}
-
-				// branch := &responses.BranchResp{}
-				// if updateUserResp.User.Branch != nil {
-				// 	currency := responses.CurrencyResp{Symbol: updateUserResp.User.Branch.Country.DefaultCurrency.Symbol, Currency: updateUserResp.User.Branch.Country.DefaultCurrency.Currency}
-				// 	country := responses.CountryResp{Country: updateUserResp.User.Branch.Country.Country, CountryCode: updateUserResp.User.Branch.Country.CountryCode, Currency: &currency}
-				// 	branch = &responses.BranchResp{BranchId: updateUserResp.User.Branch.BranchId, Branch: updateUserResp.User.Branch.Branch, Country: &country, Location: updateUserResp.User.Branch.Location, PhoneNumber: updateUserResp.User.Branch.PhoneNumber}
-				// } else {
-				// 	branch = nil
-				// }
-				status := "ACTIVE"
-
-				if updateUserResp.Result.Active == 6 {
-					status = "DELETED"
-				}
-				if updateUserResp.Result.Active == 2 {
-					status = "PENDING"
-				}
-				if updateUserResp.Result.Active == 4 {
-					status = "INACTIVE"
-				}
-
-				data = responses.UserGateway{
-					UserId: updateUserResp.Result.UserId,
-					// UserType:    regResp.User.UserType,
-					FirstName:   firstname,
-					LastName:    lastname,
-					Username:    updateUserResp.Result.Username,
-					Email:       updateUserResp.Result.Email,
-					PhoneNumber: updateUserResp.Result.PhoneNumber,
-					Role:        updateUserResp.Result.Role,
-					Customer:    updateUserResp.Result.UserDetails,
-					ImagePath:   updateUserResp.Result.ImagePath,
-					Status:      status,
-					// Gender:         regResp.User.Gender,
-					// Dob:            regResp.User.Dob,
-					// Address:        regResp.User.Address,
-					// IdType:         regResp.User.IdType,
-					// IdNumber:       regResp.User.IdNumber,
-					// Active:         regResp.User.Active,
-					// IsVerified:     regResp.User.IsVerified,
-					// DateRegistered: regResp.User.DateCreated,
-				}
-
-				isSuccess = true
-				var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: isSuccess, Result: &data, StatusDesc: "User updated"}
-				c.Data["json"] = resp
-
-			} else {
-				var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred " + updateUserResp.StatusDesc}
-				c.Data["json"] = resp
-			}
+		firstname := ""
+		lastname := ""
+		if len(splitName) > 1 {
+			firstname = splitName[0]
+			lastname = splitName[1]
 		} else {
-			var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "You are not authorized to access this resource"}
-			c.Data["json"] = resp
+			firstname = splitName[0]
 		}
+
+		// branch := &responses.BranchResp{}
+		// if updateUserResp.User.Branch != nil {
+		// 	currency := responses.CurrencyResp{Symbol: updateUserResp.User.Branch.Country.DefaultCurrency.Symbol, Currency: updateUserResp.User.Branch.Country.DefaultCurrency.Currency}
+		// 	country := responses.CountryResp{Country: updateUserResp.User.Branch.Country.Country, CountryCode: updateUserResp.User.Branch.Country.CountryCode, Currency: &currency}
+		// 	branch = &responses.BranchResp{BranchId: updateUserResp.User.Branch.BranchId, Branch: updateUserResp.User.Branch.Branch, Country: &country, Location: updateUserResp.User.Branch.Location, PhoneNumber: updateUserResp.User.Branch.PhoneNumber}
+		// } else {
+		// 	branch = nil
+		// }
+		status := "ACTIVE"
+
+		if updateUserResp.Result.Active == 6 {
+			status = "DELETED"
+		}
+		if updateUserResp.Result.Active == 2 {
+			status = "PENDING"
+		}
+		if updateUserResp.Result.Active == 4 {
+			status = "INACTIVE"
+		}
+
+		data = responses.UserGateway{
+			UserId: updateUserResp.Result.UserId,
+			// UserType:    regResp.User.UserType,
+			FirstName:   firstname,
+			LastName:    lastname,
+			Username:    updateUserResp.Result.Username,
+			Email:       updateUserResp.Result.Email,
+			PhoneNumber: updateUserResp.Result.PhoneNumber,
+			Role:        updateUserResp.Result.Role,
+			Customer:    updateUserResp.Result.UserDetails,
+			ImagePath:   updateUserResp.Result.ImagePath,
+			Status:      status,
+			// Gender:         regResp.User.Gender,
+			// Dob:            regResp.User.Dob,
+			// Address:        regResp.User.Address,
+			// IdType:         regResp.User.IdType,
+			// IdNumber:       regResp.User.IdNumber,
+			// Active:         regResp.User.Active,
+			// IsVerified:     regResp.User.IsVerified,
+			// DateRegistered: regResp.User.DateCreated,
+		}
+
+		isSuccess = true
+		var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: isSuccess, Result: &data, StatusDesc: "User updated"}
+		c.Data["json"] = resp
+
 	} else {
-		var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred. Invalid authorization token"}
+		var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred " + updateUserResp.StatusDesc}
 		c.Data["json"] = resp
 	}
 
@@ -1591,97 +1546,80 @@ func (c *UserManagementController) UpdateUserBranch() {
 		c.ServeJSON()
 		return
 	}
+	userData := c.Ctx.Input.GetData("user").(*responses.AuthenticatedUser)
 	var v requests.UpdateUserBranchRequestDTO
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
-	authorization := c.Ctx.Input.Header("Authorization")
 	logs.Info("Updating user ...")
 
 	idStr := c.Ctx.Input.Param(":userid")
 	// id, _ := strconv.ParseInt(idStr, 0, 64)
 
-	token := strings.Split(authorization, " ")
-
 	var isSuccess bool = false
 
-	if token[0] == "Bearer" {
-		logs.Info("Token is ", token[1])
-		verifyToken := functions.VerifyToken(&c.Controller, token[1])
+	updateUserResp := functions.UpdateUserBranch(&c.Controller, idStr, v, userData.UserID)
 
-		logs.Info("Success response")
+	if updateUserResp.StatusCode == 200 {
+		var data responses.UserGateway
 
-		if verifyToken.StatusCode == 200 {
-			updateUserResp := functions.UpdateUserBranch(&c.Controller, idStr, v)
+		splitName := strings.Split(updateUserResp.Result.FullName, " | ")
 
-			if updateUserResp.StatusCode == 200 {
-				var data responses.UserGateway
-
-				splitName := strings.Split(updateUserResp.Result.FullName, " | ")
-
-				firstname := ""
-				lastname := ""
-				if len(splitName) > 1 {
-					firstname = splitName[0]
-					lastname = splitName[1]
-				} else {
-					firstname = splitName[0]
-				}
-
-				// branch := &responses.BranchResp{}
-				// if updateUserResp.User.Branch != nil {
-				// 	currency := responses.CurrencyResp{Symbol: updateUserResp.User.Branch.Country.DefaultCurrency.Symbol, Currency: updateUserResp.User.Branch.Country.DefaultCurrency.Currency}
-				// 	country := responses.CountryResp{Country: updateUserResp.User.Branch.Country.Country, CountryCode: updateUserResp.User.Branch.Country.CountryCode, Currency: &currency}
-				// 	branch = &responses.BranchResp{BranchId: updateUserResp.User.Branch.BranchId, Branch: updateUserResp.User.Branch.Branch, Country: &country, Location: updateUserResp.User.Branch.Location, PhoneNumber: updateUserResp.User.Branch.PhoneNumber}
-				// } else {
-				// 	branch = nil
-				// }
-				status := "ACTIVE"
-
-				if updateUserResp.Result.Active == 6 {
-					status = "INACTIVE"
-				}
-				if updateUserResp.Result.Active == 2 {
-					status = "PENDING"
-				}
-				if updateUserResp.Result.Active == 4 {
-					status = "INACTIVE"
-				}
-
-				data = responses.UserGateway{
-					UserId: updateUserResp.Result.UserId,
-					// UserType:    regResp.User.UserType,
-					FirstName:   firstname,
-					LastName:    lastname,
-					Username:    updateUserResp.Result.Username,
-					Email:       updateUserResp.Result.Email,
-					PhoneNumber: updateUserResp.Result.PhoneNumber,
-					Role:        updateUserResp.Result.Role,
-					Customer:    updateUserResp.Result.UserDetails,
-					ImagePath:   updateUserResp.Result.ImagePath,
-					Status:      status,
-					// Gender:         regResp.User.Gender,
-					// Dob:            regResp.User.Dob,
-					// Address:        regResp.User.Address,
-					// IdType:         regResp.User.IdType,
-					// IdNumber:       regResp.User.IdNumber,
-					// Active:         regResp.User.Active,
-					// IsVerified:     regResp.User.IsVerified,
-					// DateRegistered: regResp.User.DateCreated,
-				}
-
-				isSuccess = true
-				var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: isSuccess, Result: &data, StatusDesc: "User updated"}
-				c.Data["json"] = resp
-
-			} else {
-				var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred " + updateUserResp.StatusDesc}
-				c.Data["json"] = resp
-			}
+		firstname := ""
+		lastname := ""
+		if len(splitName) > 1 {
+			firstname = splitName[0]
+			lastname = splitName[1]
 		} else {
-			var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "You are not authorized to access this resource"}
-			c.Data["json"] = resp
+			firstname = splitName[0]
 		}
+
+		// branch := &responses.BranchResp{}
+		// if updateUserResp.User.Branch != nil {
+		// 	currency := responses.CurrencyResp{Symbol: updateUserResp.User.Branch.Country.DefaultCurrency.Symbol, Currency: updateUserResp.User.Branch.Country.DefaultCurrency.Currency}
+		// 	country := responses.CountryResp{Country: updateUserResp.User.Branch.Country.Country, CountryCode: updateUserResp.User.Branch.Country.CountryCode, Currency: &currency}
+		// 	branch = &responses.BranchResp{BranchId: updateUserResp.User.Branch.BranchId, Branch: updateUserResp.User.Branch.Branch, Country: &country, Location: updateUserResp.User.Branch.Location, PhoneNumber: updateUserResp.User.Branch.PhoneNumber}
+		// } else {
+		// 	branch = nil
+		// }
+		status := "ACTIVE"
+
+		if updateUserResp.Result.Active == 6 {
+			status = "INACTIVE"
+		}
+		if updateUserResp.Result.Active == 2 {
+			status = "PENDING"
+		}
+		if updateUserResp.Result.Active == 4 {
+			status = "INACTIVE"
+		}
+
+		data = responses.UserGateway{
+			UserId: updateUserResp.Result.UserId,
+			// UserType:    regResp.User.UserType,
+			FirstName:   firstname,
+			LastName:    lastname,
+			Username:    updateUserResp.Result.Username,
+			Email:       updateUserResp.Result.Email,
+			PhoneNumber: updateUserResp.Result.PhoneNumber,
+			Role:        updateUserResp.Result.Role,
+			Customer:    updateUserResp.Result.UserDetails,
+			ImagePath:   updateUserResp.Result.ImagePath,
+			Status:      status,
+			// Gender:         regResp.User.Gender,
+			// Dob:            regResp.User.Dob,
+			// Address:        regResp.User.Address,
+			// IdType:         regResp.User.IdType,
+			// IdNumber:       regResp.User.IdNumber,
+			// Active:         regResp.User.Active,
+			// IsVerified:     regResp.User.IsVerified,
+			// DateRegistered: regResp.User.DateCreated,
+		}
+
+		isSuccess = true
+		var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: isSuccess, Result: &data, StatusDesc: "User updated"}
+		c.Data["json"] = resp
+
 	} else {
-		var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred. Invalid authorization token"}
+		var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred " + updateUserResp.StatusDesc}
 		c.Data["json"] = resp
 	}
 
