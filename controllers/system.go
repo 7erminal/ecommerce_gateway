@@ -1512,9 +1512,9 @@ func (c *SystemController) AddShop() {
 
 	var isSuccess bool = false
 
-	activeState := "false"
+	activeState := "2"
 	if userData != nil && userData.RoleName == "SUPER_ADMIN" {
-		activeState = "true"
+		activeState = "1"
 	}
 
 	userIdStr := userData.UserID

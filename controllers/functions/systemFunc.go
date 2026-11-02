@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"strconv"
 	"strings"
 
 	"github.com/beego/beego/v2/core/logs"
@@ -1658,6 +1659,9 @@ func AddShop(c *beego.Controller, v requests.ShopApiRequestDTO, userid string) (
 	request.InterfaceParams["AssistantName"] = v.ShopAssistantName
 	request.InterfaceParams["AssistantPhoneNumber"] = v.ShopAssistantNumber
 	request.InterfaceParams["AddedBy"] = v.AddedBy
+	// convert v.Active to int
+	activeInt, _ := strconv.Atoi(v.Active)
+	request.InterfaceParams["Active"] = activeInt
 	client := api.Client{
 		Request: request,
 		Type_:   "body",
