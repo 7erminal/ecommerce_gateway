@@ -923,8 +923,9 @@ func (c *SystemController) AddApplication() {
 
 	logs.Info("Token verified")
 	addedBy := userData.UserId
-	logs.Info("Adding application by user: ", addedBy)
+	// logs.Info("Adding application by user: ", addedBy)
 	isSuccess = false
+	logs.Info("User data is ", userData)
 
 	// Generate application code
 	req := requests.ApplicationApiRequest{
