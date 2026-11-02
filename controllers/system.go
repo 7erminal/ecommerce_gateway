@@ -915,7 +915,7 @@ func (c *SystemController) AddApplication() {
 		c.ServeJSON()
 		return
 	}
-	userData, _ := c.Ctx.Input.GetData("user").(*responses.UsersOri)
+	userData, _ := c.Ctx.Input.GetData("user").(*responses.AuthenticatedUser)
 	var v requests.ApplicationRequest
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
 
@@ -923,8 +923,8 @@ func (c *SystemController) AddApplication() {
 
 	logs.Info("Token verified")
 	logs.Info("User data is ", userData)
-	addedBy := userData.UserId
-	// logs.Info("Adding application by user: ", addedBy)
+	addedBy := userData.UserID
+	logs.Info("Adding application by user: ", addedBy)
 	isSuccess = false
 
 	// Generate application code
