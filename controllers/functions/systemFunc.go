@@ -1876,6 +1876,7 @@ func AddApplicationShop(c *beego.Controller, v requests.ApplicationShopRequest, 
 	host, _ := beego.AppConfig.String("systemBaseUrl")
 
 	logs.Info("Adding shops ")
+	logs.Info("Requesting to add application shop with data: ", v)
 
 	request := api.NewRequest(
 		host,
