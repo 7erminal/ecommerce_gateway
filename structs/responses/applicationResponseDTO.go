@@ -48,7 +48,7 @@ type ThemePersonalResp struct {
 }
 
 type ApplicationResp struct {
-	ApplicationId    int64
+	ApplicationId    string
 	ApplicationCode  string
 	ApplicationName  string
 	ApplicationLogo  string

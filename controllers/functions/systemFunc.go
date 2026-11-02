@@ -643,10 +643,11 @@ func AddApplication(c *beego.Controller, req requests.ApplicationApiRequest, add
 
 	// Transform backend response to gateway response
 	if backendResp.StatusCode == 201 || backendResp.StatusCode == 200 {
+		appidstr := strconv.FormatInt(backendResp.Result.ApplicationId, 10)
 		resp = responses.ApplicationResponseDTO{
 			Success: true,
 			Result: &responses.ApplicationResp{
-				ApplicationId:    backendResp.Result.ApplicationId,
+				ApplicationId:    appidstr,
 				ApplicationCode:  backendResp.Result.ApplicationCode,
 				ApplicationName:  backendResp.Result.ApplicationName,
 				ApplicationLogo:  backendResp.Result.ApplicationLogo,
@@ -725,10 +726,11 @@ func UpdateApplication(c *beego.Controller, req requests.UpdateApplicationReques
 
 	// Transform backend response to gateway response
 	if backendResp.StatusCode == 200 {
+		appidstr := strconv.FormatInt(backendResp.Result.ApplicationId, 10)
 		resp = responses.ApplicationResponseDTO{
 			Success: true,
 			Result: &responses.ApplicationResp{
-				ApplicationId:    backendResp.Result.ApplicationId,
+				ApplicationId:    appidstr,
 				ApplicationCode:  backendResp.Result.ApplicationCode,
 				ApplicationName:  backendResp.Result.ApplicationName,
 				ApplicationLogo:  backendResp.Result.ApplicationLogo,
@@ -792,10 +794,11 @@ func UpdateApplicationTheme(c *beego.Controller, applicationId string, themeCode
 	json.Unmarshal(read, &backendResp)
 
 	if backendResp.StatusCode == 200 {
+		appidstr := strconv.FormatInt(backendResp.Result.ApplicationId, 10)
 		resp = responses.ApplicationResponseDTO{
 			Success: true,
 			Result: &responses.ApplicationResp{
-				ApplicationId:    backendResp.Result.ApplicationId,
+				ApplicationId:    appidstr,
 				ApplicationCode:  backendResp.Result.ApplicationCode,
 				ApplicationName:  backendResp.Result.ApplicationName,
 				ApplicationLogo:  backendResp.Result.ApplicationLogo,
@@ -1307,10 +1310,11 @@ func GetApplicationByCode(c *beego.Controller, code string) (resp responses.Appl
 				Active:          tc.Active,
 			})
 		}
+		appidstr := strconv.FormatInt(backendResp.Result.ApplicationId, 10)
 		resp = responses.ApplicationResponseDTO{
 			Success: true,
 			Result: &responses.ApplicationResp{
-				ApplicationId:    backendResp.Result.ApplicationId,
+				ApplicationId:    appidstr,
 				ApplicationCode:  backendResp.Result.ApplicationCode,
 				ApplicationName:  backendResp.Result.ApplicationName,
 				ApplicationLogo:  backendResp.Result.ApplicationLogo,
