@@ -1962,3 +1962,44 @@ func (c *SystemController) ToggleApplicationShopBanner() {
 
 	c.ServeJSON()
 }
+
+// UpdateApplicationTheme ...
+// @Title Update Application Theme
+// @Description Update theme colors and default font size for an application
+// @Param	Authorization		header 	string true		"header for User"
+// @Param	body		body 	requests.UpdateApplicationThemeRequest	true		"body for theme update"
+// @Success 200 {object} responses.ApplicationResponseDTO
+// @Failure 403 body is empty
+// @router /application/update-theme [put]
+func (c *SystemController) UpdateApplicationTheme() {
+	if !c.RequirePermission("SETTINGS", "UPDATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
+	u := c.Ctx.Input.GetData("user")
+	userData, err := u.(*responses.AuthenticatedUser)
+	if err != false {
+		logs.Error("Error retrieving user data: ", err)
+	}
+	var v requests.UpdateApplicationThemeRequest
+	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
+
+	logs.Info("Requesting to update application theme with data: ", v)
+
+	var isSuccess bool = false
+
+	updateResp := functions.UpdateApplicationTheme(&c.Controller, v.ApplicationId, v.ThemeColors, v.DefaultFontsize)
+
+	if updateResp.Success {
+		isSuccess = true
+		message := "Application theme updated successfully"
+		var resp responses.ApplicationResponseDTO = responses.ApplicationResponseDTO{Success: isSuccess, Result: updateResp.Result, StatusDesc: message}
+		c.Data["json"] = resp
+	} else {
+		var resp responses.ApplicationResponseDTO = responses.ApplicationResponseDTO{Success: isSuccess, Result: nil, StatusDesc: updateResp.StatusDesc}
+		c.Data["json"] = resp
+	}
+
+	c.ServeJSON()
+}

@@ -2234,3 +2234,68 @@ func ToggleApplicationShopBanner(c *beego.Controller, applicationShopId int64, s
 	logs.Info("Resp is ", resp)
 	return
 }
+
+// UpdateApplicationTheme updates the theme colors and default font size for an application
+func UpdateApplicationTheme(c *beego.Controller, applicationId int64, themeColors string, defaultFontsize string) (resp responses.ApplicationResponseDTO) {
+	host, _ := beego.AppConfig.String("systemBaseUrl")
+
+	logs.Info("Updating application theme")
+	logs.Info("Requesting to update application theme with data: ApplicationId=", applicationId, " ThemeColors=", themeColors, " DefaultFontsize=", defaultFontsize)
+
+	request := api.NewRequest(
+		host,
+		"/v1/applications/update-theme",
+		api.PUT)
+	request.InterfaceParams["ApplicationId"] = applicationId
+	request.InterfaceParams["ThemeColors"] = themeColors
+	request.InterfaceParams["DefaultFontsize"] = defaultFontsize
+	client := api.Client{
+		Request: request,
+		Type_:   "body",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		resp = responses.ApplicationResponseDTO{Success: false, Result: nil, StatusDesc: err.Error()}
+		return
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		logs.Error("Error reading response body: %v", err)
+		resp = responses.ApplicationResponseDTO{Success: false, Result: nil, StatusDesc: err.Error()}
+		return
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+
+	var data responses.ApplicationResponse
+	json.Unmarshal(read, &data)
+
+	if data.StatusCode == 200 {
+		appidstr := strconv.FormatInt(data.Result.ApplicationId, 10)
+		appRespData := responses.ApplicationResp{
+			ApplicationId:    appidstr,
+			ApplicationCode:  data.Result.ApplicationCode,
+			ApplicationName:  data.Result.ApplicationName,
+			ApplicationLogo:  data.Result.ApplicationLogo,
+			ThemeColors:      data.Result.ThemeColors,
+			DefaultFontsize:  data.Result.DefaultFontsize,
+			ApplicationImage: data.Result.ApplicationImage,
+			DateCreated:      data.Result.DateCreated,
+			DateModified:     data.Result.DateModified,
+			Active:           data.Result.Active,
+		}
+		resp = responses.ApplicationResponseDTO{Success: true, Result: &appRespData, StatusDesc: data.StatusMessage}
+	} else {
+		resp = responses.ApplicationResponseDTO{Success: false, Result: nil, StatusDesc: data.StatusMessage}
+	}
+
+	logs.Info("Resp is ", resp)
+	return
+}
