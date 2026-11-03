@@ -159,8 +159,9 @@ type ApplicationResponse struct {
 }
 
 type ApplicationShopFullResponseData struct {
-	Application ApplicationResponseData
-	ShopId      string
+	ApplicationShopId string
+	Application       ApplicationResponseData
+	ShopId            string
 }
 
 type ApplicationShopsApiResponse struct {

@@ -1963,15 +1963,15 @@ func (c *SystemController) ToggleApplicationShopBanner() {
 	c.ServeJSON()
 }
 
-// UpdateApplicationTheme ...
-// @Title Update Application Theme
+// UpdateApplicationThemeConfig ...
+// @Title Update Application Theme Config
 // @Description Update theme colors and default font size for an application
 // @Param	Authorization		header 	string true		"header for User"
 // @Param	body		body 	requests.UpdateApplicationThemeRequest	true		"body for theme update"
 // @Success 200 {object} responses.ApplicationResponseDTO
 // @Failure 403 body is empty
 // @router /application/update-theme [put]
-func (c *SystemController) UpdateApplicationTheme() {
+func (c *SystemController) UpdateApplicationThemeConfig() {
 	if !c.RequirePermission("SETTINGS", "UPDATE") {
 		c.Data["json"] = map[string]string{"error": "forbidden"}
 		c.ServeJSON()
@@ -1989,7 +1989,7 @@ func (c *SystemController) UpdateApplicationTheme() {
 
 	var isSuccess bool = false
 
-	updateResp := functions.UpdateApplicationTheme(&c.Controller, v.ApplicationId, v.ThemeColors, v.DefaultFontsize)
+	updateResp := functions.UpdateApplicationThemeConfig(&c.Controller, v.ApplicationId, v.ThemeColors, v.DefaultFontsize, userData.UserID)
 
 	if updateResp.Success {
 		isSuccess = true

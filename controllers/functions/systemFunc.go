@@ -2236,7 +2236,7 @@ func ToggleApplicationShopBanner(c *beego.Controller, applicationShopId int64, s
 }
 
 // UpdateApplicationTheme updates the theme colors and default font size for an application
-func UpdateApplicationTheme(c *beego.Controller, applicationId int64, themeColors string, defaultFontsize string) (resp responses.ApplicationResponseDTO) {
+func UpdateApplicationThemeConfig(c *beego.Controller, applicationId int64, themeColors string, defaultFontsize string, updatedBy string) (resp responses.ApplicationResponseDTO) {
 	host, _ := beego.AppConfig.String("systemBaseUrl")
 
 	logs.Info("Updating application theme")
@@ -2249,6 +2249,7 @@ func UpdateApplicationTheme(c *beego.Controller, applicationId int64, themeColor
 	request.InterfaceParams["ApplicationId"] = applicationId
 	request.InterfaceParams["ThemeColors"] = themeColors
 	request.InterfaceParams["DefaultFontsize"] = defaultFontsize
+	request.InterfaceParams["UpdatedBy"] = updatedBy
 	client := api.Client{
 		Request: request,
 		Type_:   "body",
