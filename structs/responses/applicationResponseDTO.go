@@ -151,14 +151,21 @@ type ApplicationResponseData struct {
 
 type ApplicationShopResponseData struct {
 	ApplicationShopId string
+	ApplicationId     string
+	ApplicationCode   string
+	ApplicationName   string
+	ApplicationLogo   string
 	ShopId            string
-	ShowBanner        int
+	ShowBanner        bool
 	BannerImages      string
 	BorderRadius      string
+	ThemeColors       string
+	DefaultFontsize   string
+	ApplicationImage  string
 	DateCreated       time.Time
 	DateModified      time.Time
-	CreatedBy         int
-	ModifiedBy        int
+	CreatedBy         string
+	ModifiedBy        string
 	Active            int
 }
 
