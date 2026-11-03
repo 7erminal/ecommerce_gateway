@@ -2103,3 +2103,134 @@ func UploadUserImage(c *beego.Controller, systemImage string, system string) (re
 
 	return data
 }
+
+// UpdateApplicationShopBanner updates the banner and border radius for an application shop
+func UpdateApplicationShopBanner(c *beego.Controller, applicationShopId int64, bannerImages string, borderRadius float64, updatedBy string) (resp responses.ApplicationResponseDTO) {
+	host, _ := beego.AppConfig.String("systemBaseUrl")
+
+	logs.Info("Updating application shop banner")
+	logs.Info("Requesting to update application shop banner with data: ApplicationShopId=", applicationShopId, " BannerImages=", bannerImages, " BorderRadius=", borderRadius)
+
+	request := api.NewRequest(
+		host,
+		"/v1/applications/shop/update-banner",
+		api.PUT)
+	request.InterfaceParams["ApplicationShopId"] = applicationShopId
+	request.InterfaceParams["BannerImages"] = bannerImages
+	request.InterfaceParams["BorderRadius"] = borderRadius
+	request.InterfaceParams["UpdatedBy"] = updatedBy // or pass the actual user who is updating the banner
+	client := api.Client{
+		Request: request,
+		Type_:   "body",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		resp = responses.ApplicationResponseDTO{Success: false, Result: nil, StatusDesc: err.Error()}
+		return
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		logs.Error("Error reading response body: %v", err)
+		resp = responses.ApplicationResponseDTO{Success: false, Result: nil, StatusDesc: err.Error()}
+		return
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+
+	var data responses.ApplicationResponse
+	json.Unmarshal(read, &data)
+
+	if data.StatusCode == 200 {
+		appidstr := strconv.FormatInt(data.Result.ApplicationId, 10)
+		appRespData := responses.ApplicationResp{
+			ApplicationId:    appidstr,
+			ApplicationCode:  data.Result.ApplicationCode,
+			ApplicationName:  data.Result.ApplicationName,
+			ApplicationLogo:  data.Result.ApplicationLogo,
+			ThemeColors:      data.Result.ThemeColors,
+			DefaultFontsize:  data.Result.DefaultFontsize,
+			ApplicationImage: data.Result.ApplicationImage,
+			DateCreated:      data.Result.DateCreated,
+			DateModified:     data.Result.DateModified,
+			Active:           data.Result.Active,
+		}
+		resp = responses.ApplicationResponseDTO{Success: true, Result: &appRespData, StatusDesc: data.StatusMessage}
+	} else {
+		resp = responses.ApplicationResponseDTO{Success: false, Result: nil, StatusDesc: data.StatusMessage}
+	}
+
+	logs.Info("Resp is ", resp)
+	return
+}
+
+// ToggleApplicationShopBanner toggles the show banner flag for an application shop
+func ToggleApplicationShopBanner(c *beego.Controller, applicationShopId int64, showBanner bool, updatedBy string) (resp responses.ApplicationResponseDTO) {
+	host, _ := beego.AppConfig.String("systemBaseUrl")
+
+	logs.Info("Toggling application shop banner")
+	logs.Info("Requesting to toggle application shop banner with data: ApplicationShopId=", applicationShopId, " ShowBanner=", showBanner)
+
+	request := api.NewRequest(
+		host,
+		"/v1/applications/shop/toggle-banner",
+		api.PUT)
+	request.InterfaceParams["ApplicationShopId"] = applicationShopId
+	request.InterfaceParams["ShowBanner"] = showBanner
+	request.InterfaceParams["UpdatedBy"] = updatedBy
+	client := api.Client{
+		Request: request,
+		Type_:   "body",
+	}
+	res, err := client.SendRequest()
+	if err != nil {
+		logs.Error("client.Error: %v", err)
+		resp = responses.ApplicationResponseDTO{Success: false, Result: nil, StatusDesc: err.Error()}
+		return
+	}
+	defer res.Body.Close()
+	read, err := io.ReadAll(res.Body)
+	if err != nil {
+		logs.Error("Error reading response body: %v", err)
+		resp = responses.ApplicationResponseDTO{Success: false, Result: nil, StatusDesc: err.Error()}
+		return
+	}
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, read, "", "  "); err != nil {
+		logs.Info("Raw response received is ", string(read))
+	} else {
+		logs.Info("Raw response received is \n", prettyJSON.String())
+	}
+
+	var data responses.ApplicationResponse
+	json.Unmarshal(read, &data)
+
+	if data.StatusCode == 200 {
+		appidstr := strconv.FormatInt(data.Result.ApplicationId, 10)
+		appRespData := responses.ApplicationResp{
+			ApplicationId:    appidstr,
+			ApplicationCode:  data.Result.ApplicationCode,
+			ApplicationName:  data.Result.ApplicationName,
+			ApplicationLogo:  data.Result.ApplicationLogo,
+			ThemeColors:      data.Result.ThemeColors,
+			DefaultFontsize:  data.Result.DefaultFontsize,
+			ApplicationImage: data.Result.ApplicationImage,
+			DateCreated:      data.Result.DateCreated,
+			DateModified:     data.Result.DateModified,
+			Active:           data.Result.Active,
+		}
+		resp = responses.ApplicationResponseDTO{Success: true, Result: &appRespData, StatusDesc: data.StatusMessage}
+	} else {
+		resp = responses.ApplicationResponseDTO{Success: false, Result: nil, StatusDesc: data.StatusMessage}
+	}
+
+	logs.Info("Resp is ", resp)
+	return
+}

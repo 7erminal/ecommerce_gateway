@@ -47,6 +47,8 @@ func (c *SystemController) URLMapping() {
 	c.Mapping("GetShops", c.GetShops)
 	c.Mapping("GetShop", c.GetShop)
 	c.Mapping("GetApplicationShops", c.GetApplicationShops)
+	c.Mapping("UpdateApplicationShopBanner", c.UpdateApplicationShopBanner)
+	c.Mapping("ToggleApplicationShopBanner", c.ToggleApplicationShopBanner)
 }
 
 // GetRoles ...
@@ -1873,6 +1875,88 @@ func (c *SystemController) RemoveApplicationShop() {
 		c.Data["json"] = resp
 	} else {
 		var resp responses.ApplicationResponseDTO = responses.ApplicationResponseDTO{Success: isSuccess, Result: nil, StatusDesc: addStatusResp.StatusMessage}
+		c.Data["json"] = resp
+	}
+
+	c.ServeJSON()
+}
+
+// UpdateApplicationShopBanner ...
+// @Title Update Application Shop Banner
+// @Description Update banner images and border radius for a shop
+// @Param	Authorization		header 	string true		"header for User"
+// @Param	body		body 	requests.UpdateApplicationShopBannerRequest	true		"body for banner update"
+// @Success 200 {object} responses.ApplicationResponseDTO
+// @Failure 403 body is empty
+// @router /application/shop/update-banner [put]
+func (c *SystemController) UpdateApplicationShopBanner() {
+	if !c.RequirePermission("SETTINGS", "UPDATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
+	u := c.Ctx.Input.GetData("user")
+	userData, err := u.(*responses.AuthenticatedUser)
+	if err != false {
+		logs.Error("Error retrieving user data: ", err)
+	}
+	var v requests.UpdateApplicationShopBannerRequest
+	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
+
+	logs.Info("Requesting to update application shop banner with data: ", v)
+
+	var isSuccess bool = false
+
+	updateResp := functions.UpdateApplicationShopBanner(&c.Controller, v.ApplicationShopId, v.BannerImages, v.BorderRadius, userData.UserID)
+
+	if updateResp.Success {
+		isSuccess = true
+		message := "Banner updated successfully"
+		var resp responses.ApplicationResponseDTO = responses.ApplicationResponseDTO{Success: isSuccess, Result: updateResp.Result, StatusDesc: message}
+		c.Data["json"] = resp
+	} else {
+		var resp responses.ApplicationResponseDTO = responses.ApplicationResponseDTO{Success: isSuccess, Result: nil, StatusDesc: updateResp.StatusDesc}
+		c.Data["json"] = resp
+	}
+
+	c.ServeJSON()
+}
+
+// ToggleApplicationShopBanner ...
+// @Title Toggle Application Shop Banner
+// @Description Toggle the show banner flag for a shop
+// @Param	Authorization		header 	string true		"header for User"
+// @Param	body		body 	requests.ToggleApplicationShopBannerRequest	true		"body for banner toggle"
+// @Success 200 {object} responses.ApplicationResponseDTO
+// @Failure 403 body is empty
+// @router /application/shop/toggle-banner [put]
+func (c *SystemController) ToggleApplicationShopBanner() {
+	if !c.RequirePermission("SETTINGS", "UPDATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
+	u := c.Ctx.Input.GetData("user")
+	userData, err := u.(*responses.AuthenticatedUser)
+	if err != false {
+		logs.Error("Error retrieving user data: ", err)
+	}
+	var v requests.ToggleApplicationShopBannerRequest
+	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
+
+	logs.Info("Requesting to toggle application shop banner with data: ", v)
+
+	var isSuccess bool = false
+
+	toggleResp := functions.ToggleApplicationShopBanner(&c.Controller, v.ApplicationShopId, v.ShowBanner, userData.UserID)
+
+	if toggleResp.Success {
+		isSuccess = true
+		message := "Banner toggled successfully"
+		var resp responses.ApplicationResponseDTO = responses.ApplicationResponseDTO{Success: isSuccess, Result: toggleResp.Result, StatusDesc: message}
+		c.Data["json"] = resp
+	} else {
+		var resp responses.ApplicationResponseDTO = responses.ApplicationResponseDTO{Success: isSuccess, Result: nil, StatusDesc: toggleResp.StatusDesc}
 		c.Data["json"] = resp
 	}
 

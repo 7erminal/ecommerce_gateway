@@ -369,6 +369,24 @@ func init() {
 
     beego.GlobalControllerRouter["AMC_gateway/controllers:SystemController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:SystemController"],
         beego.ControllerComments{
+            Method: "ToggleApplicationShopBanner",
+            Router: `/application/shop/toggle-banner`,
+            AllowHTTPMethods: []string{"put"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["AMC_gateway/controllers:SystemController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:SystemController"],
+        beego.ControllerComments{
+            Method: "UpdateApplicationShopBanner",
+            Router: `/application/shop/update-banner`,
+            AllowHTTPMethods: []string{"put"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["AMC_gateway/controllers:SystemController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:SystemController"],
+        beego.ControllerComments{
             Method: "Delete",
             Router: `/delete-branch/:id`,
             AllowHTTPMethods: []string{"delete"},
@@ -684,6 +702,15 @@ func init() {
 
     beego.GlobalControllerRouter["AMC_gateway/controllers:UserManagementController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:UserManagementController"],
         beego.ControllerComments{
+            Method: "AddUser",
+            Router: `/add-user`,
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["AMC_gateway/controllers:UserManagementController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:UserManagementController"],
+        beego.ControllerComments{
             Method: "DeleteRole",
             Router: `/delete-role/:role`,
             AllowHTTPMethods: []string{"delete"},
@@ -829,8 +856,8 @@ func init() {
     beego.GlobalControllerRouter["AMC_gateway/controllers:UserManagementController"] = append(beego.GlobalControllerRouter["AMC_gateway/controllers:UserManagementController"],
         beego.ControllerComments{
             Method: "UpdateUserImage",
-            Router: `/update-user-image`,
-            AllowHTTPMethods: []string{"post"},
+            Router: `/update-user-image/:id`,
+            AllowHTTPMethods: []string{"put"},
             MethodParams: param.Make(),
             Filters: nil,
             Params: nil})
