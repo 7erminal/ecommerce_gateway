@@ -59,6 +59,7 @@ type ApplicationResp struct {
 	DateModified     time.Time
 	Active           int
 	Theme            *ThemePersonalResp
+	ApplicationShops []ApplicationShopResponseData
 }
 
 type ApplicationResponseDTO struct {
@@ -149,7 +150,16 @@ type ApplicationResponseData struct {
 }
 
 type ApplicationShopResponseData struct {
-	ShopId string
+	ApplicationShopId string
+	ShopId            string
+	ShowBanner        int
+	BannerImages      string
+	BorderRadius      string
+	DateCreated       time.Time
+	DateModified      time.Time
+	CreatedBy         int
+	ModifiedBy        int
+	Active            int
 }
 
 type ApplicationResponse struct {
