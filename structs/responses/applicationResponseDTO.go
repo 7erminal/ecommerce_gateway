@@ -134,7 +134,7 @@ type ThemeResponseData struct {
 }
 
 type ApplicationResponseData struct {
-	ApplicationId    int64
+	ApplicationId    string
 	ApplicationCode  string
 	ApplicationName  string
 	ApplicationLogo  string

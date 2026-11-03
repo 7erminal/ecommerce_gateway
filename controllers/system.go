@@ -5,7 +5,6 @@ import (
 	"AMC_gateway/structs/requests"
 	"AMC_gateway/structs/responses"
 	"encoding/json"
-	"strconv"
 	"strings"
 
 	"github.com/beego/beego/v2/core/logs"
@@ -1803,9 +1802,8 @@ func (c *SystemController) AddApplicationShop() {
 	if addStatusResp.StatusCode == 200 {
 		message := "Shop Added Successfully"
 		isSuccess = true
-		appidstr := strconv.FormatInt(addStatusResp.Result.ApplicationId, 10)
 		appRespData := responses.ApplicationResp{
-			ApplicationId:    appidstr,
+			ApplicationId:    addStatusResp.Result.ApplicationId,
 			ApplicationCode:  addStatusResp.Result.ApplicationCode,
 			ApplicationName:  addStatusResp.Result.ApplicationName,
 			ApplicationLogo:  addStatusResp.Result.ApplicationLogo,
@@ -1859,9 +1857,8 @@ func (c *SystemController) RemoveApplicationShop() {
 		message := "Shop Branch Removed Successfully"
 		isSuccess = true
 		// convert ID to string
-		appidstr := strconv.FormatInt(addStatusResp.Result.ApplicationId, 10)
 		appRespData := responses.ApplicationResp{
-			ApplicationId:    appidstr,
+			ApplicationId:    addStatusResp.Result.ApplicationId,
 			ApplicationCode:  addStatusResp.Result.ApplicationCode,
 			ApplicationName:  addStatusResp.Result.ApplicationName,
 			ApplicationLogo:  addStatusResp.Result.ApplicationLogo,

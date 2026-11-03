@@ -643,11 +643,10 @@ func AddApplication(c *beego.Controller, req requests.ApplicationApiRequest, add
 
 	// Transform backend response to gateway response
 	if backendResp.StatusCode == 201 || backendResp.StatusCode == 200 {
-		appidstr := strconv.FormatInt(backendResp.Result.ApplicationId, 10)
 		resp = responses.ApplicationResponseDTO{
 			Success: true,
 			Result: &responses.ApplicationResp{
-				ApplicationId:    appidstr,
+				ApplicationId:    backendResp.Result.ApplicationId,
 				ApplicationCode:  backendResp.Result.ApplicationCode,
 				ApplicationName:  backendResp.Result.ApplicationName,
 				ApplicationLogo:  backendResp.Result.ApplicationLogo,
@@ -726,11 +725,10 @@ func UpdateApplication(c *beego.Controller, req requests.UpdateApplicationReques
 
 	// Transform backend response to gateway response
 	if backendResp.StatusCode == 200 {
-		appidstr := strconv.FormatInt(backendResp.Result.ApplicationId, 10)
 		resp = responses.ApplicationResponseDTO{
 			Success: true,
 			Result: &responses.ApplicationResp{
-				ApplicationId:    appidstr,
+				ApplicationId:    backendResp.Result.ApplicationId,
 				ApplicationCode:  backendResp.Result.ApplicationCode,
 				ApplicationName:  backendResp.Result.ApplicationName,
 				ApplicationLogo:  backendResp.Result.ApplicationLogo,
@@ -794,11 +792,10 @@ func UpdateApplicationTheme(c *beego.Controller, applicationId string, themeCode
 	json.Unmarshal(read, &backendResp)
 
 	if backendResp.StatusCode == 200 {
-		appidstr := strconv.FormatInt(backendResp.Result.ApplicationId, 10)
 		resp = responses.ApplicationResponseDTO{
 			Success: true,
 			Result: &responses.ApplicationResp{
-				ApplicationId:    appidstr,
+				ApplicationId:    backendResp.Result.ApplicationId,
 				ApplicationCode:  backendResp.Result.ApplicationCode,
 				ApplicationName:  backendResp.Result.ApplicationName,
 				ApplicationLogo:  backendResp.Result.ApplicationLogo,
@@ -1310,11 +1307,10 @@ func GetApplicationByCode(c *beego.Controller, code string) (resp responses.Appl
 				Active:          tc.Active,
 			})
 		}
-		appidstr := strconv.FormatInt(backendResp.Result.ApplicationId, 10)
 		resp = responses.ApplicationResponseDTO{
 			Success: true,
 			Result: &responses.ApplicationResp{
-				ApplicationId:    appidstr,
+				ApplicationId:    backendResp.Result.ApplicationId,
 				ApplicationCode:  backendResp.Result.ApplicationCode,
 				ApplicationName:  backendResp.Result.ApplicationName,
 				ApplicationLogo:  backendResp.Result.ApplicationLogo,
@@ -2105,7 +2101,7 @@ func UploadUserImage(c *beego.Controller, systemImage string, system string) (re
 }
 
 // UpdateApplicationShopBanner updates the banner and border radius for an application shop
-func UpdateApplicationShopBanner(c *beego.Controller, applicationShopId int64, bannerImages string, borderRadius float64, updatedBy string) (resp responses.ApplicationResponseDTO) {
+func UpdateApplicationShopBanner(c *beego.Controller, applicationShopId string, bannerImages string, borderRadius float64, updatedBy string) (resp responses.ApplicationResponseDTO) {
 	host, _ := beego.AppConfig.String("systemBaseUrl")
 
 	logs.Info("Updating application shop banner")
@@ -2148,9 +2144,8 @@ func UpdateApplicationShopBanner(c *beego.Controller, applicationShopId int64, b
 	json.Unmarshal(read, &data)
 
 	if data.StatusCode == 200 {
-		appidstr := strconv.FormatInt(data.Result.ApplicationId, 10)
 		appRespData := responses.ApplicationResp{
-			ApplicationId:    appidstr,
+			ApplicationId:    data.Result.ApplicationId,
 			ApplicationCode:  data.Result.ApplicationCode,
 			ApplicationName:  data.Result.ApplicationName,
 			ApplicationLogo:  data.Result.ApplicationLogo,
@@ -2171,7 +2166,7 @@ func UpdateApplicationShopBanner(c *beego.Controller, applicationShopId int64, b
 }
 
 // ToggleApplicationShopBanner toggles the show banner flag for an application shop
-func ToggleApplicationShopBanner(c *beego.Controller, applicationShopId int64, showBanner bool, updatedBy string) (resp responses.ApplicationResponseDTO) {
+func ToggleApplicationShopBanner(c *beego.Controller, applicationShopId string, showBanner bool, updatedBy string) (resp responses.ApplicationResponseDTO) {
 	host, _ := beego.AppConfig.String("systemBaseUrl")
 
 	logs.Info("Toggling application shop banner")
@@ -2213,9 +2208,8 @@ func ToggleApplicationShopBanner(c *beego.Controller, applicationShopId int64, s
 	json.Unmarshal(read, &data)
 
 	if data.StatusCode == 200 {
-		appidstr := strconv.FormatInt(data.Result.ApplicationId, 10)
 		appRespData := responses.ApplicationResp{
-			ApplicationId:    appidstr,
+			ApplicationId:    data.Result.ApplicationId,
 			ApplicationCode:  data.Result.ApplicationCode,
 			ApplicationName:  data.Result.ApplicationName,
 			ApplicationLogo:  data.Result.ApplicationLogo,
@@ -2236,7 +2230,7 @@ func ToggleApplicationShopBanner(c *beego.Controller, applicationShopId int64, s
 }
 
 // UpdateApplicationTheme updates the theme colors and default font size for an application
-func UpdateApplicationThemeConfig(c *beego.Controller, applicationId int64, themeColors string, defaultFontsize string, updatedBy string) (resp responses.ApplicationResponseDTO) {
+func UpdateApplicationThemeConfig(c *beego.Controller, applicationId string, themeColors string, defaultFontsize string, updatedBy string) (resp responses.ApplicationResponseDTO) {
 	host, _ := beego.AppConfig.String("systemBaseUrl")
 
 	logs.Info("Updating application theme")
@@ -2279,7 +2273,7 @@ func UpdateApplicationThemeConfig(c *beego.Controller, applicationId int64, them
 	json.Unmarshal(read, &data)
 
 	if data.StatusCode == 200 {
-		appidstr := strconv.FormatInt(data.Result.ApplicationId, 10)
+		appidstr := data.Result.ApplicationId
 		appRespData := responses.ApplicationResp{
 			ApplicationId:    appidstr,
 			ApplicationCode:  data.Result.ApplicationCode,
