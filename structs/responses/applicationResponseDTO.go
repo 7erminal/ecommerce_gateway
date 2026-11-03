@@ -146,7 +146,7 @@ type ApplicationResponseData struct {
 	DateModified     time.Time
 	Active           int
 	Theme            *ThemePersonalResp
-	ApplicationShops []ApplicationShopResponseData
+	Shops            []ApplicationShopResponseData
 }
 
 type ApplicationShopResponseData struct {
@@ -177,11 +177,11 @@ type ApplicationShopFullResponseData struct {
 type ApplicationShopsApiResponse struct {
 	StatusCode    int
 	StatusMessage string
-	Result        []ApplicationShopFullResponseData
+	Result        []ApplicationShopResponseData
 }
 
 type ApplicationShopsResponse struct {
 	Success    bool
 	StatusDesc string
-	Result     []ApplicationShopFullResponseData
+	Result     []ApplicationShopResponseData
 }
