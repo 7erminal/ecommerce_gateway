@@ -49,6 +49,7 @@ func (c *SystemController) URLMapping() {
 	c.Mapping("GetApplicationShops", c.GetApplicationShops)
 	c.Mapping("UpdateApplicationShopBanner", c.UpdateApplicationShopBanner)
 	c.Mapping("ToggleApplicationShopBanner", c.ToggleApplicationShopBanner)
+	c.Mapping("UpdateApplicationThemeConfig", c.UpdateApplicationThemeConfig)
 }
 
 // GetRoles ...
