@@ -59,7 +59,7 @@ type ApplicationResp struct {
 	DateModified     time.Time
 	Active           int
 	Theme            *ThemePersonalResp
-	ApplicationShops []ApplicationShopResponseData
+	Shops            []ApplicationShopResponseData
 }
 
 type ApplicationResponseDTO struct {
