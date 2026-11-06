@@ -645,7 +645,7 @@ func AddApplication(c *beego.Controller, req requests.ApplicationApiRequest, add
 	if backendResp.StatusCode == 201 || backendResp.StatusCode == 200 {
 		resp = responses.ApplicationResponseDTO{
 			Success: true,
-			Result: &responses.ApplicationResp{
+			Result: &responses.ApplicationRespEx{
 				ApplicationId:    backendResp.Result.ApplicationId,
 				ApplicationCode:  backendResp.Result.ApplicationCode,
 				ApplicationName:  backendResp.Result.ApplicationName,
@@ -727,7 +727,7 @@ func UpdateApplication(c *beego.Controller, req requests.UpdateApplicationReques
 	if backendResp.StatusCode == 200 {
 		resp = responses.ApplicationResponseDTO{
 			Success: true,
-			Result: &responses.ApplicationResp{
+			Result: &responses.ApplicationRespEx{
 				ApplicationId:    backendResp.Result.ApplicationId,
 				ApplicationCode:  backendResp.Result.ApplicationCode,
 				ApplicationName:  backendResp.Result.ApplicationName,
@@ -794,7 +794,7 @@ func UpdateApplicationTheme(c *beego.Controller, applicationId string, themeCode
 	if backendResp.StatusCode == 200 {
 		resp = responses.ApplicationResponseDTO{
 			Success: true,
-			Result: &responses.ApplicationResp{
+			Result: &responses.ApplicationRespEx{
 				ApplicationId:    backendResp.Result.ApplicationId,
 				ApplicationCode:  backendResp.Result.ApplicationCode,
 				ApplicationName:  backendResp.Result.ApplicationName,
@@ -1307,9 +1307,39 @@ func GetApplicationByCode(c *beego.Controller, code string) (resp responses.Appl
 				Active:          tc.Active,
 			})
 		}
+
+		appShops := []responses.ApplicationShopResponseExtraData{}
+		for _, shop := range backendResp.Result.Shops {
+			shopResp := GetShop(c, shop.ShopId)
+
+			if shopResp.StatusCode == 200 {
+				logs.Info("Shop details fetched successfully", shopResp)
+				appShops = append(appShops, responses.ApplicationShopResponseExtraData{
+					ApplicationShopId: shop.ApplicationShopId,
+					ApplicationId:     backendResp.Result.ApplicationId,
+					ApplicationCode:   backendResp.Result.ApplicationCode,
+					ApplicationName:   backendResp.Result.ApplicationName,
+					ApplicationLogo:   backendResp.Result.ApplicationLogo,
+					ShopId:            shopResp.Result.ShopId,
+					ShopName:          shopResp.Result.ShopName,
+					ShowBanner:        shop.ShowBanner,
+					BannerImages:      shop.BannerImages,
+					BorderRadius:      shop.BorderRadius,
+					ThemeColors:       shop.ThemeColors,
+					DefaultFontsize:   shop.DefaultFontsize,
+					ApplicationImage:  backendResp.Result.ApplicationImage,
+					DateCreated:       shopResp.Result.DateCreated,
+					DateModified:      shopResp.Result.DateModified,
+					CreatedBy:         shop.CreatedBy,
+					ModifiedBy:        shop.ModifiedBy,
+					Active:            backendResp.Result.Active,
+				})
+			}
+		}
 		resp = responses.ApplicationResponseDTO{
 			Success: true,
-			Result: &responses.ApplicationResp{
+			Result: &responses.ApplicationRespEx{
+				Shops:            appShops,
 				ApplicationId:    backendResp.Result.ApplicationId,
 				ApplicationCode:  backendResp.Result.ApplicationCode,
 				ApplicationName:  backendResp.Result.ApplicationName,
@@ -2144,7 +2174,7 @@ func UpdateApplicationShopBanner(c *beego.Controller, applicationShopId string, 
 	json.Unmarshal(read, &data)
 
 	if data.StatusCode == 200 {
-		appRespData := responses.ApplicationResp{
+		appRespData := responses.ApplicationRespEx{
 			ApplicationId:    data.Result.ApplicationId,
 			ApplicationCode:  data.Result.ApplicationCode,
 			ApplicationName:  data.Result.ApplicationName,
@@ -2208,7 +2238,7 @@ func ToggleApplicationShopBanner(c *beego.Controller, applicationShopId string, 
 	json.Unmarshal(read, &data)
 
 	if data.StatusCode == 200 {
-		appRespData := responses.ApplicationResp{
+		appRespData := responses.ApplicationRespEx{
 			ApplicationId:    data.Result.ApplicationId,
 			ApplicationCode:  data.Result.ApplicationCode,
 			ApplicationName:  data.Result.ApplicationName,
@@ -2274,7 +2304,7 @@ func UpdateApplicationThemeConfig(c *beego.Controller, applicationId string, the
 
 	if data.StatusCode == 200 {
 		appidstr := data.Result.ApplicationId
-		appRespData := responses.ApplicationResp{
+		appRespData := responses.ApplicationRespEx{
 			ApplicationId:    appidstr,
 			ApplicationCode:  data.Result.ApplicationCode,
 			ApplicationName:  data.Result.ApplicationName,

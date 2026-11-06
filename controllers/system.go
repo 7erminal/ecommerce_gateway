@@ -1802,7 +1802,7 @@ func (c *SystemController) AddApplicationShop() {
 	if addStatusResp.StatusCode == 200 {
 		message := "Shop Added Successfully"
 		isSuccess = true
-		appRespData := responses.ApplicationResp{
+		appRespData := responses.ApplicationRespEx{
 			ApplicationId:    addStatusResp.Result.ApplicationId,
 			ApplicationCode:  addStatusResp.Result.ApplicationCode,
 			ApplicationName:  addStatusResp.Result.ApplicationName,
@@ -1857,7 +1857,7 @@ func (c *SystemController) RemoveApplicationShop() {
 		message := "Shop Branch Removed Successfully"
 		isSuccess = true
 		// convert ID to string
-		appRespData := responses.ApplicationResp{
+		appRespData := responses.ApplicationRespEx{
 			ApplicationId:    addStatusResp.Result.ApplicationId,
 			ApplicationCode:  addStatusResp.Result.ApplicationCode,
 			ApplicationName:  addStatusResp.Result.ApplicationName,

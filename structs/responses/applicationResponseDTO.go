@@ -62,9 +62,24 @@ type ApplicationResp struct {
 	Shops            []ApplicationShopResponseData
 }
 
+type ApplicationRespEx struct {
+	ApplicationId    string
+	ApplicationCode  string
+	ApplicationName  string
+	ApplicationLogo  string
+	ThemeColors      string
+	DefaultFontsize  string
+	ApplicationImage string
+	DateCreated      time.Time
+	DateModified     time.Time
+	Active           int
+	Theme            *ThemePersonalResp
+	Shops            []ApplicationShopResponseExtraData
+}
+
 type ApplicationResponseDTO struct {
 	Success    bool
-	Result     *ApplicationResp
+	Result     *ApplicationRespEx
 	StatusDesc string
 }
 
@@ -149,6 +164,26 @@ type ApplicationResponseData struct {
 	Shops            []ApplicationShopResponseData
 }
 
+type ApplicationShopApiResponseData struct {
+	ApplicationShopId string
+	ApplicationId     string
+	ApplicationCode   string
+	ApplicationName   string
+	ApplicationLogo   string
+	ShopId            string
+	ShowBanner        bool
+	BannerImages      string
+	BorderRadius      string
+	ThemeColors       string
+	DefaultFontsize   string
+	ApplicationImage  string
+	DateCreated       time.Time
+	DateModified      time.Time
+	CreatedBy         string
+	ModifiedBy        string
+	Active            int
+}
+
 type ApplicationShopResponseData struct {
 	ApplicationShopId string
 	ApplicationId     string
@@ -167,6 +202,34 @@ type ApplicationShopResponseData struct {
 	CreatedBy         string
 	ModifiedBy        string
 	Active            int
+}
+
+type ApplicationShopResponseExtraData struct {
+	ApplicationShopId   string
+	ApplicationId       string
+	ApplicationCode     string
+	ApplicationName     string
+	ApplicationLogo     string
+	ShopId              string
+	ShopName            string
+	ShopDescription     string
+	ShopAssistantName   string
+	ShopAssistantNumber string
+	PhoneNumber         string
+	Email               string
+	Image               string
+	ShopLocation        string
+	ShowBanner          bool
+	BannerImages        string
+	BorderRadius        string
+	ThemeColors         string
+	DefaultFontsize     string
+	ApplicationImage    string
+	DateCreated         time.Time
+	DateModified        time.Time
+	CreatedBy           string
+	ModifiedBy          string
+	Active              int
 }
 
 type ApplicationResponse struct {
