@@ -775,7 +775,7 @@ func (c *ItemsController) AddPurpose() {
 // @Failure 403 body is empty
 // @router /get-categories [get]
 func (c *ItemsController) GetCategories() {
-	if !c.RequirePermission("ITEM", "READ") {
+	if !c.RequirePermission("ITEM", "LIST") {
 		c.Data["json"] = map[string]string{"error": "forbidden"}
 		c.ServeJSON()
 		return
@@ -810,11 +810,6 @@ func (c *ItemsController) GetCategories() {
 // @Failure 403 body is empty
 // @router /get-features [get]
 func (c *ItemsController) GetFeatures() {
-	if !c.RequirePermission("ITEM", "READ") {
-		c.Data["json"] = map[string]string{"error": "forbidden"}
-		c.ServeJSON()
-		return
-	}
 	var isSuccess bool = false
 
 	logs.Info("Success response received")
@@ -845,11 +840,6 @@ func (c *ItemsController) GetFeatures() {
 // @Failure 403 body is empty
 // @router /get-purposes [get]
 func (c *ItemsController) GetPurposes() {
-	if !c.RequirePermission("ITEM", "READ") {
-		c.Data["json"] = map[string]string{"error": "forbidden"}
-		c.ServeJSON()
-		return
-	}
 	var isSuccess bool = false
 
 	logs.Info("Success response received")
@@ -886,7 +876,7 @@ func (c *ItemsController) GetPurposes() {
 // @Failure 403 body is empty
 // @router /get-items [get]
 func (c *ItemsController) GetItems() {
-	if !c.RequirePermission("ITEM", "READ") && !c.RequirePermission("ITEM", "LIST") {
+	if !c.RequirePermission("ITEM", "LIST") {
 		c.Data["json"] = map[string]string{"error": "forbidden"}
 		c.ServeJSON()
 		return
@@ -1058,11 +1048,6 @@ func (c *ItemsController) GetProduct() {
 // @Failure 403 body is empty
 // @router /delete-category/:id [delete]
 func (c *ItemsController) DeleteCategory() {
-	if !c.RequirePermission("ITEM", "DELETE") {
-		c.Data["json"] = map[string]string{"error": "forbidden"}
-		c.ServeJSON()
-		return
-	}
 	v := c.Ctx.Input.GetData("user")
 	userData, err_ := v.(*responses.AuthenticatedUser)
 	userIdStr := userData.UserID
@@ -1102,11 +1087,6 @@ func (c *ItemsController) DeleteCategory() {
 // @Failure 403 body is empty
 // @router /delete-feature/:id [delete]
 func (c *ItemsController) DeleteFeature() {
-	if !c.RequirePermission("ITEM", "DELETE") {
-		c.Data["json"] = map[string]string{"error": "forbidden"}
-		c.ServeJSON()
-		return
-	}
 	v := c.Ctx.Input.GetData("user")
 	userData, err_ := v.(*responses.AuthenticatedUser)
 	userIdStr := userData.UserID
@@ -1146,11 +1126,6 @@ func (c *ItemsController) DeleteFeature() {
 // @Failure 403 body is empty
 // @router /delete-purpose/:id [delete]
 func (c *ItemsController) DeletePurpose() {
-	if !c.RequirePermission("ITEM", "DELETE") {
-		c.Data["json"] = map[string]string{"error": "forbidden"}
-		c.ServeJSON()
-		return
-	}
 	v := c.Ctx.Input.GetData("user")
 	userData, err_ := v.(*responses.AuthenticatedUser)
 	userIdStr := userData.UserID
@@ -1190,11 +1165,6 @@ func (c *ItemsController) DeletePurpose() {
 // @Failure 403 body is empty
 // @router /delete-item/:id [delete]
 func (c *ItemsController) DeleteItem() {
-	if !c.RequirePermission("ITEM", "DELETE") {
-		c.Data["json"] = map[string]string{"error": "forbidden"}
-		c.ServeJSON()
-		return
-	}
 	v := c.Ctx.Input.GetData("user")
 	userData, err_ := v.(*responses.AuthenticatedUser)
 	userIdStr := userData.UserID

@@ -134,6 +134,11 @@ func (c *AuthenticationController) Register() {
 // @Failure 403 body is empty
 // @router /sign-in [post]
 func (c *AuthenticationController) SignIn() {
+	if !c.RequirePermission("USER", "READ") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	var v requests.SignIn
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
 
@@ -236,6 +241,11 @@ func (c *AuthenticationController) ChangePassword() {
 // @Failure 403 body is empty
 // @router /verify-token [post]
 func (c *AuthenticationController) VerifyToken() {
+	if !c.RequirePermission("USER", "READ") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	var v requests.StringRequestDTO
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
 
@@ -266,6 +276,11 @@ func (c *AuthenticationController) VerifyToken() {
 // @Failure 403 body is empty
 // @router /refresh-access-token [post]
 func (c *AuthenticationController) RefreshAccessToken() {
+	if !c.RequirePermission("USER", "READ") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	var v requests.StringRequestDTO
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
 
@@ -298,6 +313,11 @@ func (c *AuthenticationController) RefreshAccessToken() {
 // @Failure 403 body is empty
 // @router /refresh-customer-access-token [post]
 func (c *AuthenticationController) RefreshCustomerAccessToken() {
+	if !c.RequirePermission("USER", "READ") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
 	var v requests.StringRequestDTO
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
 

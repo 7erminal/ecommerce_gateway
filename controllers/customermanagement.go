@@ -170,7 +170,7 @@ func (c *CustomermanagementController) GetOne() {
 // @Failure 403
 // @router / [get]
 func (c *CustomermanagementController) GetAll() {
-	if !c.RequirePermission("CUSTOMER", "READ") && !c.RequirePermission("CUSTOMER", "LIST") {
+	if !c.RequirePermission("CUSTOMER", "LIST") {
 		c.Data["json"] = map[string]string{"error": "forbidden"}
 		c.ServeJSON()
 		return

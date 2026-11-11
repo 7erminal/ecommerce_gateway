@@ -26,7 +26,7 @@ func (c *PaymentController) URLMapping() {
 // @Failure 403
 // @router /payment-methods [get]
 func (c *PaymentController) GetPaymentMethods() {
-	if !c.RequirePermission("PAYMENT", "READ") {
+	if !c.RequirePermission("PAYMENT", "LIST") {
 		c.Data["json"] = map[string]string{"error": "forbidden"}
 		c.ServeJSON()
 		return
@@ -63,7 +63,6 @@ func (c *PaymentController) UploadPaymentProof() {
 		c.ServeJSON()
 		return
 	}
-
 	var isSuccess bool = false
 	image, header, err := c.GetFile("Image")
 

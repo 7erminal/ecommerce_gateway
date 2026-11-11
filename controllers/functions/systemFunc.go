@@ -2131,11 +2131,11 @@ func UploadUserImage(c *beego.Controller, systemImage string, system string) (re
 }
 
 // UpdateApplicationShopBanner updates the banner and border radius for an application shop
-func UpdateApplicationShopBanner(c *beego.Controller, applicationShopId string, bannerImages string, borderRadius float64, updatedBy string) (resp responses.ApplicationResponseDTO) {
+func UpdateApplicationShopBanner(c *beego.Controller, applicationShopId string, bannerImages string, borderRadius float64, baseUrl string, updatedBy string) (resp responses.ApplicationResponseDTO) {
 	host, _ := beego.AppConfig.String("systemBaseUrl")
 
 	logs.Info("Updating application shop banner")
-	logs.Info("Requesting to update application shop banner with data: ApplicationShopId=", applicationShopId, " BannerImages=", bannerImages, " BorderRadius=", borderRadius)
+	logs.Info("Requesting to update application shop banner with data: ApplicationShopId=", applicationShopId, " BannerImages=", bannerImages, " BorderRadius=", borderRadius, " BaseUrl=", baseUrl)
 
 	request := api.NewRequest(
 		host,
@@ -2144,6 +2144,7 @@ func UpdateApplicationShopBanner(c *beego.Controller, applicationShopId string, 
 	request.InterfaceParams["ApplicationShopId"] = applicationShopId
 	request.InterfaceParams["BannerImages"] = bannerImages
 	request.InterfaceParams["BorderRadius"] = borderRadius
+	request.InterfaceParams["BaseUrl"] = baseUrl
 	request.InterfaceParams["UpdatedBy"] = updatedBy // or pass the actual user who is updating the banner
 	client := api.Client{
 		Request: request,

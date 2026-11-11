@@ -1905,7 +1905,7 @@ func (c *SystemController) UpdateApplicationShopBanner() {
 
 	var isSuccess bool = false
 
-	updateResp := functions.UpdateApplicationShopBanner(&c.Controller, v.ApplicationShopId, v.BannerImages, v.BorderRadius, userData.UserID)
+	updateResp := functions.UpdateApplicationShopBanner(&c.Controller, v.ApplicationShopId, v.BannerImages, v.BorderRadius, v.BaseUrl, userData.UserID)
 
 	if updateResp.Success {
 		isSuccess = true
