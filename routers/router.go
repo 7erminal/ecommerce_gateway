@@ -22,6 +22,11 @@ func init() {
 				&controllers.AuthenticationController{},
 			),
 		),
+		beego.NSNamespace("/reg",
+			beego.NSInclude(
+				&controllers.RegistrationController{},
+			),
+		),
 		beego.NSNamespace("/user",
 			beego.NSBefore(middlewares.AuthWithRoleBasedAppMiddleware),
 			beego.NSInclude(

@@ -18,6 +18,7 @@ type RegistrationController struct {
 // URLMapping ...
 func (c *RegistrationController) URLMapping() {
 	c.Mapping("RegisterAlt", c.RegisterAlt)
+	c.Mapping("RegisterFull", c.RegisterFull)
 }
 
 // Post ...
@@ -34,6 +35,81 @@ func (c *RegistrationController) RegisterAlt() {
 		return
 	}
 	var v requests.Registration
+	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
+
+	if v.RoleId == "" {
+		var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: false, Result: nil, StatusDesc: "User role not specified"}
+
+		c.Data["json"] = resp
+	} else {
+		userRole := functions.GetRole(&c.Controller, v.RoleId)
+
+		if userRole.StatusCode == 200 {
+
+			var req requests.RegisterUser = requests.RegisterUser{Email: v.Email, Name: v.FirstName + " | " + v.LastName, Gender: "", PhoneNumber: v.PhoneNumber, Password: v.Password, RoleId: v.RoleId}
+
+			regResp := functions.RegistrationRequest(&c.Controller, req)
+
+			var isSuccess bool = false
+
+			var data responses.UserGateway
+
+			if regResp.StatusCode == 200 {
+				splitName := strings.Split(regResp.User.FullName, " | ")
+
+				logs.Debug("Name is ", splitName[0])
+
+				role := responses.Role{Role: userRole.Role.Role}
+
+				data = responses.UserGateway{
+					// UserId:         regResp.User.UserId,
+					// UserType:    regResp.User.UserType,
+					FirstName:   splitName[0],
+					LastName:    splitName[1],
+					Username:    regResp.User.Username,
+					Email:       regResp.User.Email,
+					PhoneNumber: regResp.User.PhoneNumber,
+					Role:        &role,
+					// Gender:         regResp.User.Gender,
+					// Dob:            regResp.User.Dob,
+					// Address:        regResp.User.Address,
+					// IdType:         regResp.User.IdType,
+					// IdNumber:       regResp.User.IdNumber,
+					// Active:         regResp.User.Active,
+					// IsVerified:     regResp.User.IsVerified,
+					// DateRegistered: regResp.User.DateCreated,
+				}
+
+				isSuccess = true
+			}
+
+			var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: isSuccess, Result: &data, StatusDesc: regResp.StatusDesc}
+
+			c.Data["json"] = resp
+		} else {
+			var resp responses.UserGatewayResponseDTO = responses.UserGatewayResponseDTO{Success: false, Result: nil, StatusDesc: "User role not specified"}
+
+			c.Data["json"] = resp
+		}
+	}
+
+	c.ServeJSON()
+}
+
+// Post Full Registration ...
+// @Title Create. Full Registration
+// @Description Register a User and Shop with Full Details
+// @Param	body		body 	requests.Registration	true		"body for Registration content. Role should be the role ID"
+// @Success 200 {object} responses.UserGatewayResponseDTO
+// @Failure 403 body is empty
+// @router /register [post]
+func (c *RegistrationController) RegisterFull() {
+	if !c.RequirePermission("USER", "CREATE") {
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return
+	}
+	var v requests.FullRegistration
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
 
 	if v.RoleId == "" {

@@ -172,10 +172,26 @@ func GetItems(c *beego.Controller, query string, fields string, sortby string, o
 		"/v1/items/",
 		api.GET)
 
-	// request.FileField["UserImage"] = userImage
-	// request.Params["UserId"] = strconv.FormatInt(userId, 10)
-	// request.HeaderField["content-type"] = "multipart/form-data"
-	// request.Params = {"UserId": strconv.Itoa(int(userid))}
+	// Add query parameters
+	if query != "" {
+		request.Params["query"] = query
+	}
+	if fields != "" {
+		request.Params["fields"] = fields
+	}
+	if sortby != "" {
+		request.Params["sortby"] = sortby
+	}
+	if order != "" {
+		request.Params["order"] = order
+	}
+	if offset != "" {
+		request.Params["offset"] = offset
+	}
+	if limit != "" {
+		request.Params["limit"] = limit
+	}
+
 	client := api.Client{
 		Request: request,
 		Type_:   "params",
