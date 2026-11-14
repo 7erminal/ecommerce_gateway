@@ -21,9 +21,18 @@ func (c *BaseController) RequirePermission(permissionCode, actionCode string) bo
 	}
 
 	user := userData.(*responses.AuthenticatedUser)
-	for _, p := range user.Permissions {
-		if p.PermissionCode == permissionCode && p.ActionCode == actionCode {
-			return true
+	if user.Type == "" {
+		c.Ctx.Output.SetStatus(403)
+		c.Data["json"] = map[string]string{"error": "forbidden"}
+		c.ServeJSON()
+		return false
+	}
+
+	if user.Type == "USER" {
+		for _, p := range user.Permissions {
+			if p.PermissionCode == permissionCode && p.ActionCode == actionCode {
+				return true
+			}
 		}
 	}
 
