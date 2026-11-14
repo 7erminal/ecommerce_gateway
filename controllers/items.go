@@ -918,65 +918,84 @@ func (c *ItemsController) GetItems() {
 	if v := c.GetString("query"); v != "" {
 		query = v
 	}
+
 	logs.Info("Success response received")
 	isSuccess = false
 
 	// if verifyToken.User.UserDetails.Branch != nil {
 	// 	branchId := strconv.FormatInt(verifyToken.User.UserDetails.Branch.BranchId, 10)
 
-	// Depending on the role, fetch items
-	var getItemsResp responses.ItemsOriResponseDTO
-	if userData.RoleName == "SUPER_ADMIN" {
-		getItemsResp = functions.GetItems(&c.Controller, query, fields, sortby, order, offset, limit)
-	} else {
-		branchId := userData.BranchID
+	shopResp := functions.GetShop(&c.Controller, userData.Shop)
 
-		getItemsResp = functions.GetItemsByBranch(&c.Controller, branchId, query, fields, sortby, order, offset, limit)
-	}
-
-	if getItemsResp.StatusCode == 200 {
-		logs.Info("Items returned: ", getItemsResp.Items)
-
-		items := []responses.Item{}
-		if getItemsResp.Items != nil && len(*getItemsResp.Items) > 0 {
-			for _, item := range *getItemsResp.Items {
-				availableSizes := strings.Split(item.AvailableSizes, ",")
-				availableColors := strings.Split(item.AvailableColors, ",")
-				itemT := responses.Item{
-					ProductId:        item.ItemId,
-					ProductName:      item.ItemName,
-					Description:      item.Description,
-					ProductPrice:     float64(item.ItemPrice.ItemPrice),
-					ProductCostPrice: float64(item.ItemPrice.AltItemPrice),
-					ImagePath:        item.ImagePath,
-					Quantity:         item.Quantity,
-					Branch:           item.Branch,
-					Category:         item.Category,
-					AvailableSizes:   &availableSizes,
-					AvailableColors:  &availableColors,
-					Features:         item.ItemFeatures,
-					Purposes:         item.ItemPurposes,
-					Status:           "ACTIVE",
-				}
-
-				items = append(items, itemT)
-			}
-
-		} else {
-			items = []responses.Item{}
-		}
-
-		isSuccess = true
-
-		data := responses.ItemsData{}
-		data.Data = &items
-		data.Count = len(items)
-
-		var resp responses.ItemsResponseDTO = responses.ItemsResponseDTO{Success: isSuccess, Result: &data, StatusDesc: getItemsResp.StatusDesc}
-		c.Data["json"] = resp
-	} else {
+	if shopResp.StatusCode != 200 && userData.RoleName != "SUPER_ADMIN" {
 		var resp responses.ItemsResponseDTO = responses.ItemsResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
 		c.Data["json"] = resp
+	} else {
+
+		// Depending on the role, fetch items
+		var getItemsResp responses.ItemsOriResponseDTO
+		if userData.RoleName != "SUPER_ADMIN" {
+			if query != "" {
+				query = query + ",branch:" + userData.BranchID
+			} else {
+				if shopResp.Result != nil && shopResp.Result.ShopBranches != nil && len(shopResp.Result.ShopBranches) > 0 {
+					var branchIds []string
+					for _, branch := range shopResp.Result.ShopBranches {
+						branchIds = append(branchIds, branch.BranchId)
+					}
+					query = query + ",branch__in:" + strings.Join(branchIds, ",")
+				} else {
+					query = "branch:" + userData.BranchID
+				}
+			}
+		}
+
+		getItemsResp = functions.GetItems(&c.Controller, query, fields, sortby, order, offset, limit)
+
+		if getItemsResp.StatusCode == 200 {
+			logs.Info("Items returned: ", getItemsResp.Items)
+
+			items := []responses.Item{}
+			if getItemsResp.Items != nil && len(*getItemsResp.Items) > 0 {
+				for _, item := range *getItemsResp.Items {
+					availableSizes := strings.Split(item.AvailableSizes, ",")
+					availableColors := strings.Split(item.AvailableColors, ",")
+					itemT := responses.Item{
+						ProductId:        item.ItemId,
+						ProductName:      item.ItemName,
+						Description:      item.Description,
+						ProductPrice:     float64(item.ItemPrice.ItemPrice),
+						ProductCostPrice: float64(item.ItemPrice.AltItemPrice),
+						ImagePath:        item.ImagePath,
+						Quantity:         item.Quantity,
+						Branch:           item.Branch,
+						Category:         item.Category,
+						AvailableSizes:   &availableSizes,
+						AvailableColors:  &availableColors,
+						Features:         item.ItemFeatures,
+						Purposes:         item.ItemPurposes,
+						Status:           "ACTIVE",
+					}
+
+					items = append(items, itemT)
+				}
+
+			} else {
+				items = []responses.Item{}
+			}
+
+			isSuccess = true
+
+			data := responses.ItemsData{}
+			data.Data = &items
+			data.Count = len(items)
+
+			var resp responses.ItemsResponseDTO = responses.ItemsResponseDTO{Success: isSuccess, Result: &data, StatusDesc: getItemsResp.StatusDesc}
+			c.Data["json"] = resp
+		} else {
+			var resp responses.ItemsResponseDTO = responses.ItemsResponseDTO{Success: isSuccess, Result: nil, StatusDesc: "An Error occurred"}
+			c.Data["json"] = resp
+		}
 	}
 
 	c.ServeJSON()
