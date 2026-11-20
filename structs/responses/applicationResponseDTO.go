@@ -225,6 +225,7 @@ type ApplicationShopResponseExtraData struct {
 	ThemeColors         string
 	DefaultFontsize     string
 	ApplicationImage    string
+	BaseUrl             string
 	DateCreated         time.Time
 	DateModified        time.Time
 	CreatedBy           string
